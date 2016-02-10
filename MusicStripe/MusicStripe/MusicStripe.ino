@@ -1,7 +1,7 @@
 
 
 
-#include "MusicStripeLibrary.h"
+
 #include "LiquidCrystal.h"
 #include "IRremote.h"
 
@@ -143,7 +143,7 @@ void setup()
 	delay(500);
 	Serial.flush();
 
-
+	
 	LED1_active = true;
 	ChanceState(FixColorState);
 	// ChanceState(WifiConnectSate);

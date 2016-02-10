@@ -17,7 +17,7 @@
 enum ControlByte : uint8_t {
 	RGBColor = 1,
 	MusicTitle,
-
+	
 	SwitchStade,
 	Start,
 	Stop,
