@@ -21,13 +21,5 @@
     <ClInclude Include="__vm\.MusicStripe.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\MusicLibrary\src\_micro-api\libraries\MusicLibraryLib\src\MusicStripLib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\MusicLibrary\src\_micro-api\libraries\MusicLibraryLib\src\MusicStripLib.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

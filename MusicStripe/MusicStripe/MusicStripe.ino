@@ -1,7 +1,7 @@
 
 
 
-
+#include "..\MusicLibrary\src\_micro-api\libraries\MusicLibraryLib\src\MusicStripLib.h"
 #include "LiquidCrystal.h"
 #include "IRremote.h"
 
@@ -45,8 +45,8 @@
 bool LED2_active = false;
 bool LED1_active = false;
 
-byte color0[] = { 255,0,0 };
-byte color1[] = { 0,0,0 };
+byte color0[] = { 128,10,70 };
+byte color1[] = { 255,180,125 };
 
 //long deltas[3] = { 5, 6, 7 };
 long rgb[3];
@@ -81,17 +81,18 @@ decode_results results;
 //-------Fade-------------
 
 
-int LED1_freq = 50;
-int LED2_freq = 50;
+int LED1_freq = 500;
+int LED2_freq = 500;
 int LED1_counter = 0; //+-5
 int LED2_counter = 0; //+-5
 
 int LED1_mscounter = 0; //ms to freq
 int LED2_mscounter = 0;
 
-int Display_freq;
+int Display_freq ;
 int Display_mscounter;
 int Display_counter;
+bool Display_scroll = false;
 
 uint8_t Display_max;
 
@@ -143,16 +144,20 @@ void setup()
 	delay(500);
 	Serial.flush();
 
-	
-	LED1_active = true;
-	ChanceState(FixColorState);
-	// ChanceState(WifiConnectSate);
 
+	LED1_active = false;
+	color0[0] = 10;
+	color0[1] = 10;
+	color0[2] = 10;
+	LED2_active = true;
+	
+	 ChanceState(WifiConnectSate);
+	 ChanceState(FixColorState);
 }
 
-void ToggleLightSwitch()
+void ToggleLightSwitch(bool OnOff)
 {
-	LightStat = !LightStat;
+	LightStat = OnOff;
 	digitalWrite(LightPin, !LightStat);
 
 
@@ -301,24 +306,30 @@ void CHECK_IR() {
 }
 
 void ScrollDisplay() {
-
+	
 	if (Display_mscounter == Display_freq) {
-		if (Display_counter >= Display_max * 2)
+	//	Serial.println(Display_counter >= Display_max * 2);
+		if (Display_counter >= Display_max+16 )
 		{
-			for (int i = 0; i <= Display_max * 2; i++)
+
+			for (int i = 0; i < Display_max +16; i++)
 			{
 				lcd.scrollDisplayRight();
 			}
+			Display_counter = 0;
 		}
 		else
 		{
+			//Serial.println(Display_counter);
 			lcd.scrollDisplayLeft();
 			Display_counter++;
 		}
 		Display_mscounter = 0;
 	}
-	else
+	else {
+		delay(10);
 		Display_mscounter++;
+	}
 
 
 }
@@ -328,7 +339,7 @@ void loop()
 	uint8_t ctrl = 0;
 
 	if (Serial.available() > 0) {
-		Serial.println("reading");
+	
 		ctrl = (uint8_t)Serial.read();
 		//if (bitRead(ctrl, 0) {
 		switch (ctrl) {
@@ -336,20 +347,23 @@ void loop()
 			currentMode = Serial.read();
 			break;
 		case LightToggle:
-			ToggleLightSwitch();
+			ToggleLightSwitch((bool)Serial.read());
 
 			//	}
 
 		}
 
+
 	}
 
 	switch (currentMode) {
 	case FixColorState:
+		if (Display_scroll)
 		ScrollDisplay();
 		break;
 	case FadeState:
-		Fadeing();
+		Fadeing();	
+		if (Display_scroll)
 		ScrollDisplay();
 		break;
 	}
@@ -393,6 +407,43 @@ void Smooth()
 	analogWrite(6, rgb[2] * bright[2] / 256);
 	delay(50);
 }
+void DisplayColorStripe()
+{
+
+	lcd.print("Stripe 1:");
+	if (LED1_active)
+	{
+		lcd.print((String)color0[0] + "/" + (String)color0[1] + "/" + (String)color0[2]);
+		Display_max = ((String)color0[0] + "/" + (String)color0[1] + "/" + (String)color0[2]).length() + 9;
+		//Serial.println(Display_max);
+	}
+	else {
+		lcd.print("---");
+	}
+	lcd.setCursor(0, 1);
+	lcd.print("Stripe 2:");
+
+
+	if (LED2_active)
+	{
+		lcd.print((String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2]);
+		if (((String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2]).length() + 9> Display_max)
+			Display_max = ((String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2]).length() + 9;
+
+	}
+	else {
+		lcd.print("---");
+	}
+	//Serial.println(Display_max);
+	if (Display_max > 16)
+		Display_scroll = true;
+	if(Display_scroll)
+	for (size_t i = 0; i < 16; i++)
+	{
+		lcd.scrollDisplayRight();
+	}
+
+}
 void ChanceState(uint8_t State)
 {
 	lcd.clear();
@@ -403,61 +454,27 @@ void ChanceState(uint8_t State)
 	switch (State)
 	{
 	case FixColorState:
-		lcd.print("Stripe 1:");
-		if (LED1_active)
-		{
-			lcd.print((String)color0[0] + "/" + (String)color0[1] + "/" + (String)color0[2]);
-			Display_max = ((String)color0[0] + "/" + (String)color0[1] + "/" + (String)color0[2]).length();
-		}
-		else
-			lcd.print("---");
-		lcd.setCursor(0, 1);
-		lcd.print("Stripe 2:");
+		Display_freq = 70;
+		DisplayColorStripe();
 
-
-		if (LED2_active)
-		{
-			lcd.print((String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2]);
-			if (((String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2]).length() > Display_max)
-				Display_max = ((String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2]).length();
-		}
-		else
-			lcd.print("---");
-		if (LED1_active)
+		if (LED1_active) {
 			setColor(color0, 0);
-		if (LED2_active)
+		}
+		if (LED2_active) {
 			setColor(color1, 1);
+		}
 		break;
 	case WifiConnectSate:
 		connectWifi(_ssid, _pwd, _port);
 		break;
 	case FadeState:
+		Display_freq = 70;
+		DisplayColorStripe();
 		Fadeing();
 		break;
 	case FlashState:
-		lcd.print("Stripe 1:");
-		if (LED1_active) {
-			lcd.print((String)color0[0] + "/" + (String)color0[1] + "/" + (String)color0[2]);
-			lcd.print(LED1_freq);
-			Display_max = (((String)color0[0] + "/" + (String)color0[1] + "/" + (String)color0[2]) + LED1_freq).length();
-		}
-		else
-			lcd.print("---");
-
-
-
-		lcd.setCursor(0, 1);
-		lcd.print("Stripe 2:");
-
-
-		if (LED2_active) {
-			lcd.print((String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2]);
-			lcd.print(LED1_freq);
-			if (Display_max<(((String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2]) + LED1_freq).length())
-				Display_max = (((String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2]) + LED1_freq).length();
-		}
-		else
-			lcd.print("---");
+		Display_freq = 70;
+		DisplayColorStripe();
 		LED1_mscounter = 0;
 		// = 0;
 		fadeup = true;
