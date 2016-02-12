@@ -18,10 +18,10 @@
 //-----display
 
 #define DR4 A0
-
 #define DR5 A1
 #define DR6 A2
 #define DR7 A3
+
 #define Enable A4
 #define RS  A5
 
@@ -31,9 +31,9 @@
 
 
 //----------LED1
-#define R1 9 
-#define G1 10
-#define B1 11
+#define R1 3
+#define G1 5
+#define B1 6
 
 //---------LED 2
 
@@ -139,20 +139,17 @@ void setup()
 	lcd.begin(16, 2);
 	Serial.begin(115200);
 	lcd.print("Welcome");
-	delay(500);
 	lcd.print(".");
 	delay(500);
+	lcd.print(".");
 	Serial.flush();
+	delay(500);
+	lcd.print(".");
 
 
-	LED1_active = false;
-	color0[0] = 10;
-	color0[1] = 10;
-	color0[2] = 10;
-	LED2_active = true;
-	
-	 ChanceState(WifiConnectSate);
-	 ChanceState(FixColorState);
+
+
+	ChanceState(WifiConnectSate);
 }
 
 void ToggleLightSwitch(bool OnOff)
@@ -359,40 +356,59 @@ void loop()
 	switch (currentMode) {
 	case FixColorState:
 		if (Display_scroll)
-		ScrollDisplay();
+			ScrollDisplay();
 		break;
 	case FadeState:
-		Fadeing();	
+		Fadeing();
 		if (Display_scroll)
-		ScrollDisplay();
+			ScrollDisplay();
+		break;
+
+	case SmoothState:
+		Smooth();
 		break;
 	}
-
-
 }
 
-
+//LED1/2_freq, LED1/2_active > LED1/2_mscounter
 void Flash()
 {
+	if (LED1_active) {
+		LED1_mscounter++;
+		if (LED1_mscounter < LED1_freq/2) {
+			FixColor();
 
-	LED1_mscounter++;
-	if (LED1_mscounter < 25) {
-		FixColor();
+		}
+		else
+		{
+			byte out[] = { 0,0,0 };
+			setColor(out, 0);
+		}
+		if (LED1_mscounter == LED1_freq)
+			LED1_mscounter = 0;
+	}
+	if (LED2_active) {
+		LED2_mscounter++;
+		if (LED2_mscounter < LED2_freq/2) {
+			FixColor();
+
+		}
+		else
+		{
+			byte out[] = { 0,0,0 };
+			setColor(out, 0);
+		}
+		if (LED2_mscounter == LED2_freq)
+			LED2_mscounter = 0;
+
 
 	}
-	else
-	{
-		byte out[] = { 0,0,0 };
-		setColor(out, 0);
-	}
-	if (LED1_mscounter == 50)
-		LED1_mscounter = 0;
-
 }
 
-void Smooth()
+//Spped with LED1_freq, LED1/2_active
+void Smooth( )
 {
-
+	
 	hue += HUE_DELTA;
 	if (hue > HUE_MAX) {
 		hue = 0.0;
@@ -401,12 +417,22 @@ void Smooth()
 	rgb[0] = (rgbval & 0x00FF0000) >> 16; // there must be better ways
 	rgb[1] = (rgbval & 0x0000FF00) >> 8;
 	rgb[2] = rgbval & 0x000000FF;
-	for (k = 0; k < 2; k++) { // for all three colours
-		analogWrite(R1 + k, rgb[k] * bright[k] / 256);
+	if (LED1_active) {
+
+		analogWrite(R1, rgb[0] * bright[0] / 256);
+		analogWrite(G1, rgb[1] * bright[1] / 256);
+		analogWrite(B1, rgb[2] * bright[2] / 256);
 	}
-	analogWrite(6, rgb[2] * bright[2] / 256);
-	delay(50);
+	if (LED2_active) {
+
+		analogWrite(R2, rgb[0] * bright[0] / 256);
+		analogWrite(G2, rgb[1] * bright[1] / 256);
+		analogWrite(B2, rgb[2] * bright[2] / 256);
+	}
+	delay(LED1_freq);
 }
+
+
 void DisplayColorStripe()
 {
 
@@ -451,6 +477,8 @@ void ChanceState(uint8_t State)
 	Display_max = 0;
 	Display_counter = 0;
 	Display_mscounter = 0;
+
+
 	switch (State)
 	{
 	case FixColorState:
@@ -480,7 +508,10 @@ void ChanceState(uint8_t State)
 		fadeup = true;
 
 		break;
-
+	case SmoothState:
+		Display_freq = 70;
+		DisplayColorStripe();
+		break;
 
 	}
 
