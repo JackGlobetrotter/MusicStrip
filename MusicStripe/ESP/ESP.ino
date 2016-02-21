@@ -1,7 +1,11 @@
 
 
-#include "ESP8266WiFi.h"
-#include "MusicStripeLibrary.h"
+
+#include <WiFiServer.h> 
+#include <WiFiClient.h>
+#include <WiFi.h>
+#include <WiFiUdp.h>
+#include "..\MusicLibrary\src\_micro-api\libraries\MusicLibraryLib\src\MusicStripLib.h"
 
 String ssid = "";
 String password = "";
@@ -20,13 +24,15 @@ void setup() {
 	digitalWrite(0, LOW);	digitalWrite(2, LOW);
 }
 
-bool WifiConnect()
+String WifiConnect()
 {
 
 
 	if (ssid == "" | password == "" | port == 0)
-		return false;
-	WiFi.begin(ssid.c_str(), password.c_str());
+		return "";
+	char* ssidbuffer;
+	ssid.toCharArray(ssidbuffer, ssid.length(), 0);
+	WiFi.begin(ssidbuffer, password.c_str());
 	server = WiFiServer(port);
 	while (WiFi.status() != WL_CONNECTED) {
 		delay(500);
@@ -34,10 +40,11 @@ bool WifiConnect()
 
 
 	connected = true;
+	server =  WiFiServer(port);
 	digitalWrite(0, HIGH);	digitalWrite(2, HIGH);
-	Serial.println(WiFi.localIP().toString() + ":" + port);//
+	return (WiFi.localIP().toString() + ":" + port);//
 
-	return true;
+	//return true;
 
 }
 
@@ -62,17 +69,17 @@ void loop() {
 	if (!connected) {
 		if (Serial.available()> 0)
 		{
-			switch (Serial.read())
+			switch ((uint8_t)Serial.read())
 			{
 			case ControlByte::SSID:
-				if (Serial.available() <= 0)
+				while (Serial.available() <= 3)
 					delay(50);
 				ssid = Serial.readString();
 				Serial.write((uint8_t)1);
 				Serial.flush();
 				break;
 			case ControlByte::PWD:
-				if (Serial.available() <= 0)
+				while (Serial.available() <= 3)
 					delay(50);
 
 				password = Serial.readString();
@@ -82,17 +89,16 @@ void loop() {
 			case ControlByte::Port:
 
 				//logical OR keeps x_high intact in combined and fills in                                                             //rightmost 8 bits
-				if (Serial.available() <= 0)
+				while (Serial.available() <= 0)
 					delay(50);
 				port = Serial.read();
 
 				Serial.write((uint8_t)1);
 				Serial.flush();
 				break;
-			case ControlByte::Connect:
-				if (Serial.available() <= 0)
-					delay(50);
-				Serial.write((uint8_t)WifiConnect());
+			case ControlByte::Connect:				
+				Serial.print((String)WifiConnect());
+				Serial.flush();
 				break;
 
 
@@ -111,6 +117,13 @@ void loop() {
 				WifiDeconnect();
 			else
 				Serial.write(req);
+			while (client.available())
+			{
+				req = client.read();
+				if (req == ControlByte::Stop)
+					client.flush();
+				Serial.write(req);
+			}
 		}
 
 		while (!client.connected()) {

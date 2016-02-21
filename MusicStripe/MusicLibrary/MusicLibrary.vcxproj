@@ -71,11 +71,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="MusicLibrary.ino">
-      <FileType>CppCode</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="src\_micro-api\libraries\MusicLibraryLib\src\MusicStripLib.h" />
     <ClInclude Include="__vm\.MusicLibrary.vsarduino.h" />
   </ItemGroup>

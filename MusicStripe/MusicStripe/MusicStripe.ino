@@ -172,7 +172,7 @@ bool connectWifi(String ssid, String password, uint8_t port) {
 
 	Serial.write(ControlByte::Port);
 	Serial.write(port);
-	if (Serial.available() <= 0)
+	while (Serial.available() <= 0)
 		delay(100);
 	if (Serial.read() != 1)
 		return "";
@@ -185,7 +185,7 @@ bool connectWifi(String ssid, String password, uint8_t port) {
 	Serial.write(ControlByte::SSID);
 
 	Serial.print(ssid);
-	if (Serial.available() <= 0)
+	while (Serial.available() <= 0)
 		delay(100);
 	// Console.WriteLine(myPort.ReadLine());
 	if (Serial.read() != 1)
@@ -199,7 +199,7 @@ bool connectWifi(String ssid, String password, uint8_t port) {
 	Serial.write(ControlByte::PWD);
 
 	Serial.print(password);
-	if (Serial.available() <= 0)
+	while (Serial.available() <= 0)
 		delay(100);
 	if (Serial.read() != 1)
 		return "";
@@ -209,6 +209,7 @@ bool connectWifi(String ssid, String password, uint8_t port) {
 
 	lcd.print(".");
 	Serial.write(ControlByte::Connect);
+
 	while (Serial.available() <= 5)
 	{
 		lcd.print(".");

@@ -15,7 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="MusicLibrary.ino" />
     <None Include="src\_micro-api\libraries\MusicLibraryLib\library.properties" />
   </ItemGroup>
   <ItemGroup>
