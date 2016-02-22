@@ -14,24 +14,24 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="_core">
-      <UniqueIdentifier>{7d236c19-bac7-485f-acda-a1c141533e79}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_core\spiffs">
-      <UniqueIdentifier>{48e2b2ca-2c33-49b4-ae60-219b6caddf6c}</UniqueIdentifier>
+      <UniqueIdentifier>{fccfef72-c4d8-4df4-9257-9a81589ff8f5}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries">
-      <UniqueIdentifier>{58317b74-a730-4daa-9f7b-86b7394a5d28}</UniqueIdentifier>
+      <UniqueIdentifier>{69a590e7-8fc4-4b64-895a-93ad241de7a8}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\LiquidCrystal">
-      <UniqueIdentifier>{d8961681-7410-4372-bb9e-7c3c72e51c3b}</UniqueIdentifier>
+      <UniqueIdentifier>{ee2202bd-dc12-4baa-88d1-3052e90442b6}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\LiquidCrystal\src">
-      <UniqueIdentifier>{f282384e-2ec5-4068-af0b-540f5afbc9e0}</UniqueIdentifier>
+      <UniqueIdentifier>{fe33162b-e307-4bff-87e9-1833109eb96e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_libraries\IRremote">
+      <UniqueIdentifier>{416cccd9-61ec-4d5e-a27f-4c0524e54eee}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="MusicStripe.ino" />
-    <None Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\cont.S">
+    <None Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\wiring_pulse.S">
       <Filter>_core</Filter>
     </None>
   </ItemGroup>
@@ -39,244 +39,208 @@
     <ClInclude Include="__vm\.MusicStripe.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\Arduino.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Arduino.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\binary.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\binary.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\cbuf.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Client.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\Client.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\HardwareSerial.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\cont.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\HardwareSerial_private.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\debug.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\IPAddress.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\eboot_command.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\new.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\Esp.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\PluggableUSB.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\esp8266_peri.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Print.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\flash_utils.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Printable.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\FS.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Server.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\FSImpl.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Stream.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\HardwareSerial.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Udp.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\i2s.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\USBAPI.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\interrupts.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\USBCore.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\IPAddress.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\USBDesc.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\md5.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\WCharacter.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\MD5Builder.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\wiring_private.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\pgmspace.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\WString.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\Print.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\variants\standard\pins_arduino.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\Printable.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\Server.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\sigma_delta.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\stdlib_noniso.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\Stream.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\StreamString.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\twi.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\Udp.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\Updater.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\user_config.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\WCharacter.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\wiring_private.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\WString.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\spiffs\spiffs.h">
-      <Filter>_core\spiffs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\spiffs\spiffs_config.h">
-      <Filter>_core\spiffs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\spiffs\spiffs_nucleus.h">
-      <Filter>_core\spiffs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\variants\generic\pins_arduino.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\Program Files (x86)\Arduino\libraries\LiquidCrystal\src\LiquidCrystal.h">
+    <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\libraries\LiquidCrystal\src\LiquidCrystal.h">
       <Filter>_libraries\LiquidCrystal\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Arduino\libraries\IRremote\IRremote.h">
+      <Filter>_libraries\IRremote</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Arduino\libraries\IRremote\IRremoteInt.h">
+      <Filter>_libraries\IRremote</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\abi.cpp">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\abi.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\cont_util.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\CDC.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\core_esp8266_eboot_command.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\HardwareSerial.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\core_esp8266_flash_utils.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\HardwareSerial0.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\core_esp8266_i2s.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\HardwareSerial1.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\core_esp8266_main.cpp">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\HardwareSerial2.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\core_esp8266_noniso.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\HardwareSerial3.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\core_esp8266_phy.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\hooks.c">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\core_esp8266_postmortem.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\IPAddress.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\core_esp8266_si2c.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\main.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\core_esp8266_timer.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\new.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\core_esp8266_wiring.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\PluggableUSB.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\core_esp8266_wiring_analog.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Print.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\core_esp8266_wiring_digital.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Stream.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\core_esp8266_wiring_pulse.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Tone.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\core_esp8266_wiring_pwm.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\USBCore.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\core_esp8266_wiring_shift.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\WInterrupts.c">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\debug.cpp">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\wiring.c">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\Esp.cpp">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\wiring_analog.c">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\FS.cpp">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\wiring_digital.c">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\HardwareSerial.cpp">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\wiring_pulse.c">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\IPAddress.cpp">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\wiring_shift.c">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\libc_replacements.c">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\WMath.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\MD5Builder.cpp">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\WString.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\pgmspace.cpp">
-      <Filter>_core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\Print.cpp">
-      <Filter>_core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\spiffs_api.cpp">
-      <Filter>_core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\spiffs_hal.cpp">
-      <Filter>_core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\Stream.cpp">
-      <Filter>_core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\StreamString.cpp">
-      <Filter>_core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\time.c">
-      <Filter>_core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\Tone.cpp">
-      <Filter>_core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\Updater.cpp">
-      <Filter>_core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\WMath.cpp">
-      <Filter>_core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\WString.cpp">
-      <Filter>_core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\spiffs\spiffs_cache.c">
-      <Filter>_core\spiffs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\spiffs\spiffs_check.c">
-      <Filter>_core\spiffs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\spiffs\spiffs_gc.c">
-      <Filter>_core\spiffs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\spiffs\spiffs_hydrogen.c">
-      <Filter>_core\spiffs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.0.0\cores\esp8266\spiffs\spiffs_nucleus.c">
-      <Filter>_core\spiffs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\Program Files (x86)\Arduino\libraries\LiquidCrystal\src\LiquidCrystal.cpp">
+    <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\libraries\LiquidCrystal\src\LiquidCrystal.cpp">
       <Filter>_libraries\LiquidCrystal\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\irPronto.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\irRecv.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\IRremote.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\irSend.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Aiwa.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Denon.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Dish.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_JVC.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_LG.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Mitsubishi.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_NEC.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Panasonic.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_RC5_RC6.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Samsung.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Sanyo.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Sharp.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Sony.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Template.cpp">
+      <Filter>_libraries\IRremote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Whynter.cpp">
+      <Filter>_libraries\IRremote</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

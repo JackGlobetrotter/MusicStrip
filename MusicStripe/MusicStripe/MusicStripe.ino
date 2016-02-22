@@ -1,9 +1,12 @@
 
 
 
-#include "..\MusicLibrary\src\_micro-api\libraries\MusicLibraryLib\src\MusicStripLib.h"
-#include "LiquidCrystal.h"
-#include "IRremote.h"
+#include <IRremoteInt.h>
+#include <IRremote.h>
+#include <LiquidCrystal.h>
+#include <..\MusicLibrary\src\_micro-api\libraries\MusicLibraryLib\src\MusicStripLib.h>
+
+
 
 
 #define SIZE    255
@@ -149,7 +152,7 @@ void setup()
 
 
 
-	ChanceState(WifiConnectSate);
+	//ChanceState(WifiConnectSate);
 }
 
 void ToggleLightSwitch(bool OnOff)

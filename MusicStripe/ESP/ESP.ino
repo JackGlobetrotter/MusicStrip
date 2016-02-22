@@ -1,10 +1,10 @@
 
 
 
-#include <WiFiServer.h> 
 #include <WiFiClient.h>
-#include <WiFi.h>
-#include <WiFiUdp.h>
+
+#include <ESP8266WiFi.h>
+
 #include "..\MusicLibrary\src\_micro-api\libraries\MusicLibraryLib\src\MusicStripLib.h"
 
 String ssid = "";
