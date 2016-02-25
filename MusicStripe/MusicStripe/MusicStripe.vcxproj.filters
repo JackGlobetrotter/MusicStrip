@@ -14,19 +14,16 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="_core">
-      <UniqueIdentifier>{fccfef72-c4d8-4df4-9257-9a81589ff8f5}</UniqueIdentifier>
+      <UniqueIdentifier>{2ece2683-2c7a-466d-b6dc-cfec8710e503}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries">
-      <UniqueIdentifier>{69a590e7-8fc4-4b64-895a-93ad241de7a8}</UniqueIdentifier>
+      <UniqueIdentifier>{119b2825-9137-45da-af35-d153df9ec2c4}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\LiquidCrystal">
-      <UniqueIdentifier>{ee2202bd-dc12-4baa-88d1-3052e90442b6}</UniqueIdentifier>
+      <UniqueIdentifier>{272fa946-6d72-49b1-b3b1-a653bebc8997}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\LiquidCrystal\src">
-      <UniqueIdentifier>{fe33162b-e307-4bff-87e9-1833109eb96e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_libraries\IRremote">
-      <UniqueIdentifier>{416cccd9-61ec-4d5e-a27f-4c0524e54eee}</UniqueIdentifier>
+      <UniqueIdentifier>{80bf109a-3929-4c53-9b46-2d00e5649eb8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -101,12 +98,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\libraries\LiquidCrystal\src\LiquidCrystal.h">
       <Filter>_libraries\LiquidCrystal\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Arduino\libraries\IRremote\IRremote.h">
-      <Filter>_libraries\IRremote</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Arduino\libraries\IRremote\IRremoteInt.h">
-      <Filter>_libraries\IRremote</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -184,63 +175,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\libraries\LiquidCrystal\src\LiquidCrystal.cpp">
       <Filter>_libraries\LiquidCrystal\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\irPronto.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\irRecv.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\IRremote.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\irSend.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Aiwa.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Denon.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Dish.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_JVC.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_LG.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Mitsubishi.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_NEC.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Panasonic.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_RC5_RC6.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Samsung.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Sanyo.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Sharp.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Sony.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Template.cpp">
-      <Filter>_libraries\IRremote</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Whynter.cpp">
-      <Filter>_libraries\IRremote</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

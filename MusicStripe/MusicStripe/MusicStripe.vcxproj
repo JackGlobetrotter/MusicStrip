@@ -47,10 +47,10 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino;C:\Program Files (x86)\Arduino\hardware\arduino\avr\variants\standard;C:\Users\jakob\OneDrive\Documents\GitHubVisualStudio\MusicStrip\MusicStripe\MusicStripe;C:\Users\jakob\OneDrive\Documents\Arduino\libraries\IRremote;C:\Users\jakob\OneDrive\Documents\Arduino\libraries\IRremote\utility;C:\Program Files (x86)\Arduino\libraries\LiquidCrystal\src;C:\Program Files (x86)\Arduino\libraries\LiquidCrystal\src\utility;C:\Program Files (x86)\Arduino\libraries;C:\Program Files (x86)\Arduino\hardware\arduino\avr\libraries;C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\mz2zg0wv.4ft\Micro Platforms\default\debuggers;C:\Users\jakob\OneDrive\Documents\Arduino\libraries;C:\Users\jakob\OneDrive\Documents\GitHubVisualStudio\MusicStrip\MusicStripe\MusicStripe;C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino;C:\Program Files (x86)\Arduino\hardware\arduino\avr\variants\standard;C:\Users\jakob\OneDrive\Documents\Arduino\libraries\IRremote;C:\Program Files (x86)\Arduino\libraries\LiquidCrystal\src;C:\Program Files (x86)\Arduino\libraries;C:\Program Files (x86)\Arduino\hardware\arduino\avr\libraries;C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\mz2zg0wv.4ft\Micro Platforms\default\debuggers;C:\Users\jakob\OneDrive\Documents\Arduino\libraries;C:\Program Files (x86)\Arduino\hardware\tools\avr/avr/include/;C:\Program Files (x86)\Arduino\hardware\tools\avr//avr/include/avr/;C:\Program Files (x86)\Arduino\hardware\tools\avr/lib\gcc\avr\4.8.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>C:\Users\Jakob\Source\Repos\MusicStrip\MusicStripe\MusicStripe\__vm\.MusicStripe.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
-      <PreprocessorDefinitions>__ESP8266_ESp8266__;__ESP8266_ESP8266__;_VMDEBUG=1;__ets__;ICACHE_FLASH;F_CPU=80000000L;ARDUINO=10607;ARDUINO_ESP8266_ESP01;ARDUINO_ARCH_ESP8266;ESP8266;__cplusplus=201103L;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino;C:\Program Files (x86)\Arduino\hardware\arduino\avr\variants\standard;C:\Users\jakob\OneDrive\Documents\GitHubVisualStudio\MusicStrip\MusicStripe\MusicStripe;C:\Program Files (x86)\Arduino\libraries\LiquidCrystal\src;C:\Program Files (x86)\Arduino\libraries\LiquidCrystal\src\utility;C:\Program Files (x86)\Arduino\libraries;C:\Program Files (x86)\Arduino\hardware\arduino\avr\libraries;C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\mz2zg0wv.4ft\Micro Platforms\default\debuggers;C:\Users\jakob\OneDrive\Documents\Arduino\libraries;C:\Users\jakob\OneDrive\Documents\GitHubVisualStudio\MusicStrip\MusicStripe\MusicStripe;C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino;C:\Program Files (x86)\Arduino\hardware\arduino\avr\variants\standard;C:\Program Files (x86)\Arduino\libraries\LiquidCrystal\src;C:\Program Files (x86)\Arduino\libraries;C:\Program Files (x86)\Arduino\hardware\arduino\avr\libraries;C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\mz2zg0wv.4ft\Micro Platforms\default\debuggers;C:\Users\jakob\OneDrive\Documents\Arduino\libraries;C:\Program Files (x86)\Arduino\hardware\tools\avr/avr/include/;C:\Program Files (x86)\Arduino\hardware\tools\avr//avr/include/avr/;C:\Program Files (x86)\Arduino\hardware\tools\avr/lib\gcc\avr\4.8.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>C:\Users\jakob\OneDrive\Documents\GitHubVisualStudio\MusicStrip\MusicStripe\MusicStripe\__vm\.MusicStripe.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <IgnoreStandardIncludePath>true</IgnoreStandardIncludePath>
+      <PreprocessorDefinitions>__AVR_ATmega328p__;__AVR_ATmega328P__;F_CPU=16000000L;ARDUINO=10606;ARDUINO_AVR_UNO;ARDUINO_ARCH_AVR;__cplusplus;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -98,8 +98,6 @@
     <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\WString.h" />
     <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\variants\standard\pins_arduino.h" />
     <ClInclude Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\libraries\LiquidCrystal\src\LiquidCrystal.h" />
-    <ClInclude Include="..\..\..\..\Arduino\libraries\IRremote\IRremote.h" />
-    <ClInclude Include="..\..\..\..\Arduino\libraries\IRremote\IRremoteInt.h" />
     <ClInclude Include="__vm\.MusicStripe.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
@@ -128,25 +126,6 @@
     <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\WMath.cpp" />
     <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\WString.cpp" />
     <ClCompile Include="..\..\..\..\..\..\..\..\Program Files (x86)\Arduino\libraries\LiquidCrystal\src\LiquidCrystal.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\irPronto.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\irRecv.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\IRremote.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\irSend.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Aiwa.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Denon.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Dish.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_JVC.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_LG.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Mitsubishi.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_NEC.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Panasonic.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_RC5_RC6.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Samsung.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Sanyo.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Sharp.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Sony.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Template.cpp" />
-    <ClCompile Include="..\..\..\..\Arduino\libraries\IRremote\ir_Whynter.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
