@@ -10,7 +10,7 @@
 String ssid = "";
 String password = "";
 uint8_t port = 0;
-
+enum ControlByte;
 WiFiServer server(23);
 WiFiClient client;
 bool connected = false;
@@ -22,25 +22,29 @@ void setup() {
 
 	pinMode(0, OUTPUT); pinMode(2, OUTPUT);
 	digitalWrite(0, LOW);	digitalWrite(2, LOW);
+	
 }
 
 String WifiConnect()
 {
 
+	if (ssid == "" || password == "" || port == 0)
+		return "False data";
 
-	if (ssid == "" | password == "" | port == 0)
-		return "";
-	char* ssidbuffer;
+	char ssidbuffer[ssid.length() + 1];
 	ssid.toCharArray(ssidbuffer, ssid.length(), 0);
-	WiFi.begin(ssidbuffer, password.c_str());
+
+	WiFi.begin(ssid.c_str(), password.c_str());
+
 	server = WiFiServer(port);
+	server.begin();
 	while (WiFi.status() != WL_CONNECTED) {
 		delay(500);
 	}
 
 
 	connected = true;
-	server =  WiFiServer(port);
+
 	digitalWrite(0, HIGH);	digitalWrite(2, HIGH);
 	return (WiFi.localIP().toString() + ":" + port);//
 
@@ -96,8 +100,10 @@ void loop() {
 				Serial.write((uint8_t)1);
 				Serial.flush();
 				break;
-			case ControlByte::Connect:				
-				Serial.print((String)WifiConnect());
+			case ControlByte::Connect:		
+
+				
+				Serial.print(WifiConnect());
 				Serial.flush();
 				break;
 
