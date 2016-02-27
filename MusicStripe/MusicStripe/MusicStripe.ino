@@ -1,9 +1,12 @@
 
 
 
-#include "..\MusicLibrary\src\_micro-api\libraries\MusicLibraryLib\src\MusicStripLib.h"
-#include "LiquidCrystal.h"
-#include "IRremote.h"
+//#include <IRremoteInt.h>
+//#include <IRremote.h>
+#include <LiquidCrystal.h>
+#include <..\MusicLibrary\src\_micro-api\libraries\MusicLibraryLib\src\MusicStripLib.h>
+
+
 
 
 #define SIZE    255
@@ -37,9 +40,9 @@
 
 //---------LED 2
 
-#define R2 9
-#define G2 10
-#define B2 11
+#define R2 7
+#define G2 7
+#define B2 8
 
 
 bool LED2_active = false;
@@ -73,8 +76,8 @@ int pulsedelay = 0;
 
 
 
-IRrecv irrecv(IRPin);
-decode_results results;
+//IRrecv irrecv(IRPin);
+//decode_results results;
 
 // ----- RuntimeVariabes
 
@@ -116,6 +119,9 @@ bool LightStat = true;
 
 void setup()
 {
+	pinMode(LightPin, INPUT);
+	LightStat=  digitalRead(LightPin);
+
 	pinMode(LightPin, OUTPUT);
 	pinMode(R1, OUTPUT);
 	pinMode(R2, OUTPUT);
@@ -124,7 +130,7 @@ void setup()
 	pinMode(B1, OUTPUT);
 	pinMode(B2, OUTPUT);
 
-	digitalWrite(LightPin, LightStat);
+
 	digitalWrite(R1, LOW);
 	digitalWrite(R2, LOW);
 	digitalWrite(G1, LOW);
@@ -133,8 +139,8 @@ void setup()
 	digitalWrite(B2, LOW);
 
 
-	attachInterrupt(0, CHECK_IR, CHANGE);
-	irrecv.enableIRIn();
+	//attachInterrupt(0, CHECK_IR, CHANGE);
+	//irrecv.enableIRIn();
 
 	lcd.begin(16, 2);
 	Serial.begin(115200);
@@ -146,10 +152,11 @@ void setup()
 	delay(500);
 	lcd.print(".");
 
+	//Display_scroll = true;
 
-
-
-	ChanceState(WifiConnectSate);
+	LED1_active = true;
+	ChanceState(FixColorState);
+	connectWifi(_ssid,_pwd,_port);
 }
 
 void ToggleLightSwitch(bool OnOff)
@@ -172,7 +179,7 @@ bool connectWifi(String ssid, String password, uint8_t port) {
 
 	Serial.write(ControlByte::Port);
 	Serial.write(port);
-	if (Serial.available() <= 0)
+	while (Serial.available() <= 0)
 		delay(100);
 	if (Serial.read() != 1)
 		return "";
@@ -185,7 +192,7 @@ bool connectWifi(String ssid, String password, uint8_t port) {
 	Serial.write(ControlByte::SSID);
 
 	Serial.print(ssid);
-	if (Serial.available() <= 0)
+	while (Serial.available() <= 0)
 		delay(100);
 	// Console.WriteLine(myPort.ReadLine());
 	if (Serial.read() != 1)
@@ -199,7 +206,7 @@ bool connectWifi(String ssid, String password, uint8_t port) {
 	Serial.write(ControlByte::PWD);
 
 	Serial.print(password);
-	if (Serial.available() <= 0)
+	while (Serial.available() <= 0)
 		delay(100);
 	if (Serial.read() != 1)
 		return "";
@@ -209,6 +216,7 @@ bool connectWifi(String ssid, String password, uint8_t port) {
 
 	lcd.print(".");
 	Serial.write(ControlByte::Connect);
+
 	while (Serial.available() <= 5)
 	{
 		lcd.print(".");
@@ -221,85 +229,85 @@ bool connectWifi(String ssid, String password, uint8_t port) {
 	lcd.clear();
 	lcd.print("Connected to:");
 	lcd.setCursor(0, 1);
-	lcd.print(IP + ":" + _port);
+	lcd.print(IP);
 	return WifiIsConnected;
 }
 void CHECK_IR() {
-	while (irrecv.decode(&results)) {
-		LED1_mscounter = 0;
+	//while (irrecv.decode(&results)) {
+	//	LED1_mscounter = 0;
 
 
-		switch (results.value)
-		{
-		case 16195807: //RED
-			if (LED1_active) {
-				color0[0] = 255;
-				color0[1] = 0;
-				color0[2] = 0;
-			}
-			if (LED2_active) {
-				color1[0] = 255;
-				color1[1] = 0;
-				color1[2] = 0;
-			}
-			break;
-		case 16228447:  //GREEN
-			if (LED1_active) {
-				color0[0] = 0;
-				color0[1] = 255;
-				color0[2] = 0;
-			}
-			if (LED2_active) {
-				color1[0] = 0;
-				color1[1] = 255;
-				color1[2] = 0;
-			}
-			break;
-		case 16212127:  //BLUE
-			if (LED1_active) {
-				color0[0] = 0;
-				color0[1] = 0;
-				color0[2] = 255;
-			}
-			if (LED2_active) {
-				color1[0] = 0;
-				color1[1] = 0;
-				color1[2] = 255;
-			}
-			break;
-		case 16244767:  //WHITE
-			if (LED1_active) {
-				color0[0] = 255;
-				color0[1] = 255;
-				color0[2] = 255;
-			}
-			if (LED2_active) {
-				color1[0] = 255;
-				color1[1] = 255;
-				color1[2] = 255;
-			}
-			break;
-		case 16240687: //FLASH
-			currentMode = FlashState;
-			break;
-		case 16248847: //STROBE
-			currentMode = FixColorState;
-			break;
-		case 16238647: //FADE
-			currentMode = FadeState;
-			break;
-		case 16246807: //SMOOTH
-			currentMode = SmoothState;
-			//	fadeup = true;
-			break;
+	//	switch (results.value)
+	//	{
+	//	case 16195807: //RED
+	//		if (LED1_active) {
+	//			color0[0] = 255;
+	//			color0[1] = 0;
+	//			color0[2] = 0;
+	//		}
+	//		if (LED2_active) {
+	//			color1[0] = 255;
+	//			color1[1] = 0;
+	//			color1[2] = 0;
+	//		}
+	//		break;
+	//	case 16228447:  //GREEN
+	//		if (LED1_active) {
+	//			color0[0] = 0;
+	//			color0[1] = 255;
+	//			color0[2] = 0;
+	//		}
+	//		if (LED2_active) {
+	//			color1[0] = 0;
+	//			color1[1] = 255;
+	//			color1[2] = 0;
+	//		}
+	//		break;
+	//	case 16212127:  //BLUE
+	//		if (LED1_active) {
+	//			color0[0] = 0;
+	//			color0[1] = 0;
+	//			color0[2] = 255;
+	//		}
+	//		if (LED2_active) {
+	//			color1[0] = 0;
+	//			color1[1] = 0;
+	//			color1[2] = 255;
+	//		}
+	//		break;
+	//	case 16244767:  //WHITE
+	//		if (LED1_active) {
+	//			color0[0] = 255;
+	//			color0[1] = 255;
+	//			color0[2] = 255;
+	//		}
+	//		if (LED2_active) {
+	//			color1[0] = 255;
+	//			color1[1] = 255;
+	//			color1[2] = 255;
+	//		}
+	//		break;
+	//	case 16240687: //FLASH
+	//		currentMode = FlashState;
+	//		break;
+	//	case 16248847: //STROBE
+	//		currentMode = FixColorState;
+	//		break;
+	//	case 16238647: //FADE
+	//		currentMode = FadeState;
+	//		break;
+	//	case 16246807: //SMOOTH
+	//		currentMode = SmoothState;
+	//		//	fadeup = true;
+	//		break;
 
-		}
+	//	}
 
 
-		//		delay(100);
+	//	//		delay(100);
 
-		irrecv.resume(); // Receive the next value
-	}
+	//	irrecv.resume(); // Receive the next value
+	//}
 }
 
 void ScrollDisplay() {
@@ -337,19 +345,55 @@ void loop()
 
 	if (Serial.available() > 0) {
 	
+	
 		ctrl = (uint8_t)Serial.read();
 		//if (bitRead(ctrl, 0) {
+
 		switch (ctrl) {
 		case SwitchStade:
-			currentMode = Serial.read();
+			if (Serial.available() <= 0)
+				delay(50);
+		
+			ChanceState( Serial.read());
+
 			break;
 		case LightToggle:
+			if (Serial.available() <= 0)
+				delay(50);
 			ToggleLightSwitch((bool)Serial.read());
 
 			//	}
+			break;
+		case GetLightState:
 
+			Serial.write((uint8_t)LightStat);
+
+			break;
+
+		case LED1Data:
+
+			if (Serial.available() <= 0)
+				delay(50);
+			Serial.readBytes(color0, 3); ChanceState(currentMode);
+		
+			break;
+		case LED2Data:
+			if (Serial.available() <= 0)
+				delay(50);
+			Serial.readBytes(color1, 3); ChanceState(currentMode);
+			break;
+		case LEDState:
+			if (Serial.available() <= 0)
+				delay(50);
+			if (!(bool)Serial.read())
+				LED1_active = (bool)Serial.read();
+			else
+				LED2_active = (bool)Serial.read();
+
+			ChanceState(currentMode);
+			break;
 		}
-
+	
 
 	}
 
@@ -463,6 +507,8 @@ void DisplayColorStripe()
 	//Serial.println(Display_max);
 	if (Display_max > 16)
 		Display_scroll = true;
+	else
+		Display_scroll = false;
 	if(Display_scroll)
 	for (size_t i = 0; i < 16; i++)
 	{
@@ -482,15 +528,25 @@ void ChanceState(uint8_t State)
 	switch (State)
 	{
 	case FixColorState:
-		Display_freq = 70;
-		DisplayColorStripe();
+
 
 		if (LED1_active) {
 			setColor(color0, 0);
 		}
+		else {
+			setColor(new byte[3]{ 0,0,0 }, 0);
+		}
+
 		if (LED2_active) {
 			setColor(color1, 1);
 		}
+		else {
+			setColor(new byte[3]{ 0,0,0 }, 1);
+		}
+
+		Display_freq = 70;
+		DisplayColorStripe();
+
 		break;
 	case WifiConnectSate:
 		connectWifi(_ssid, _pwd, _port);
@@ -510,6 +566,7 @@ void ChanceState(uint8_t State)
 		break;
 	case SmoothState:
 		Display_freq = 70;
+		LED1_freq = 10;
 		DisplayColorStripe();
 		break;
 
