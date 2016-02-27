@@ -156,6 +156,7 @@ void setup()
 
 	LED1_active = true;
 	ChanceState(FixColorState);
+	connectWifi(_ssid,_pwd,_port);
 }
 
 void ToggleLightSwitch(bool OnOff)
@@ -228,7 +229,7 @@ bool connectWifi(String ssid, String password, uint8_t port) {
 	lcd.clear();
 	lcd.print("Connected to:");
 	lcd.setCursor(0, 1);
-	lcd.print(IP + ":" + _port);
+	lcd.print(IP);
 	return WifiIsConnected;
 }
 void CHECK_IR() {

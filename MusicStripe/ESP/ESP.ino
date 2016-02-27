@@ -121,6 +121,14 @@ void loop() {
 			// Read the first line of the request
 			if (req == ControlByte::Disconnect)
 				WifiDeconnect();
+			else if (req == ControlByte::GetLightState)
+			{
+				Serial.write(req);
+				while (Serial.available() <= 0)
+					delay(50);
+				client.write(Serial.read());
+
+			}
 			else
 				Serial.write(req);
 			while (client.available())

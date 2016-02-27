@@ -14,16 +14,16 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="_core">
-      <UniqueIdentifier>{2ece2683-2c7a-466d-b6dc-cfec8710e503}</UniqueIdentifier>
+      <UniqueIdentifier>{653a5676-e692-4ce2-b80d-2808f8051371}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries">
-      <UniqueIdentifier>{119b2825-9137-45da-af35-d153df9ec2c4}</UniqueIdentifier>
+      <UniqueIdentifier>{2e822f71-d057-4d50-9281-3024146305f8}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\LiquidCrystal">
-      <UniqueIdentifier>{272fa946-6d72-49b1-b3b1-a653bebc8997}</UniqueIdentifier>
+      <UniqueIdentifier>{fe831e10-b135-42f9-8e88-ff42fb880181}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\LiquidCrystal\src">
-      <UniqueIdentifier>{80bf109a-3929-4c53-9b46-2d00e5649eb8}</UniqueIdentifier>
+      <UniqueIdentifier>{16432f45-b83d-4085-96e9-941cef808512}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
