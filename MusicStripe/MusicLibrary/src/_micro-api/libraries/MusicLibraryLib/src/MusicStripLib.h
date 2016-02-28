@@ -18,7 +18,7 @@ enum ControlByte : uint8_t {
 	RGBColor = 1,
 	MusicTitle,
 
-	LED1SwitchStade, LED2SwitchStade, 
+	LED1SwitchStade, LED2SwitchStade,
 	LED1Data,
 	LED2Data,
 	LEDState,
@@ -38,8 +38,9 @@ enum ControlByte : uint8_t {
 	FlashState,
 	FixColorState,
 	WifiConnectSate,
-	GetLightState
-
+	GetLightState,
+	LED1Frequency,
+	LED2Frequency
 };
 
 #endif

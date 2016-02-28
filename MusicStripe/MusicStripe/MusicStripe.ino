@@ -510,7 +510,27 @@ void loop()
 				LED2ChanceState(LED2_mode);
 			}
 	
+		case LED1Frequency:
+			LED1_freq = Serial.read();
+			EEPROM.write(3, LED1_freq);
+			break;
+		case LED2Frequency:
+			LED2_freq = Serial.read();
+			EEPROM.write(9, LED2_freq);
+			break;
+		case SSID:
+			_ssid = Serial.readString();
+			storeData_WIFI();
+			break;
 
+		case PWD:
+			_pwd = Serial.readString();
+			storeData_WIFI();
+			break;
+
+		case Port:
+			_port = Serial.read();
+			storeData_WIFI();
 			break;
 		}
 	
@@ -545,11 +565,11 @@ void loop()
 			Smooth(true);
 			break;
 		}
-		if (Display_scroll)
-		{
-
-		}
-
+		
+	}
+	if (Display_scroll)
+	{
+		ScrollDisplay();
 	}
 }
 
