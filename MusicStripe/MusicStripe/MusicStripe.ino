@@ -5,9 +5,12 @@
 //#include <IRremote.h>
 #include <LiquidCrystal.h>
 #include <..\MusicLibrary\src\_micro-api\libraries\MusicLibraryLib\src\MusicStripLib.h>
+#include <EEPROM\EEPROM.h>
 
+//get working 2 led stripes controled seperate
+//fix fading, flash
 
-
+#define WIFIPointer 0
 
 #define SIZE    255
 #define DELAY    20
@@ -52,12 +55,14 @@ byte color0[] = { 128,10,70 };
 byte color1[] = { 255,180,125 };
 
 //long deltas[3] = { 5, 6, 7 };
-long rgb[3];
-long rgbval;
+long LED1Smooth[3];
+long LED2Smooth[3];
+long LED1rgbval;
+long LED2rgbval;
 // for reasons unknown, if value !=0, the LED doesn't light. Hmm ...
 // and saturation seems to be inverted
-float hue = 0.0, saturation = 1, value = 1;
-
+float LED1hue = 0.0, LED1saturation = 1, LED1value = 1;
+float LED2hue = 0.0, LED2saturation = 1, LED2value = 1;
 /*
 chosen LED SparkFun sku: COM-09264
 has Max Luminosity (RGB): (2800, 6500, 1200)mcd
@@ -66,12 +71,13 @@ R  250/600  =  107/256
 G  250/950  =   67/256
 B  250/250  =  256/256
 */
-long bright[3] = { 107, 67, 256 };
+long LED1bright[3] = { 107, 67, 256 };
+long LED2bright[3] = { 107, 67, 256 };
 //long bright[3] = { 256, 256, 256};
-
-long k, temp_value;
-int pulsedelay = 0;
-
+long LED1k, LED1temp_value;
+long LED2k, LED2temp_value;
+int LED1pulsedelay = 0;
+int LED2pulsedelay = 0;
 // ----- Definitions
 
 
@@ -99,7 +105,8 @@ bool Display_scroll = false;
 
 uint8_t Display_max;
 
-uint8_t currentMode = 1;
+uint8_t LED1_mode = 1;
+uint8_t LED2_mode = 1;
 bool blinking = false;
 
 
@@ -110,18 +117,16 @@ uint8_t fadecount = 0;
 LiquidCrystal lcd(RS, Enable, DR4, DR5, DR6, DR7);
 
 
-String _ssid = "WIFI-WG";
-String _pwd = "Weltfrieden67110";
+String _ssid = "test";
+String _pwd = "test";
 uint8_t _port = 80;
 bool WifiIsConnected = false;
 
 bool LightStat = true;
-
+int EEPROM_Pointer = 0;
 void setup()
 {
-	pinMode(LightPin, INPUT);
-	LightStat=  digitalRead(LightPin);
-
+	loadData();
 	pinMode(LightPin, OUTPUT);
 	pinMode(R1, OUTPUT);
 	pinMode(R2, OUTPUT);
@@ -155,8 +160,102 @@ void setup()
 	//Display_scroll = true;
 
 	LED1_active = true;
-	ChanceState(FixColorState);
 	connectWifi(_ssid,_pwd,_port);
+}
+
+void loadData()
+{
+	LightStat = EEPROM.read(EEPROM_Pointer);
+	EEPROM_Pointer++;
+	//LED1
+	LED1_active = EEPROM.read(EEPROM_Pointer);
+	EEPROM_Pointer++;
+
+	LED1_mode = EEPROM.read(EEPROM_Pointer);
+	EEPROM_Pointer++;
+
+	LED1_freq = EEPROM.read(EEPROM_Pointer);
+	EEPROM_Pointer++;
+
+	for (byte i = 0; i < 3; i++)
+	{
+		color0[i] = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
+
+	}
+
+	//LED2
+
+	LED2_active = EEPROM.read(EEPROM_Pointer);
+	EEPROM_Pointer++;
+
+	LED2_mode = EEPROM.read(EEPROM_Pointer);
+	EEPROM_Pointer++;
+
+	LED2_freq = EEPROM.read(EEPROM_Pointer);
+	EEPROM_Pointer++;
+
+	for (byte i = 0; i < 3; i++)
+	{
+		color1[i] = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
+
+	}
+
+	// WIFI-DATA
+
+	uint8_t go = EEPROM.read(EEPROM_Pointer);
+	EEPROM_Pointer++;
+		byte temp[go];
+	for (int i = 0; i < go; i++)
+	{
+		go[i] = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
+	}
+	if (go != 0)
+		_ssid = String(go);
+
+	uint8_t go = EEPROM.read(EEPROM_Pointer);
+	EEPROM_Pointer++;
+	byte temp[go];
+	for (int i = 0; i < go; i++)
+	{
+		go[i] = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
+	}
+	if (go != 0)
+		_pwd = String(go);
+
+	go = EEPROM.read(EEPROM_Pointer);
+	if (go != 0)
+		_port = go;
+	EEPROM_Pointer++;
+}
+
+void storeData_WIFI()
+{
+	EEPROM_Pointer = 13;
+	EEPROM.write(EEPROM_Pointer
+	, _ssid.length());
+	EEPROM_Pointer ++;
+
+	for (uint8_t i = 0; i < _ssid.length(); i++)
+	{		
+		EEPROM.write(EEPROM_Pointer, _ssid.charAt(i));
+		EEPROM_Pointer++;
+	}
+	EEPROM.write(EEPROM_Pointer
+		, _pwd.length());
+	EEPROM_Pointer++;
+
+	for (uint8_t i = 0; i < _pwd.length(); i++)
+	{
+		EEPROM.write(EEPROM_Pointer, _pwd.charAt(i));
+		EEPROM_Pointer++;
+	}
+	EEPROM.write(EEPROM_Pointer
+		, _port);
+
 }
 
 void ToggleLightSwitch(bool OnOff)
@@ -288,16 +387,16 @@ void CHECK_IR() {
 	//		}
 	//		break;
 	//	case 16240687: //FLASH
-	//		currentMode = FlashState;
+	//		LED1_mode = FlashState;
 	//		break;
 	//	case 16248847: //STROBE
-	//		currentMode = FixColorState;
+	//		LED1_mode = FixColorState;
 	//		break;
 	//	case 16238647: //FADE
-	//		currentMode = FadeState;
+	//		LED1_mode = FadeState;
 	//		break;
 	//	case 16246807: //SMOOTH
-	//		currentMode = SmoothState;
+	//		LED1_mode = SmoothState;
 	//		//	fadeup = true;
 	//		break;
 
@@ -350,17 +449,26 @@ void loop()
 		//if (bitRead(ctrl, 0) {
 
 		switch (ctrl) {
-		case SwitchStade:
+		case LED1SwitchStade:
 			if (Serial.available() <= 0)
 				delay(50);
 		
-			ChanceState( Serial.read());
+			LED1ChanceState(Serial.read());
 
-			break;
+			break;		
+		case LED2SwitchStade:
+				if (Serial.available() <= 0)
+					delay(50);
+
+				LED2ChanceState(Serial.read());
+
+				break;
 		case LightToggle:
 			if (Serial.available() <= 0)
 				delay(50);
-			ToggleLightSwitch((bool)Serial.read());
+			uint8_t temp = Serial.read();
+			EEPROM.write(0, temp);
+			ToggleLightSwitch((bool)temp);
 
 			//	}
 			break;
@@ -374,53 +482,84 @@ void loop()
 
 			if (Serial.available() <= 0)
 				delay(50);
-			Serial.readBytes(color0, 3); ChanceState(currentMode);
-		
+			Serial.readBytes(color0, 3); 
+			LED1ChanceState(LED1_mode);
+			EEPROM.write(4, color0[0] );
+			EEPROM.write(5, color0[1]);
+			EEPROM.write(6, color0[2]);
 			break;
 		case LED2Data:
 			if (Serial.available() <= 0)
 				delay(50);
-			Serial.readBytes(color1, 3); ChanceState(currentMode);
+			Serial.readBytes(color1, 3); LED2ChanceState(LED2_mode);
+			EEPROM.write(10, color0[0]);
+			EEPROM.write(11, color0[1]);
+			EEPROM.write(12, color0[2]);
 			break;
 		case LEDState:
 			if (Serial.available() <= 0)
 				delay(50);
-			if (!(bool)Serial.read())
+			if (!(bool)Serial.read()) {
 				LED1_active = (bool)Serial.read();
-			else
+				EEPROM.write(1, LED1_active);
+				LED1ChanceState(LED1_mode);
+			}
+			else {
 				LED2_active = (bool)Serial.read();
+				EEPROM.write(7, LED2_active);
+				LED2ChanceState(LED2_mode);
+			}
+	
 
-			ChanceState(currentMode);
 			break;
 		}
 	
 
 	}
+	if (LED1_active) {
+		switch (LED1_mode) {
+		case FlashState:
+			break;
 
-	switch (currentMode) {
-	case FixColorState:
-		if (Display_scroll)
-			ScrollDisplay();
-		break;
-	case FadeState:
-		Fadeing();
-		if (Display_scroll)
-			ScrollDisplay();
-		break;
+		case FadeState:
+			Fadeing(false);
+	
+			break;
 
-	case SmoothState:
-		Smooth();
-		break;
+		case SmoothState:
+			Smooth(false);
+			break;
+		}
+	}
+	if (LED2_active)
+	{
+		switch (LED2_mode) {
+		case FlashState:
+			break;
+		case FadeState:
+			Fadeing(true);
+			
+			break;
+
+		case SmoothState:
+			Smooth(true);
+			break;
+		}
+		if (Display_scroll)
+		{
+
+		}
+
 	}
 }
 
 //LED1/2_freq, LED1/2_active > LED1/2_mscounter
-void Flash()
+void Flash(bool LEDStripe)
 {
-	if (LED1_active) {
+	if (LED1_active && !LEDStripe) {
 		LED1_mscounter++;
 		if (LED1_mscounter < LED1_freq/2) {
-			FixColor();
+			FixColor(LEDStripe);
 
 		}
 		else
@@ -431,10 +570,10 @@ void Flash()
 		if (LED1_mscounter == LED1_freq)
 			LED1_mscounter = 0;
 	}
-	if (LED2_active) {
+	if (LED2_active && LEDStripe ) {
 		LED2_mscounter++;
 		if (LED2_mscounter < LED2_freq/2) {
-			FixColor();
+			FixColor(LEDStripe);
 
 		}
 		else
@@ -450,30 +589,41 @@ void Flash()
 }
 
 //Spped with LED1_freq, LED1/2_active
-void Smooth( )
+void Smooth(bool LEDStripe )
 {
 	
-	hue += HUE_DELTA;
-	if (hue > HUE_MAX) {
-		hue = 0.0;
-	}
-	rgbval = HSV_to_RGB(hue, saturation, value);
-	rgb[0] = (rgbval & 0x00FF0000) >> 16; // there must be better ways
-	rgb[1] = (rgbval & 0x0000FF00) >> 8;
-	rgb[2] = rgbval & 0x000000FF;
-	if (LED1_active) {
 
-		analogWrite(R1, rgb[0] * bright[0] / 256);
-		analogWrite(G1, rgb[1] * bright[1] / 256);
-		analogWrite(B1, rgb[2] * bright[2] / 256);
-	}
-	if (LED2_active) {
+	if (LED1_active && !LEDStripe) {
 
-		analogWrite(R2, rgb[0] * bright[0] / 256);
-		analogWrite(G2, rgb[1] * bright[1] / 256);
-		analogWrite(B2, rgb[2] * bright[2] / 256);
+		LED1hue += HUE_DELTA;
+		if (LED1hue > HUE_MAX) {
+			LED1hue = 0.0;
+		}
+		LED1rgbval = HSV_to_RGB(LED1hue, LED1saturation, LED1value);
+		LED1Smooth[0] = (rgbval & 0x00FF0000) >> 16; // there must be better ways
+		LED1Smooth[1] = (rgbval & 0x0000FF00) >> 8;
+		LED1Smooth[2] = rgbval & 0x000000FF;
+
+		analogWrite(R1, LED1Smooth[0] * LED1bright[0] / 256);
+		analogWrite(G1, LED1Smooth[1] * LED1bright[1] / 256);
+		analogWrite(B1, LED1Smooth[2] * LED1bright[2] / 256);
+		delay(LED1_freq);
 	}
-	delay(LED1_freq);
+	if (LED2_active && LEDStripe) {
+		LED2hue += HUE_DELTA;
+		if (LED2hue > HUE_MAX) {
+			LED2hue = 0.0;
+		}
+		LED2rgbval = HSV_to_RGB(LED2hue, LED2saturation, LED2value);
+		LED2rgbval[0] = (rgbval & 0x00FF0000) >> 16; // there must be better ways
+		LED2rgbval[1] = (rgbval & 0x0000FF00) >> 8;
+		LED2Smooth[2] = rgbval & 0x000000FF;
+		analogWrite(R2, LED2rgbval[0] * LED2bright[0] / 256);
+		analogWrite(G2, LED2rgbval[1] * LED2bright[1] / 256);
+		analogWrite(B2, LED2rgbval[2] * LED2bright[2] / 256);
+		delay(LED2_freq);
+	}
+	
 }
 
 
@@ -516,14 +666,14 @@ void DisplayColorStripe()
 	}
 
 }
-void ChanceState(uint8_t State)
+void LED1ChanceState(uint8_t State)
 {
 	lcd.clear();
-	currentMode = State;
+	LED1_mode = State;
 	Display_max = 0;
 	Display_counter = 0;
 	Display_mscounter = 0;
-
+	EEPROM.write(2, State);
 
 	switch (State)
 	{
@@ -536,14 +686,7 @@ void ChanceState(uint8_t State)
 		else {
 			setColor(new byte[3]{ 0,0,0 }, 0);
 		}
-
-		if (LED2_active) {
-			setColor(color1, 1);
-		}
-		else {
-			setColor(new byte[3]{ 0,0,0 }, 1);
-		}
-
+	
 		Display_freq = 70;
 		DisplayColorStripe();
 
@@ -574,11 +717,60 @@ void ChanceState(uint8_t State)
 
 }
 
-
-
-void Fadeing() //LED1_counter over 100 =  {X} over {color0[1,2,3]}
+void LED2ChanceState(uint8_t State)
 {
-	if (LED1_active) {
+	lcd.clear();
+	LED1_mode = State;
+	Display_max = 0;
+	Display_counter = 0;
+	Display_mscounter = 0;
+	EEPROM.write(8, State);
+
+	switch (State)
+	{
+	case FixColorState:
+
+
+		if (LED2_active) {
+			setColor(color1, 0);
+		}
+		else {
+			setColor(new byte[3]{ 0,0,0 }, 0);
+		}
+
+		Display_freq = 70;
+		DisplayColorStripe();
+
+		break;
+	case WifiConnectSate:
+		connectWifi(_ssid, _pwd, _port);
+		break;
+	case FadeState:
+		Display_freq = 70;
+		DisplayColorStripe();
+		Fadeing();
+		break;
+	case FlashState:
+		Display_freq = 70;
+		DisplayColorStripe();
+		LED2_mscounter = 0;
+		// = 0;
+		fadeup = true;
+
+		break;
+	case SmoothState:
+		Display_freq = 70;
+		LED2_freq = 10;
+		DisplayColorStripe();
+		break;
+
+	}
+
+}
+
+void Fadeing(bool LEDStripe) //LED1_counter over 100 =  {X} over {color0[1,2,3]}
+{
+	if (LED1_active && !LEDStripe) {
 		if (LED1_mscounter == LED1_freq) {
 			if (fadeup)
 				LED1_counter = LED1_counter + 5;
@@ -595,7 +787,7 @@ void Fadeing() //LED1_counter over 100 =  {X} over {color0[1,2,3]}
 		LED1_mscounter++;
 	}
 
-	if (LED2_active) {
+	if (LED2_active && LEDStripe) {
 		if (LED2_mscounter == LED2_freq) {
 			if (fadeup)
 				LED2_counter = LED2_counter + 5;
@@ -660,11 +852,11 @@ void setColor(byte *mlt, bool stripe) {
 	}
 }
 
-void FixColor()
+void FixColor(bool LEDStripe)
 {
-	if (LED1_active)
+	if (LED1_active && LEDStripe)
 		setColor(color0, 0);
-	if (LED2_active)
+	if (LED2_active && LEDStripe)
 		setColor(color1, 1);
 }
 
