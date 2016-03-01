@@ -38,7 +38,11 @@ String WifiConnect()
 
 	server = WiFiServer(port);
 	server.begin();
+	int i = 10;
 	while (WiFi.status() != WL_CONNECTED) {
+		i++;
+		if (i == 20)
+			return "failed";
 		delay(500);
 	}
 
@@ -54,6 +58,7 @@ String WifiConnect()
 
 bool WifiDeconnect()
 {
+	Serial.write(ControlByte::Disconnect);
 	connected = false;
 	WiFi.disconnect();
 	int i = 0;
@@ -117,27 +122,50 @@ void loop() {
 	{
 		// Check if a client has connected
 		while (client.available()) {
+			byte go = 0;
 			byte req = client.read();
 			// Read the first line of the request
-			if (req == ControlByte::Disconnect)
-				WifiDeconnect();
-			else if (req == ControlByte::GetLightState)
+			switch (req)
 			{
+			case Disconnect:
+				WifiDeconnect();
+				break;
+			case GetLightState:
 				Serial.write(req);
 				while (Serial.available() <= 0)
 					delay(50);
 				client.write(Serial.read());
-
-			}
-			else
+				break;
+			case SSID:
 				Serial.write(req);
-			while (client.available())
-			{
-				req = client.read();
-				if (req == ControlByte::Stop)
-					client.flush();
+				while (client.available() <= 0)
+					delay(100);
+				go = client.read();
+				Serial.write(go);
+				for (int i = 0; i < go; i++)
+				{		
+					while (client.available() <= 0)
+						delay(100);
+					Serial.write(client.read());
+				}
+				break;
+			case PWD:
 				Serial.write(req);
-			}
+				go = (byte)client.read();
+				Serial.write(go);
+				for (int i = 0; i < go; i++)
+				{
+					Serial.write(client.read());
+				}
+				break;
+			case Port:
+				Serial.write(req);
+				Serial.write(client.read());
+				
+				break;
+			
+		}
+		
 		}
 
 		while (!client.connected()) {

@@ -19,6 +19,8 @@
 
 //----pinout def--------
 
+
+#define Reset 13
 #define LightPin 4
 
 //-----display
@@ -118,14 +120,30 @@ LiquidCrystal lcd(RS, Enable, DR4, DR5, DR6, DR7);
 
 
 String _ssid = "test";
-String _pwd = "test";
+String _pwd = "1234567890";
 uint8_t _port = 80;
 bool WifiIsConnected = false;
 
 bool LightStat = true;
 int EEPROM_Pointer = 0;
+
+void ResetEEPROM()
+{
+
+	for (int i = 0; i < EEPROM.length(); i++) {
+		EEPROM.write(i, 0);
+	}
+
+}
 void setup()
 {
+	Serial.begin(115200);
+
+	pinMode(Reset, INPUT);
+
+	if(!digitalRead(Reset))
+	ResetEEPROM();
+	else
 	loadData();
 	pinMode(LightPin, OUTPUT);
 	pinMode(R1, OUTPUT);
@@ -144,11 +162,8 @@ void setup()
 	digitalWrite(B2, LOW);
 
 
-	//attachInterrupt(0, CHECK_IR, CHANGE);
-	//irrecv.enableIRIn();
-
 	lcd.begin(16, 2);
-	Serial.begin(115200);
+
 	lcd.print("Welcome");
 	lcd.print(".");
 	delay(500);
@@ -157,11 +172,10 @@ void setup()
 	delay(500);
 	lcd.print(".");
 
-	//Display_scroll = true;
-
-	LED1_active = true;
 	connectWifi(_ssid,_pwd,_port);
 }
+
+
 
 void loadData()
 {
@@ -202,57 +216,69 @@ void loadData()
 
 	}
 
-	// WIFI-DATA
+
+	//WIFI
 
 	uint8_t go = EEPROM.read(EEPROM_Pointer);
+
 	EEPROM_Pointer++;
-		byte temp[go];
+		char ssidtemp[go];
 	for (int i = 0; i < go; i++)
 	{
-		go[i] = EEPROM.read(EEPROM_Pointer);
+		ssidtemp[i] = EEPROM.read(EEPROM_Pointer);
 		EEPROM_Pointer++;
 	}
 	if (go != 0)
-		_ssid = String(go);
+		_ssid = String(ssidtemp);
 
-	uint8_t go = EEPROM.read(EEPROM_Pointer);
+ go = EEPROM.read(EEPROM_Pointer);
+ memset(ssidtemp, 0, sizeof(ssidtemp));
 	EEPROM_Pointer++;
-	byte temp[go];
+	char temp1[go];
+
+
 	for (int i = 0; i < go; i++)
 	{
-		go[i] = EEPROM.read(EEPROM_Pointer);
+		temp1[i] = EEPROM.read(EEPROM_Pointer);
 		EEPROM_Pointer++;
 	}
+
 	if (go != 0)
-		_pwd = String(go);
+		_pwd = temp1;
 
 	go = EEPROM.read(EEPROM_Pointer);
 	if (go != 0)
 		_port = go;
 	EEPROM_Pointer++;
+	
 }
 
 void storeData_WIFI()
 {
+	lcd.clear();
+	lcd.print("write wifi");
 	EEPROM_Pointer = 13;
 	EEPROM.write(EEPROM_Pointer
-	, _ssid.length());
+	,(uint8_t) _ssid.length());
 	EEPROM_Pointer ++;
+
 
 	for (uint8_t i = 0; i < _ssid.length(); i++)
 	{		
-		EEPROM.write(EEPROM_Pointer, _ssid.charAt(i));
+		EEPROM.write(EEPROM_Pointer,(uint8_t)_ssid.charAt(i));
 		EEPROM_Pointer++;
 	}
 	EEPROM.write(EEPROM_Pointer
-		, _pwd.length());
+		, (uint8_t)_pwd.length());
+
 	EEPROM_Pointer++;
 
 	for (uint8_t i = 0; i < _pwd.length(); i++)
 	{
-		EEPROM.write(EEPROM_Pointer, _pwd.charAt(i));
+		EEPROM.write(EEPROM_Pointer, (uint8_t)_pwd.charAt(i));
 		EEPROM_Pointer++;
 	}
+
 	EEPROM.write(EEPROM_Pointer
 		, _port);
 
@@ -278,6 +304,7 @@ bool connectWifi(String ssid, String password, uint8_t port) {
 
 	Serial.write(ControlByte::Port);
 	Serial.write(port);
+
 	while (Serial.available() <= 0)
 		delay(100);
 	if (Serial.read() != 1)
@@ -319,7 +346,7 @@ bool connectWifi(String ssid, String password, uint8_t port) {
 	while (Serial.available() <= 5)
 	{
 		lcd.print(".");
-		delay(100);
+		delay(500);
 	}
 	String IP = Serial.readString();;
 	if (IP != "")
@@ -329,6 +356,12 @@ bool connectWifi(String ssid, String password, uint8_t port) {
 	lcd.print("Connected to:");
 	lcd.setCursor(0, 1);
 	lcd.print(IP);
+	if (IP.length() > 16)
+	{
+		Display_freq = 70;
+		Display_scroll = true;
+		Display_max =  IP.length()-16;
+	}
 	return WifiIsConnected;
 }
 void CHECK_IR() {
@@ -409,30 +442,58 @@ void CHECK_IR() {
 	//}
 }
 
-void ScrollDisplay() {
+void ScrollDisplay(bool Continous) {
 	
-	if (Display_mscounter == Display_freq) {
-	//	Serial.println(Display_counter >= Display_max * 2);
-		if (Display_counter >= Display_max+16 )
-		{
-
-			for (int i = 0; i < Display_max +16; i++)
+	if (Continous) {
+		if (Display_mscounter == Display_freq) {
+			//	Serial.println(Display_counter >= Display_max * 2);
+			if (Display_counter >= Display_max + 16)
 			{
-				lcd.scrollDisplayRight();
+
+				for (int i = 0; i < Display_max + 16; i++)
+				{
+					lcd.scrollDisplayRight();
+				}
+				Display_counter = 0;
 			}
-			Display_counter = 0;
+			else
+			{
+				//Serial.println(Display_counter);
+				lcd.scrollDisplayLeft();
+				Display_counter++;
+			}
+			Display_mscounter = 0;
 		}
-		else
-		{
-			//Serial.println(Display_counter);
-			lcd.scrollDisplayLeft();
-			Display_counter++;
+		else {
+			delay(10);
+			Display_mscounter++;
 		}
-		Display_mscounter = 0;
 	}
-	else {
-		delay(10);
-		Display_mscounter++;
+	else
+	{
+		if (Display_mscounter == Display_freq) {
+			//	Serial.println(Display_counter >= Display_max * 2);
+			if (Display_counter >= Display_max + 16)
+			{
+
+				for (int i = 0; i < Display_max + 16; i++)
+				{
+					lcd.scrollDisplayRight();
+				}
+				Display_counter = 0;
+			}
+			else
+			{
+				//Serial.println(Display_counter);
+				lcd.scrollDisplayLeft();
+				Display_counter++;
+			}
+			Display_mscounter = 0;
+		}
+		else {
+			delay(10);
+			Display_mscounter++;
+		}
 	}
 
 
@@ -440,8 +501,9 @@ void ScrollDisplay() {
 
 void loop()
 {
+	uint8_t run = 0;
 	uint8_t ctrl = 0;
-
+	uint8_t temp = 0;
 	if (Serial.available() > 0) {
 	
 	
@@ -466,7 +528,7 @@ void loop()
 		case LightToggle:
 			if (Serial.available() <= 0)
 				delay(50);
-			uint8_t temp = Serial.read();
+			temp = Serial.read();
 			EEPROM.write(0, temp);
 			ToggleLightSwitch((bool)temp);
 
@@ -519,13 +581,42 @@ void loop()
 			EEPROM.write(9, LED2_freq);
 			break;
 		case SSID:
-			_ssid = Serial.readString();
-			storeData_WIFI();
+			_ssid = "";
+			while (Serial.available() <= 0)
+				delay(50);
+			 run = Serial.read();
+			 if (run == 0)
+				 break;
+			 char buffer[run];
+			for (int i = 0; i < run; i++)
+			{
+				if (Serial.available() <= 0)
+					delay(50);
+				buffer[i] = (char)Serial.read();
+			}
+			_ssid = String(buffer);
+			
+					storeData_WIFI();
+					delete[] buffer;
 			break;
 
 		case PWD:
-			_pwd = Serial.readString();
+		
+			_pwd = "";
+			while (Serial.available() <= 0)
+				delay(50);
+			run = Serial.read();
+			char buffer1[run];
+			for (int i = 0; i < run; i++)
+			{
+				if (Serial.available() <= 0)
+					delay(50);
+				buffer1[i] = (char)Serial.read();
+			}
+			_pwd = String(buffer1);
+
 			storeData_WIFI();
+			delete[] buffer1;
 			break;
 
 		case Port:
@@ -539,6 +630,7 @@ void loop()
 	if (LED1_active) {
 		switch (LED1_mode) {
 		case FlashState:
+			Flash(false);
 			break;
 
 		case FadeState:
@@ -555,6 +647,7 @@ void loop()
 	{
 		switch (LED2_mode) {
 		case FlashState:
+			Flash(true);
 			break;
 		case FadeState:
 			Fadeing(true);
@@ -569,7 +662,7 @@ void loop()
 	}
 	if (Display_scroll)
 	{
-		ScrollDisplay();
+		ScrollDisplay(true);
 	}
 }
 
@@ -620,9 +713,9 @@ void Smooth(bool LEDStripe )
 			LED1hue = 0.0;
 		}
 		LED1rgbval = HSV_to_RGB(LED1hue, LED1saturation, LED1value);
-		LED1Smooth[0] = (rgbval & 0x00FF0000) >> 16; // there must be better ways
-		LED1Smooth[1] = (rgbval & 0x0000FF00) >> 8;
-		LED1Smooth[2] = rgbval & 0x000000FF;
+		LED1Smooth[0] = (LED1rgbval & 0x00FF0000) >> 16; // there must be better ways
+		LED1Smooth[1] = (LED1rgbval & 0x0000FF00) >> 8;
+		LED1Smooth[2] = LED1rgbval & 0x000000FF;
 
 		analogWrite(R1, LED1Smooth[0] * LED1bright[0] / 256);
 		analogWrite(G1, LED1Smooth[1] * LED1bright[1] / 256);
@@ -635,12 +728,12 @@ void Smooth(bool LEDStripe )
 			LED2hue = 0.0;
 		}
 		LED2rgbval = HSV_to_RGB(LED2hue, LED2saturation, LED2value);
-		LED2rgbval[0] = (rgbval & 0x00FF0000) >> 16; // there must be better ways
-		LED2rgbval[1] = (rgbval & 0x0000FF00) >> 8;
-		LED2Smooth[2] = rgbval & 0x000000FF;
-		analogWrite(R2, LED2rgbval[0] * LED2bright[0] / 256);
-		analogWrite(G2, LED2rgbval[1] * LED2bright[1] / 256);
-		analogWrite(B2, LED2rgbval[2] * LED2bright[2] / 256);
+		LED2Smooth[0] = (LED2rgbval & 0x00FF0000) >> 16; // there must be better ways
+		LED2Smooth[1] = (LED2rgbval & 0x0000FF00) >> 8;
+		LED2Smooth[2] = LED2rgbval & 0x000000FF;
+		analogWrite(R2, LED2Smooth[0] * LED2bright[0] / 256);
+		analogWrite(G2, LED2Smooth[1] * LED2bright[1] / 256);
+		analogWrite(B2, LED2Smooth[2] * LED2bright[2] / 256);
 		delay(LED2_freq);
 	}
 	
@@ -717,7 +810,7 @@ void LED1ChanceState(uint8_t State)
 	case FadeState:
 		Display_freq = 70;
 		DisplayColorStripe();
-		Fadeing();
+		Fadeing(false);
 		break;
 	case FlashState:
 		Display_freq = 70;
@@ -768,7 +861,7 @@ void LED2ChanceState(uint8_t State)
 	case FadeState:
 		Display_freq = 70;
 		DisplayColorStripe();
-		Fadeing();
+		Fadeing(true);
 		break;
 	case FlashState:
 		Display_freq = 70;
