@@ -1,0 +1,115 @@
+﻿<Page
+    x:Class="WindowsControl.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WindowsControl"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+xmlns:controls="using:ColorPicker" 
+    mc:Ignorable="d">
+    <Page.Resources>
+        <local:RGBToBrush x:Key="RGBToBrushConverter"></local:RGBToBrush>
+    </Page.Resources>
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="General" Width="400"  />
+            <ColumnDefinition x:Name="LED" Width="*" />
+
+        </Grid.ColumnDefinitions>
+
+        <VisualStateManager.VisualStateGroups>
+
+            <VisualStateGroup x:Name="LEDState">
+
+                <VisualState x:Name="LEDMixedState">
+                    <VisualState.Setters>
+                        <Setter Target="LED1R.Visibility" Value="Collapsed" />
+                        <Setter Target="LED1G.Visibility" Value="Collapsed" />
+                        <Setter Target="LED1B.Visibility" Value="Collapsed" />
+
+                        <Setter Target="LED1RShape.Visibility" Value="Collapsed" />
+                        <Setter Target="LED1GShape.Visibility" Value="Collapsed" />
+                        <Setter Target="LED1BShape.Visibility" Value="Collapsed" />
+
+                        <Setter Target="LED1Color.Visibility" Value="Visible" />
+
+
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="LEDDetailState">
+                    <VisualState.Setters>
+                        <Setter Target="LED1R.Visibility" Value="Visible" />
+                        <Setter Target="LED1G.Visibility" Value="Visible" />
+                        <Setter Target="LED1B.Visibility" Value="Visible" />
+
+                        <Setter Target="LED1RShape.Visibility" Value="Visible" />
+                        <Setter Target="LED1GShape.Visibility" Value="Visible" />
+                        <Setter Target="LED1BShape.Visibility" Value="Visible" />
+
+                        <Setter Target="LED1Color.Visibility" Value="Collapsed" />
+                    </VisualState.Setters>
+                </VisualState>
+
+
+
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+
+        <RelativePanel Grid.Column="0">
+            <ToggleSwitch Name="LightSwitch" Toggled="LightSwitch_Toggled" IsOn="{Binding LightState, Mode=TwoWay}" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True">Light</ToggleSwitch>
+            <ComboBox Name="LED1State" Header="LedStrip1 State" RelativePanel.Below="LightSwitch" IsEnabled="True" RelativePanel.AlignHorizontalCenterWithPanel="True" SelectionChanged="LED1State_SelectionChanged"></ComboBox>
+            <ToggleSwitch Name="LED1OnOff" Toggled="LED1OnOff_Toggled" RelativePanel.RightOf="LED1State" RelativePanel.AlignVerticalCenterWith="LED1State" Margin="10,10,10,10"></ToggleSwitch>
+
+            <ComboBox Name="LED2State" Header="LedStrip2 State" RelativePanel.Below="LED1OnOff" IsEnabled="True" RelativePanel.AlignHorizontalCenterWithPanel="True" SelectionChanged="LED2State_SelectionChanged"></ComboBox>
+            <ToggleSwitch Name="LED2OnOff" Toggled="LED1OnOff_Toggled" RelativePanel.RightOf="LED2State" RelativePanel.AlignVerticalCenterWith="LED2State" Margin="10,10,10,10"></ToggleSwitch>
+
+            <TextBox Name="IPBox" RelativePanel.AlignHorizontalCenterWithPanel="True" Text="{Binding ESP_IP, Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}" RelativePanel.Below="LED2State"></TextBox>
+            <Slider  Name="PortSlider" Minimum="1" Maximum="255" Value="80" RelativePanel.AlignHorizontalCenterWithPanel="True" RelativePanel.Below="IPBox" Width="255" TickFrequency="1" TickPlacement="Outside"></Slider>
+            <TextBox Margin="20,20,20,20" Name="PortBox" Text="{Binding ElementName=PortSlider, Path=Value,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" RelativePanel.RightOf="IPBox" RelativePanel.AlignVerticalCenterWith="IPBox"></TextBox>
+            <TextBlock Margin="5,5,5,5" RelativePanel.RightOf="IPBox" RelativePanel.AlignVerticalCenterWith="IPBox">:</TextBlock>
+            <StackPanel Name="S1" RelativePanel.Below="PortBox" Orientation="Horizontal" Margin="20,20,20,20" RelativePanel.AlignHorizontalCenterWithPanel="True">
+                <Ellipse Name="ConnectionState" Height="40" Width="40" Fill="Red" Margin="10,10,10,10"></Ellipse>
+                <Button Name="ArduinoConnect" Click="Connect_Click">Connect</Button>
+                
+            </StackPanel>
+            <TextBox Name="SSIDBox" RelativePanel.Below="S1" Text="WIFI-WG"></TextBox>
+            <TextBox Name="PWDBox" RelativePanel.Below="SSIDBox" Text="Weltfrieden67110"></TextBox>
+            <Button Name="WriteSSIDData"  RelativePanel.RightOf="SSIDBox"  RelativePanel.AlignVerticalCenterWith="SSIDBox" Click="WriteSSIDData_Click">Write SSID</Button>
+            <Button Name="WritePWDData"  RelativePanel.RightOf="PWDBox" RelativePanel.AlignVerticalCenterWith="PWDBox" Click="WritePWDData_Click">Write Password</Button>
+            <Button Name="WritePortData"  RelativePanel.RightOf="WritePWDData" RelativePanel.AlignVerticalCenterWith="WritePWDData" Click="WritePortData_Click">Write Port</Button>
+            <Button Name="Disconnect"  RelativePanel.Below="PWDBox" RelativePanel.RightOf="WritePWDData" Click="Disconnect_Click">Disconnect</Button>
+
+
+        </RelativePanel>
+        <RelativePanel Grid.Column="1" HorizontalAlignment="Stretch">
+
+            <TextBlock Name="LED1Text" RelativePanel.AlignHorizontalCenterWithPanel="True" Margin="20,20,20,20">LedStrip 1</TextBlock>
+            <ToggleSwitch Name="LEDStateToggle" Toggled="LEDState_Toggled" OffContent="Mixed" OnContent="Details" RelativePanel.RightOf="LED1Text"></ToggleSwitch>
+
+            <controls:ColorPicker SelectedColorChanged="LED1Color_SelectedColorChanged" PointerReleased="LED1Color_PointerReleased" Width="500" Name="LED1Color" SelectedColor="{Binding Led1}" RelativePanel.Below="LED1Text" RelativePanel.AlignHorizontalCenterWithPanel="True"></controls:ColorPicker>
+
+
+            <Slider ValueChanged="LED1Slider_ValueChanged" Value="{Binding ElementName=LED1Color,Path=RedValue, Mode=TwoWay}" Name="LED1R" RelativePanel.Below="LED1Text" RelativePanel.AlignHorizontalCenterWithPanel="True"                 Minimum="0" 
+                    Maximum="255"
+                    TickFrequency="1"
+                    TickPlacement="Outside" Width="255"  ></Slider>
+            <Rectangle Name="LED1RShape" RelativePanel.RightOf="LED1R" Width="30" Height="30"  RelativePanel.AlignVerticalCenterWith="LED1R"   Fill="{Binding ElementName=LED1R, Path=Value,ConverterParameter=1,Converter={StaticResource RGBToBrushConverter}}"  RelativePanel.Above="" ></Rectangle>
+            <Slider ValueChanged="LED1Slider_ValueChanged" Name="LED1G" RelativePanel.Below="LED1R" SmallChange="1" Value="{Binding ElementName=LED1Color,Path=GreenValue, Mode=TwoWay}"    RelativePanel.AlignHorizontalCenterWithPanel="True"             Minimum="0" 
+                    Maximum="255"
+                    TickFrequency="1"
+                    TickPlacement="Outside" Width="255" ></Slider>
+            <Rectangle Name="LED1GShape" RelativePanel.RightOf="LED1G"  RelativePanel.AlignVerticalCenterWith="LED1G" Width="30" Height="30"  Fill="{Binding ElementName=LED1G, Path=Value,ConverterParameter=2, Mode=TwoWay, Converter={StaticResource RGBToBrushConverter}}" ></Rectangle>
+            <Slider ValueChanged="LED1Slider_ValueChanged" Value="{Binding ElementName=LED1Color,Path=BlueValue, Mode=TwoWay}" Name="LED1B" RelativePanel.Below="LED1G"     RelativePanel.AlignHorizontalCenterWithPanel="True"            Minimum="0" 
+                    Maximum="255"
+                    TickFrequency="1"
+                    TickPlacement="Outside" Width="255" ></Slider>
+            <Rectangle Name="LED1BShape" RelativePanel.RightOf="LED1B" RelativePanel.AlignVerticalCenterWith="LED1B" Width="30" Height="30"  Fill="{Binding ElementName=LED1B, Path=Value,ConverterParameter=3, Mode=TwoWay, Converter={StaticResource RGBToBrushConverter}}" ></Rectangle>
+        </RelativePanel>
+
+    </Grid>
+</Page>
