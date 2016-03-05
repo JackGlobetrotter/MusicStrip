@@ -1,6 +1,3 @@
-
-
-
 #include <WiFiClient.h>
 
 #include <ESP8266WiFi.h>
@@ -163,6 +160,47 @@ void loop() {
 				Serial.write(client.read());
 				
 				break;
+
+				//LED1_CRTL
+			case LED1Data:
+				Serial.write(req);
+				for (byte i = 0; i < 3; i++)
+				{
+					while (Serial.available() <= 0)
+						delay(50);
+					client.write(Serial.read());
+				}
+
+				break;
+			case LED1Frequency:
+				Serial.write(req);
+				while (Serial.available() <= 0)
+					delay(50);
+				client.write(Serial.read());
+				break;
+			case LED1SwitchStade:
+				Serial.write(req);
+				while (Serial.available() <= 0)
+					delay(50);
+				client.write(Serial.read());
+				break;
+				//LED2_CRTL
+			case LED2Data:
+				Serial.write(req);
+				break;
+			case LED2Frequency:
+				Serial.write(req);
+				while (Serial.available() <= 0)
+					delay(50);
+				client.write(Serial.read());
+				break;
+			case LED2SwitchStade:
+				Serial.write(req);
+				while (Serial.available() <= 0)
+					delay(50);
+				client.write(Serial.read());
+				break;
+
 			
 		}
 		

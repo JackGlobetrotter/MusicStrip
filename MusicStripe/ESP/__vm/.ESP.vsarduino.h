@@ -5,21 +5,19 @@
 	        all non-arduino files created by visual micro and all visual studio project or solution files can be freely deleted and are not required to compile a sketch (do not delete your own code!).
 	        note: debugger breakpoints are stored in '.sln' or '.asln' files, knowledge of last uploaded breakpoints is stored in the upload.vmps.xml file. Both files are required to continue a previous debug session without needing to compile and upload again
 	
-	Hardware: Generic ESP8266 Module, Platform=esp8266, Package=esp8266
+	Hardware: Generic ESP8266 Module, Platform=2.1.0, Package=esp8266
 */
 
 #ifndef _VSARDUINO_H_
 #define _VSARDUINO_H_
-#define __ESP8266_ESp8266__
-#define __ESP8266_ESP8266__
 #define __ets__
 #define ICACHE_FLASH
 #define F_CPU 80000000L
-#define ARDUINO 10606
+#define ARDUINO 10607
 #define ARDUINO_ESP8266_ESP01
-#define ARDUINO_ARCH_ESP8266
+#define ARDUINO_ARCH_2.1.0
 #define __cplusplus
-#define __ARM__
+#define GCC_VERSION 40802
 #define __inline__
 #define __asm__(x)
 #define __extension__
@@ -29,52 +27,56 @@
 #define __asm__ 
 #define __volatile__
 
-#define __builtin_va_list
-typedef int __gnuc_va_list;
 
 #define __ICCARM__
 #define __ASM
 #define __INLINE
-#define __attribute__(noinline)
+#define __builtin_va_list void
+//#define _GNU_SOURCE 
+//#define __GNUC__ 0
+//#undef  __ICCARM__
+//#define __GNU__
 
-#define _STD_BEGIN
-#define EMIT
-#define WARNING
-#define _Lockit
-#define __CLR_OR_THIS_CALL
-#define C4005
+typedef long Pio;
+typedef long Efc;
+typedef long Adc;
+typedef long Pwm;
+typedef long Rtc;
+typedef long Rtt;
+typedef long pRtc;
+typedef long Spi;
+typedef long spi;
+typedef long Ssc;
+//typedef long p_scc;
+typedef long Tc;
+//typedef long pTc;
+typedef long Twi;
+typedef long Wdt;
+//typedef long pTwi;
+typedef long Usart;
+typedef long Pdc;
+typedef long Rstc;
 
-typedef int uint8_t;
+extern const int ADC_MR_TRGEN_DIS = 0;
+extern const int ADC_MR_TRGSEL_ADC_TRIG0 = 0;
+extern const int ADC_MR_TRGSEL_Pos = 0;
+
+extern const int ADC_MR_TRGSEL_Msk = 0;
+extern const int ADC_MR_TRGEN = 0;
+extern const int ADC_TRIG_TIO_CH_0 = 0;
+extern const int ADC_MR_TRGSEL_ADC_TRIG1 = 0;
+extern const int ADC_TRIG_TIO_CH_1 = 0;
+extern const int ADC_MR_TRGSEL_ADC_TRIG2 = 0;
+extern const int ADC_MR_TRGSEL_ADC_TRIG3 = 0;
+
 #define __ARMCC_VERSION 400678
-#define PROGMEM
-#define string_literal
+#define __attribute__(noinline)
 
 #define prog_void
 #define PGM_VOID_P int
 
-#define _GLIBCXX_CONSTEXPR  ([=] () {int _a = (1), _b = (2); return _a > _b ? _a : _b; }())
 
-
-typedef int _read;
-typedef int _seek;
-typedef int _write;
-typedef int _close;
-typedef int __cleanup;
-
-#define inline 
-#define __builtin_clz
-#define __CHAR_BIT__
-#define _EXFUN()
-#define __builtin_labs
-
-//MSVC++ 14.0 _MSC_VER == 1900 (Visual Studio 2015)
-//MSVC++ 12.0 _MSC_VER == 1800 (Visual Studio 2013)
-//MSVC++ 11.0 _MSC_VER == 1700 (Visual Studio 2012)
-//MSVC++ 10.0 _MSC_VER == 1600 (Visual Studio 2010)
-//#if (_MSC_VER == 1600)
-//	#undef __cplusplus
-//#endif
-
+            
 typedef unsigned char byte;
 extern "C" void __cxa_pure_virtual() {;}
 
