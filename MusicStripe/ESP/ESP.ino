@@ -7,13 +7,12 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #include <GDBStub\src\GDBStub.h>
-
+#include <MusicStripLib.h>
 #include <IPAddress.h>
 
 
 #define OTAMode 26
 
-#include "../MusicLibrary/src/_micro-api/libraries/MusicLibraryLib/src/MusicStripLib.h"
 
 
 uint8_t value;
@@ -355,9 +354,11 @@ loadData();
 		ArduinoOTA.onStart([]() {
 			Serial.write(OTAStart);
 		});
+	//	ArduinoOTA.setPassword((const char *)"1234567890");
 		ArduinoOTA.onEnd([]() {
 			Serial.write(OTAEnd);
 			EEPROM.write(0, 0);
+			EEPROM.commit();
 		});
 
 		ArduinoOTA.onError([](ota_error_t error) {
@@ -505,6 +506,7 @@ void loop() {
 					Serial.write(req);
 
 					EEPROM.write(0, OTAMode);
+					EEPROM.commit();
 					ESP.restart();
 					break;
 
