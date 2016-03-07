@@ -83,8 +83,13 @@ namespace WindowsControl
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        Windows.Storage.ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+        Windows.Storage.StorageFolder localFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+
         StreamSocket ESP;
         IPAddress _ESP_IP;
+        string _SSID;
+        string _PWD;
         DataWriter ESP_Stream;
         byte ESP_Port { get; set; }
         bool loading = true;
@@ -95,9 +100,26 @@ namespace WindowsControl
         bool firstchange = true;
         public  MainPage()
         {
+
             ESP_Port = 80;
-            ESP_IP = IPAddress.Parse("192.168.1.29");
+            ESP_IP = IPAddress.Parse("192.168.4.1");
             Led1 = new SolidColorBrush(Colors.CadetBlue);
+            Windows.Storage.ApplicationDataCompositeValue WifiConfig =
+          (Windows.Storage.ApplicationDataCompositeValue)localSettings.Values["WifiConfig"];
+
+            if (WifiConfig == null | WifiConfig.Count != 4)
+            {
+                // No data
+            }
+            else
+            {
+                ESP_Port = System.Convert.ToByte(WifiConfig["Port"]);
+                SSID = (String)WifiConfig["SSID"];
+                PWD = (String)WifiConfig["PWD"];
+                ESP_IP = IPAddress.Parse((String)WifiConfig["IP"]);
+
+                // Access data in composite["intVal"] and composite["strVal"]
+            }
             this.DataContext = this;
             LED1 = new byte[] { 255, 255, 0 };
             this.InitializeComponent();
@@ -111,6 +133,10 @@ namespace WindowsControl
             LED1State.Items.Add(ControlByte.FlashState.ToString());
             LED1State.SelectedIndex = 0;
             loading = false;
+
+            // Composite setting
+
+       
         }
 
        
@@ -151,6 +177,32 @@ namespace WindowsControl
             set
             {
                 _ESP_IP = value;
+            }
+        }
+
+        public string SSID
+        {
+            get
+            {
+                return _SSID;
+            }
+
+            set
+            {
+                _SSID = value;
+            }
+        }
+
+        public string PWD
+        {
+            get
+            {
+                return _PWD;
+            }
+
+            set
+            {
+                _PWD = value;
             }
         }
 
@@ -201,13 +253,17 @@ namespace WindowsControl
         {
             //WIFI
             Connect = 1,
-            Disconnect,
+            Reconnect,
             Port,
             SSID,
             PWD,
             IP,
             WifiConnectSate,
-
+            //ESP8266
+            OTAUpdate,
+            OTAStart,
+            OTAEnd,
+            OTAError,
             //General
             Start,
             Stop,
@@ -231,7 +287,6 @@ namespace WindowsControl
 
             LED1Frequency,
             LED2Frequency
-
         };
 
         private void LED1State_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -246,7 +301,7 @@ namespace WindowsControl
             // connect ESP, read Lightstat
             ESP = new StreamSocket();
             HostName hostName
-                 = new HostName( ESP_IP.ToString());
+                 = new HostName( IPBox.Text.ToString());
         
 
 
@@ -293,10 +348,7 @@ namespace WindowsControl
 
         }
 
-        private async void WriteWifiData_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
+   
         static byte[] GetBytes(string str)
         {
             byte[] bytes = new byte[str.Length+1];
@@ -318,27 +370,38 @@ namespace WindowsControl
         private async void Disconnect_Click(object sender, RoutedEventArgs e)
         {
 
-            ESP_Stream.WriteByte((byte)ControlByte.Disconnect);
+            ESP_Stream.WriteByte((byte)ControlByte.Reconnect);
 
             await ESP_Stream.StoreAsync();
             await ESP_Stream.FlushAsync();
         }
 
-        private void WriteSSIDData_Click(object sender, RoutedEventArgs e)
-        {
-            ArduinoSend(ControlByte.SSID, GetBytes(SSIDBox.Text)); 
 
-    
-        }
-
-        private void WritePWDData_Click(object sender, RoutedEventArgs e)
+        private async void WriteWifiData_Click(object sender, RoutedEventArgs e)
         {
+
+            ArduinoSend(ControlByte.SSID, GetBytes(SSIDBox.Text));
+           await System.Threading.Tasks.Task.Delay(300);
+            ArduinoSend(ControlByte.Port, new byte[] { (byte)PortSlider.Value });
+            await System.Threading.Tasks.Task.Delay(300);
             ArduinoSend(ControlByte.PWD, GetBytes(PWDBox.Text));
+
+            Windows.Storage.ApplicationDataCompositeValue composite = new Windows.Storage.ApplicationDataCompositeValue();
+            composite["Port"] = PortSlider.Value;
+            composite["SSID"] = SSIDBox.Text;
+            composite["PWD"] = PWDBox.Text;
+            composite["IP"] = IPBox.Text;
+            localSettings.Values["WifiConfig"] = composite;
         }
 
-        private void WritePortData_Click(object sender, RoutedEventArgs e)
+   
+
+        private async void OTAUpdateMode_Click(object sender, RoutedEventArgs e)
         {
-            ArduinoSend(ControlByte.PWD,new byte[] { (byte)PortSlider.Value });
+            ESP_Stream.WriteByte((byte)ControlByte.OTAUpdate);
+
+            await ESP_Stream.StoreAsync();
+            await ESP_Stream.FlushAsync();
         }
     }
 }

@@ -77,12 +77,11 @@ xmlns:controls="using:ColorPicker"
                 <Button Name="ArduinoConnect" Click="Connect_Click">Connect</Button>
                 
             </StackPanel>
-            <TextBox Name="SSIDBox" RelativePanel.Below="S1" Text="WIFI-WG"></TextBox>
-            <TextBox Name="PWDBox" RelativePanel.Below="SSIDBox" Text="Weltfrieden67110"></TextBox>
-            <Button Name="WriteSSIDData"  RelativePanel.RightOf="SSIDBox"  RelativePanel.AlignVerticalCenterWith="SSIDBox" Click="WriteSSIDData_Click">Write SSID</Button>
-            <Button Name="WritePWDData"  RelativePanel.RightOf="PWDBox" RelativePanel.AlignVerticalCenterWith="PWDBox" Click="WritePWDData_Click">Write Password</Button>
-            <Button Name="WritePortData"  RelativePanel.RightOf="WritePWDData" RelativePanel.AlignVerticalCenterWith="WritePWDData" Click="WritePortData_Click">Write Port</Button>
-            <Button Name="Disconnect"  RelativePanel.Below="PWDBox" RelativePanel.RightOf="WritePWDData" Click="Disconnect_Click">Disconnect</Button>
+            <TextBox Name="SSIDBox" RelativePanel.Below="S1" Text="{Binding SSID}"></TextBox>
+            <TextBox Name="PWDBox" RelativePanel.Below="SSIDBox" Text="{Binding PWD}"></TextBox>
+            <Button Name="WriteSSIDData"  RelativePanel.RightOf="SSIDBox"  RelativePanel.AlignVerticalCenterWith="SSIDBox" Click="WriteWifiData_Click">Write Wifi Data</Button>
+
+            <Button Name="OTAUpdateMode"  RelativePanel.Below="PWDBox" RelativePanel.RightOf="WriteSSIDData" Click="OTAUpdateMode_Click">OTAUpdate</Button>
 
 
         </RelativePanel>

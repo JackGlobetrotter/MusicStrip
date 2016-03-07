@@ -1,14 +1,10 @@
 
 
 
-//#include <IRremoteInt.h>
-//#include <IRremote.h>
 #include <LiquidCrystal.h>
 #include <..\MusicLibrary\src\_micro-api\libraries\MusicLibraryLib\src\MusicStripLib.h>
-#include <EEPROM\EEPROM.h>
+#include <EEPROM.h>
 
-//get working 2 led stripes controled seperate
-//fix fading, flash
 
 #define WIFIPointer 0
 
@@ -217,72 +213,11 @@ void loadData()
 	}
 
 
-	//WIFI
-
-	uint8_t go = EEPROM.read(EEPROM_Pointer);
-
-	EEPROM_Pointer++;
-		char ssidtemp[go];
-	for (int i = 0; i < go; i++)
-	{
-		ssidtemp[i] = EEPROM.read(EEPROM_Pointer);
-		EEPROM_Pointer++;
-	}
-	if (go != 0)
-		_ssid = String(ssidtemp);
-
- go = EEPROM.read(EEPROM_Pointer);
- memset(ssidtemp, 0, sizeof(ssidtemp));
-	EEPROM_Pointer++;
-	char temp1[go];
-
-
-	for (int i = 0; i < go; i++)
-	{
-		temp1[i] = EEPROM.read(EEPROM_Pointer);
-		EEPROM_Pointer++;
-	}
-
-	if (go != 0)
-		_pwd = temp1;
-
-	go = EEPROM.read(EEPROM_Pointer);
-	if (go != 0)
-		_port = go;
-	EEPROM_Pointer++;
+	
 	
 }
 
-void storeData_WIFI()
-{
-	lcd.clear();
-	lcd.print("write wifi");
-	EEPROM_Pointer = 13;
-	EEPROM.write(EEPROM_Pointer
-	,(uint8_t) _ssid.length());
-	EEPROM_Pointer ++;
 
-
-	for (uint8_t i = 0; i < _ssid.length(); i++)
-	{		
-		EEPROM.write(EEPROM_Pointer,(uint8_t)_ssid.charAt(i));
-		EEPROM_Pointer++;
-	}
-	EEPROM.write(EEPROM_Pointer
-		, (uint8_t)_pwd.length());
-
-	EEPROM_Pointer++;
-
-	for (uint8_t i = 0; i < _pwd.length(); i++)
-	{
-		EEPROM.write(EEPROM_Pointer, (uint8_t)_pwd.charAt(i));
-		EEPROM_Pointer++;
-	}
-
-	EEPROM.write(EEPROM_Pointer
-		, _port);
-
-}
 
 void ToggleLightSwitch(bool OnOff)
 {
@@ -294,54 +229,8 @@ void ToggleLightSwitch(bool OnOff)
 
 bool connectWifi(String ssid, String password, uint8_t port) {
 
-	lcd.clear();
-	lcd.print("Connecting to");
-	lcd.setCursor(0, 1);
-	lcd.print(ssid);
-	lcd.setCursor((uint8_t)ssid.length(), 1);
 
-	int ProgressInt = ssid.length();
-
-	Serial.write(ControlByte::Port);
-	Serial.write(port);
-
-	while (Serial.available() <= 0)
-		delay(100);
-	if (Serial.read() != 1)
-		return "";
-	else
-		Serial.flush();
-	delay(100);
-
-	lcd.print(".");
-
-	Serial.write(ControlByte::SSID);
-
-	Serial.print(ssid);
-	while (Serial.available() <= 0)
-		delay(100);
-	// Console.WriteLine(myPort.ReadLine());
-	if (Serial.read() != 1)
-		return "";
-	else
-		Serial.flush();
-	delay(100);
-
-	lcd.print(".");
-
-	Serial.write(ControlByte::PWD);
-
-	Serial.print(password);
-	while (Serial.available() <= 0)
-		delay(100);
-	if (Serial.read() != 1)
-		return "";
-	else
-		Serial.flush();
-	delay(100);
-
-	lcd.print(".");
-	Serial.write(ControlByte::Connect);
+	
 
 	while (Serial.available() <= 5)
 	{
@@ -579,49 +468,6 @@ void loop()
 		case LED2Frequency:
 			LED2_freq = Serial.read();
 			EEPROM.write(9, LED2_freq);
-			break;
-		case SSID:
-			_ssid = "";
-			while (Serial.available() <= 0)
-				delay(50);
-			 run = Serial.read();
-			 if (run == 0)
-				 break;
-			 char buffer[run];
-			for (int i = 0; i < run; i++)
-			{
-				if (Serial.available() <= 0)
-					delay(50);
-				buffer[i] = (char)Serial.read();
-			}
-			_ssid = String(buffer);
-			
-					storeData_WIFI();
-					delete[] buffer;
-			break;
-
-		case PWD:
-		
-			_pwd = "";
-			while (Serial.available() <= 0)
-				delay(50);
-			run = Serial.read();
-			char buffer1[run];
-			for (int i = 0; i < run; i++)
-			{
-				if (Serial.available() <= 0)
-					delay(50);
-				buffer1[i] = (char)Serial.read();
-			}
-			_pwd = String(buffer1);
-
-			storeData_WIFI();
-			delete[] buffer1;
-			break;
-
-		case Port:
-			_port = Serial.read();
-			storeData_WIFI();
 			break;
 		}
 	

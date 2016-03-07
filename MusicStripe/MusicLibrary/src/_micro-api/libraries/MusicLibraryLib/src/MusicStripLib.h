@@ -17,13 +17,17 @@
 enum ControlByte : uint8_t {
 	//WIFI
 	Connect =1,
-	Disconnect,
+	Reconnect,
 	Port,
 	SSID,
 	PWD,
 	IP,
 	WifiConnectSate,
-
+	//ESP8266
+	OTAUpdate,
+	OTAStart,
+	OTAEnd,
+	OTAError,
 	//General
 	Start,
 	Stop,
