@@ -82,7 +82,7 @@ xmlns:controls="using:ColorPicker"
             <Button Name="WriteSSIDData"  RelativePanel.RightOf="SSIDBox"  RelativePanel.AlignVerticalCenterWith="SSIDBox" Click="WriteWifiData_Click">Write Wifi Data</Button>
 
             <Button Name="OTAUpdateMode"  RelativePanel.Below="PWDBox" RelativePanel.RightOf="WriteSSIDData" Click="OTAUpdateMode_Click">OTAUpdate</Button>
-
+            <Button RelativePanel.Below="OTAUpdateMode" Click="Button_Click">Settings</Button>
 
         </RelativePanel>
         <RelativePanel Grid.Column="1" HorizontalAlignment="Stretch">
@@ -109,6 +109,32 @@ xmlns:controls="using:ColorPicker"
                     TickPlacement="Outside" Width="255" ></Slider>
             <Rectangle Name="LED1BShape" RelativePanel.RightOf="LED1B" RelativePanel.AlignVerticalCenterWith="LED1B" Width="30" Height="30"  Fill="{Binding ElementName=LED1B, Path=Value,ConverterParameter=3, Mode=TwoWay, Converter={StaticResource RGBToBrushConverter}}" ></Rectangle>
         </RelativePanel>
+        <AppBarSeparator HorizontalAlignment="Left" Margin="-1013,194,0,0" VerticalAlignment="Top"/>
+        <ContentDialog x:Name="SettingsDialog"
+                        VerticalAlignment="Stretch"
+                        Title="{Binding ElementName=SettingsSelect, Path=SelectedItem.Content}"
+                        PrimaryButtonText="OK"
+                        IsPrimaryButtonEnabled="False"
+                        SecondaryButtonText="Cancel"
+                        MaxWidth="{Binding ActualWidth, ElementName=pageRoot}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.3*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
 
+                </Grid.ColumnDefinitions>
+      
+            <RelativePanel Grid.Column="1" >
+
+                    <local:WifiSettings Visibility="{Binding ElementName=WifiSettingsTab, Path=Visibility}"></local:WifiSettings>                
+                
+            </RelativePanel>
+                <ListView Grid.Column="0" Name="SettingsSelect" SelectedIndex="0" SelectionChanged="SettingsSelect_SelectionChanged">
+                    <ListViewItem>General Settings</ListViewItem>
+
+                    <ListViewItem x:Name="WifiSettingsTab">Wifi Settings</ListViewItem>
+                </ListView>
+            </Grid>
+        </ContentDialog>
     </Grid>
 </Page>
