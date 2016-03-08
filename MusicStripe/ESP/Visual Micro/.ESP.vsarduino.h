@@ -12,16 +12,14 @@
 #define _VSARDUINO_H_
 #define __ESP8266_ESp8266__
 #define __ESP8266_ESP8266__
+#define _VMDEBUG 1
 #define __ets__
 #define ICACHE_FLASH
 #define F_CPU 80000000L
-#define ARDUINO 10607
+#define ARDUINO 167
 #define ARDUINO_ESP8266_ESP01
 #define ARDUINO_ARCH_ESP8266
-#define ESP8266
-#define __cplusplus 201103L
-#define __STDC__
-#define __ARM__
+#define __cplusplus
 #define __inline__
 #define __asm__(x)
 #define __extension__
@@ -100,5 +98,5 @@ extern "C" void __cxa_pure_virtual() {;}
 #define portOutputRegister(P)
 #define portInputRegister(P)
 #define portModeRegister(P)
-#include <..\ESP\ESP.ino>
+#include <ESP.ino>
 #endif

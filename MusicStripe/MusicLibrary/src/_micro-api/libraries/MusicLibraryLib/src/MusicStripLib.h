@@ -15,31 +15,42 @@
 #endif
 
 enum ControlByte : uint8_t {
-	RGBColor = 1,
-	MusicTitle,
-
-	SwitchStade,
-	LED1Data,
-	LED2Data,
-	LEDState,
-	Start,
-	Stop,
-	LightToggle,
-	IP,
+	//WIFI
+	Connect =1,
+	Reconnect,
 	Port,
 	SSID,
 	PWD,
-	Connect,
-	Disconnect,
+	IP,
+	WifiConnectSate,
+	//ESP8266
+	OTAUpdate,
+	OTAStart,
+	OTAEnd,
+	OTAError,
+	//General
+	Start,
+	Stop,
+	GetLightState,
+	RGBColor ,
+	MusicTitle,
+	//LED
+	LED1SwitchStade, 
+	LED2SwitchStade,
+	LED1Data,
+	LED2Data,
+	LEDState,
+
+	LightToggle,
 	MusicState,
 	MicroState,
 	FadeState,
 	SmoothState,
 	FlashState,
 	FixColorState,
-	WifiConnectSate,
-	GetLightState
 
+	LED1Frequency,
+	LED2Frequency
 };
 
 #endif
