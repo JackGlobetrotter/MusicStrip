@@ -625,9 +625,7 @@ void LED1ChanceState(uint8_t State)
 		DisplayColorStripe();
 
 		break;
-	case WifiConnectSate:
-		connectWifi(_ssid, _pwd, _port);
-		break;
+
 	case FadeState:
 		Display_freq = 70;
 		DisplayColorStripe();
@@ -676,9 +674,7 @@ void LED2ChanceState(uint8_t State)
 		DisplayColorStripe();
 
 		break;
-	case WifiConnectSate:
-		connectWifi(_ssid, _pwd, _port);
-		break;
+
 	case FadeState:
 		Display_freq = 70;
 		DisplayColorStripe();
