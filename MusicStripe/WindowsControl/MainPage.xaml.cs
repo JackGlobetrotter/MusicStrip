@@ -20,6 +20,9 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using System.Net;
 using Windows.Networking;
+using Windows.ApplicationModel.Core;
+using Windows.UI.Core;
+using Windows.UI.ViewManagement;
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace WindowsControl
@@ -107,7 +110,7 @@ namespace WindowsControl
             Windows.Storage.ApplicationDataCompositeValue WifiConfig =
           (Windows.Storage.ApplicationDataCompositeValue)localSettings.Values["WifiConfig"];
 
-            if (WifiConfig == null | WifiConfig.Count != 4)
+            if (WifiConfig == null || WifiConfig.Count != 4)
             {
                 // No data
             }
@@ -402,6 +405,19 @@ namespace WindowsControl
 
             await ESP_Stream.StoreAsync();
             await ESP_Stream.FlushAsync();
+        }
+
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as Button;
+            var result = await SettingsDialog.ShowAsync();
+            btn.Content = "Result: " + result;
+
+        }
+
+        private void SettingsSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 }

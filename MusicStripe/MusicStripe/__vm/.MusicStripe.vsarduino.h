@@ -13,10 +13,11 @@
 #define __AVR_ATmega328p__
 #define __AVR_ATmega328P__
 #define F_CPU 16000000L
-#define ARDUINO 167
+#define ARDUINO 10607
 #define ARDUINO_AVR_UNO
 #define ARDUINO_ARCH_AVR
-#define __cplusplus
+#define __cplusplus 201103L
+#define __AVR__
 #define __inline__
 #define __asm__(x)
 #define __extension__
@@ -83,5 +84,5 @@ extern "C" void __cxa_pure_virtual() {;}
 #define portOutputRegister(P)
 #define portInputRegister(P)
 #define portModeRegister(P)
-#include <MusicStripe.ino>
+#include <..\MusicStripe\MusicStripe.ino>
 #endif
