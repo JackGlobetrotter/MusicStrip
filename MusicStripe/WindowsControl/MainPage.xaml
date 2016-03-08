@@ -9,6 +9,8 @@ xmlns:controls="using:ColorPicker"
     mc:Ignorable="d">
     <Page.Resources>
         <local:RGBToBrush x:Key="RGBToBrushConverter"></local:RGBToBrush>
+
+        <local:BooleanToVisibilityConverter x:Key="BoolToVis" />
     </Page.Resources>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
@@ -126,13 +128,14 @@ xmlns:controls="using:ColorPicker"
       
             <RelativePanel Grid.Column="1" >
 
-                    <local:WifiSettings Visibility="{Binding ElementName=WifiSettingsTab, Path=Visibility}"></local:WifiSettings>                
-                
-            </RelativePanel>
+                    <local:WifiSettings Visibility="{Binding ElementName=WifiSettingsTab, Path=IsSelected, Converter={StaticResource BoolToVis}}"></local:WifiSettings>
+                    <local:GeneralSettings  Visibility="{Binding ElementName=GeneralSettingsTab, Path=IsSelected, Converter={StaticResource BoolToVis}}">
+                    </local:GeneralSettings>
+                </RelativePanel>
                 <ListView Grid.Column="0" Name="SettingsSelect" SelectedIndex="0" SelectionChanged="SettingsSelect_SelectionChanged">
-                    <ListViewItem>General Settings</ListViewItem>
+                    <ListViewItem Name="GeneralSettingsTab">General Settings</ListViewItem>
 
-                    <ListViewItem x:Name="WifiSettingsTab">Wifi Settings</ListViewItem>
+                    <ListViewItem Name="WifiSettingsTab" IsSelected="True">Wifi Settings</ListViewItem>
                 </ListView>
             </Grid>
         </ContentDialog>
