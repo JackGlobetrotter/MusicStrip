@@ -1,8 +1,9 @@
 
 
 
+#include <SoftwareSerial.h>
 #include <LiquidCrystal.h>
-#include <..\MusicLibrary\src\_micro-api\libraries\MusicLibraryLib\src\MusicStripLib.h>
+#include <MusicStripLib.h>
 #include <EEPROM.h>
 
 
@@ -18,8 +19,8 @@
 
 #define Reset 13
 #define LightPin 4
-#define ESPReset
-#define ESPFactory
+#define ESPReset 7
+#define ESPFactory 8
 //-----display
 
 #define DR4 A0
@@ -30,11 +31,6 @@
 #define Enable A4
 #define RS  A5
 
-// ----------IR
-
-#define IRPin 2
-
-
 //----------LED1
 #define R1 3
 #define G1 5
@@ -42,9 +38,9 @@
 
 //---------LED 2
 
-#define R2 7
-#define G2 7
-#define B2 8
+#define R2 9
+#define G2 10
+#define B2 11
 
 
 bool LED2_active = false;
@@ -124,6 +120,8 @@ bool WifiIsConnected = false;
 bool LightStat = true;
 int EEPROM_Pointer = 0;
 
+SoftwareSerial ss(13,12);
+
 void ResetEEPROM()
 {
 
@@ -132,8 +130,44 @@ void ResetEEPROM()
 	}
 
 }
+
+String InitalizeWifi(bool Factory) {
+	if (Factory)
+	{
+		digitalWrite(ESPReset, LOW);
+		delay(50);
+		digitalWrite(ESPFactory, HIGH);
+		digitalWrite(ESPReset, HIGH);
+		delay(50);
+		Serial.flush();
+
+		digitalWrite(ESPReset, LOW);
+		delay(200);
+		digitalWrite(ESPReset, HIGH);
+	}
+	else
+	{
+		digitalWrite(ESPReset, LOW);
+		delay(50);
+		digitalWrite(ESPFactory, HIGH);
+		digitalWrite(ESPReset, HIGH);
+		while (Serial.available() < 50)
+			delay(10);
+		Serial.readString();
+	}
+	while (Serial.available() < 5)
+		delay(50);
+	String ret = Serial.readString();
+	if (ret.substring(ret.length() - 3, ret.length()) == "OTA")
+		WifiUpdate();
+	else
+		return ret;
+
+}
+
 void setup()
 {
+	ss.begin(115200);
 	Serial.begin(115200);
 
 	pinMode(Reset, INPUT);
@@ -142,6 +176,16 @@ void setup()
 	ResetEEPROM();
 	else
 	loadData();
+
+	lcd.begin(16, 2);
+	lcd.clear();
+	pinMode(ESPReset, OUTPUT);
+	pinMode(ESPFactory, OUTPUT);
+
+	lcd.print(InitalizeWifi(false));
+
+
+
 	pinMode(LightPin, OUTPUT);
 	pinMode(R1, OUTPUT);
 	pinMode(R2, OUTPUT);
@@ -159,17 +203,9 @@ void setup()
 	digitalWrite(B2, LOW);
 
 
-	lcd.begin(16, 2);
 
-	lcd.print("Welcome");
-	lcd.print(".");
-	delay(500);
-	lcd.print(".");
-	Serial.flush();
-	delay(500);
-	lcd.print(".");
-	lcd.clear();
-	lcd.print(Serial.readString());
+
+
 }
 
 
@@ -362,6 +398,73 @@ void ScrollDisplay(bool Continous) {
 
 
 }
+byte flash[8] = {
+	0b10000,
+	0b11000,
+	0b11100,
+	0b11110,
+	0b11110,
+	0b11100,
+	0b11000,
+	0b10000
+};
+
+
+void WifiUpdate()
+{
+	lcd.createChar(0, flash);
+	lcd.clear();
+	lcd.print("ESP Updating");
+	lcd.setCursor(0, 1);
+	lcd.print("----------------");
+	lcd.noCursor();
+	lcd.setCursor(0, 1);
+	int passing = -1;
+	int print = 0;
+	bool gotend = false;
+	byte combination[3];
+	while (!gotend) {
+		while  (Serial.available() > 2)
+		{
+			combination[2] = combination[1];
+			combination[1] = combination[0];
+			combination[0] = Serial.read();
+			
+			if (combination[0] == Start&&combination[1] == OTAEnd &&combination[2] == Stop){
+				gotend = true;
+				break;
+			}
+		}
+	
+		if (print == 3) 
+		{
+			passing++;
+			if (passing == 0) {
+				lcd.setCursor(16, 1);
+
+				lcd.print("-");
+				lcd.setCursor(0, 1);
+				lcd.write(byte(0));
+				
+			}
+			else {
+				lcd.setCursor(passing - 1, 1);
+				lcd.print("-");
+				lcd.write(byte(0));
+				if (passing == 16)
+					passing = -1;
+			}
+			print = 0;
+		}
+		else
+		print++;
+		delay(50);
+		
+	}
+	Serial.flush();
+	lcd.clear();
+	lcd.print(InitalizeWifi(false));
+}
 
 void loop()
 {
@@ -375,6 +478,10 @@ void loop()
 		//if (bitRead(ctrl, 0) {
 
 		switch (ctrl) {
+		case OTAUpdate:
+			WifiUpdate();
+			break;
+
 		case LED1SwitchStade:
 			if (Serial.available() <= 0)
 				delay(50);

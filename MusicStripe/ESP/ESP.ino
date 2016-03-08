@@ -134,7 +134,6 @@ String WifiConnect()
 
 	connected = true;
 
-	digitalWrite(0, HIGH);	digitalWrite(2, HIGH);
 	return (WiFi.localIP().toString() + ":" + port);//
 
 													//return true;
@@ -162,46 +161,7 @@ bool WifiDeconnect()
 //#define CONFIG
 #define NORMAL
 
-#ifdef CONFIG
 
- ssid = "WIFI-WG";
- password = "Weltfrieden67110";
- port = 23;
- value;
- address;
- run = 0;
-
-
-void setup() {
-	EEPROM.begin(128);
-	// put your setup code here, to run once:
-	Serial.begin(115200);
-
-}
-
-void loop() {
-	// put your main code here, to run repeatedly:
-
-
-	value = EEPROM.read(address);
-
-	Serial.print(address);
-	Serial.print("\t");
-	Serial.print(value, DEC);
-	Serial.println();
-
-	// advance to the next address of the EEPROM
-	address = address + 1;
-
-	// there are only 512 bytes of EEPROM, from 0 to 511, so if we're
-	// on address 512, wrap around to address 0
-	if (address == 64) {
-		storeData_WIFI();
-		address = 0; delay(100);
-	}
-	delay(100);
-}
-#endif
 
 #ifdef NORMAL
 
@@ -344,19 +304,32 @@ loadData();
 	if (OTAUpdateReq) {
 		WiFi.mode(WIFI_STA);
 		WiFi.begin(ssid.c_str(), password.c_str());
-		Serial.println(ssid.c_str());
-		Serial.println(password.c_str());
-		while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-			Serial.println("Connection Failed! Rebooting...");
-			delay(5000);
-			ESP.restart();
+		int i = 0;
+		while (WiFi.status() != WL_CONNECTED) {
+			i++;
+			if (i == 20)
+			{
+				Serial.print("Connection Failed! Rebooting...");
+
+				ESP.restart();
+			}
+			delay(500);
 		}
+
+
+		connected = true;
+
+
+		Serial.print(WiFi.localIP().toString() + ":OTA");//
+
 		ArduinoOTA.onStart([]() {
 			Serial.write(OTAStart);
 		});
 	//	ArduinoOTA.setPassword((const char *)"1234567890");
 		ArduinoOTA.onEnd([]() {
+			Serial.write(Start);
 			Serial.write(OTAEnd);
+			Serial.write(Stop);
 			EEPROM.write(0, 0);
 			EEPROM.commit();
 		});
@@ -374,10 +347,7 @@ loadData();
 	}
 	else{
 		WiFi.mode(WIFI_STA);
-		Serial.println(WifiConnect());
-
-		pinMode(0, OUTPUT); pinMode(2, OUTPUT);
-		digitalWrite(0, LOW);	digitalWrite(2, LOW);
+		Serial.print(WifiConnect());
 
 
 	}
