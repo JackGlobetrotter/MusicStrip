@@ -18,7 +18,8 @@
 
 #define Reset 13
 #define LightPin 4
-
+#define ESPReset
+#define ESPFactory
 //-----display
 
 #define DR4 A0
@@ -167,8 +168,8 @@ void setup()
 	Serial.flush();
 	delay(500);
 	lcd.print(".");
-
-	connectWifi(_ssid,_pwd,_port);
+	lcd.clear();
+	lcd.print(Serial.readString());
 }
 
 
@@ -227,32 +228,6 @@ void ToggleLightSwitch(bool OnOff)
 
 }
 
-bool connectWifi(String ssid, String password, uint8_t port) {
-
-
-	
-
-	while (Serial.available() <= 5)
-	{
-		lcd.print(".");
-		delay(500);
-	}
-	String IP = Serial.readString();;
-	if (IP != "")
-		WifiIsConnected = true;
-
-	lcd.clear();
-	lcd.print("Connected to:");
-	lcd.setCursor(0, 1);
-	lcd.print(IP);
-	if (IP.length() > 16)
-	{
-		Display_freq = 70;
-		Display_scroll = true;
-		Display_max =  IP.length()-16;
-	}
-	return WifiIsConnected;
-}
 void CHECK_IR() {
 	//while (irrecv.decode(&results)) {
 	//	LED1_mscounter = 0;
