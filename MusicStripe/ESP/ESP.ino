@@ -219,7 +219,7 @@ void setup() {
 	run = 0;
 	Serial.begin(115200);
 	EEPROM.begin(128);
-	delay(1000);
+	delay(200);
 
 if (digitalRead(2) == LOW)
 {
