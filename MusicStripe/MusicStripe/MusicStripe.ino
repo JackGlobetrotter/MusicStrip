@@ -131,36 +131,40 @@ void ResetEEPROM()
 
 }
 
-String InitalizeWifi(bool Factory) {
-	if (Factory)
-	{
-		digitalWrite(ESPReset, LOW);
-		delay(50);
-		digitalWrite(ESPFactory, HIGH);
-		digitalWrite(ESPReset, HIGH);
-		delay(50);
-		Serial.flush();
+String InitalizeWifi(bool Updated) {
+	if (!Updated)
 
-		digitalWrite(ESPReset, LOW);
-		delay(200);
-		digitalWrite(ESPReset, HIGH);
-	}
-	else
 	{
 		digitalWrite(ESPReset, LOW);
 		delay(50);
 		digitalWrite(ESPFactory, HIGH);
 		digitalWrite(ESPReset, HIGH);
-		while (Serial.available() < 50)
-			delay(10);
-		Serial.readString();
+
 	}
-	while (Serial.available() < 5)
-		delay(50);
-	String ret = Serial.readString();
-	if (ret.substring(ret.length() - 3, ret.length()) == "OTA")
-		WifiUpdate();
-	else
+
+	String ret;
+		 int IpPointCounter = 0;
+		 while (true)
+		 {
+			 while (Serial.available() < 5)
+				 delay(50);
+			  ret = Serial.readString();
+
+			 for (size_t i = 0; i < ret.length(); i++)
+			 {
+				 if (ret[i] == '.')
+					 IpPointCounter++;
+			 }
+			 if (IpPointCounter != 3)
+			 {
+				 IpPointCounter = 0;
+			 }
+			 else
+				 break;
+		 }
+		 if (ret.substring(ret.length() - 3, ret.length()) == "OTA")
+			 WifiUpdate();
+		 else
 		return ret;
 
 }
@@ -430,8 +434,9 @@ void WifiUpdate()
 			combination[1] = combination[0];
 			combination[0] = Serial.read();
 			
-			if (combination[0] == Start&&combination[1] == OTAEnd &&combination[2] == Stop){
+			if (combination[2] == Start&&combination[1] == OTAEnd &&combination[0] == Stop) {
 				gotend = true;
+
 				break;
 			}
 		}
@@ -461,9 +466,9 @@ void WifiUpdate()
 		delay(50);
 		
 	}
-	Serial.flush();
+
 	lcd.clear();
-	lcd.print(InitalizeWifi(false));
+	lcd.print(InitalizeWifi(true));
 }
 
 void loop()
