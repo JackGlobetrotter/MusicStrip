@@ -8,11 +8,41 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <RelativePanel>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup >
+                <VisualState x:Name="SettingsViewState">
+
+                    <VisualState.Setters>
+                        <Setter Target="SetNewWifiDataPanel.Visibility" Value="Collapsed" />
+                        <Setter Target="SettingsViewPanel.Visibility" Value="Visible" />
+                    
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="WifiSetDataState">
+
+                    <VisualState.Setters>
+                        <Setter Target="SetNewWifiDataPanel.Visibility" Value="Visible" />
+                        <Setter Target="SettingsViewPanel.Visibility" Value="Collapsed" />
+
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+        <RelativePanel Name="SettingsViewPanel">
             <TextBox Name="IPBox" RelativePanel.AlignHorizontalCenterWithPanel="True" Text="{Binding ESP_IP, Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"></TextBox>
             <Slider  Name="PortSlider" Minimum="1" Maximum="255" Value="80" RelativePanel.AlignHorizontalCenterWithPanel="True" RelativePanel.Below="IPBox" Width="255" TickFrequency="1" TickPlacement="Outside"></Slider>
             <TextBox Margin="20,20,20,20" Name="PortBox" Text="{Binding ElementName=PortSlider, Path=Value,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" RelativePanel.RightOf="IPBox" RelativePanel.AlignVerticalCenterWith="IPBox"></TextBox>
             <TextBlock Margin="5,5,5,5" RelativePanel.RightOf="IPBox" RelativePanel.AlignVerticalCenterWith="IPBox">:</TextBlock>
-            <Button Name="ResetArduino"></Button>        </RelativePanel>
+            <Button Name="SendWifiData" RelativePanel.Below="SetOtaMode" RelativePanel.AlignHorizontalCenterWithPanel="True" Click="SendWifiData_Click">Write Wifi Data</Button>
+            <Button Name="SetOtaMode" RelativePanel.Below="PortSlider" RelativePanel.AlignHorizontalCenterWithPanel="True" Click="SetOtaMode_Click">Set to OTA Update Mode</Button>
+        </RelativePanel>
+        <RelativePanel Name="SetNewWifiDataPanel" Visibility="Collapsed">
+            <TextBox Name="SSID"  RelativePanel.AlignHorizontalCenterWithPanel="True"></TextBox>
+            <PasswordBox Name="Password" RelativePanel.Below="SSID"  RelativePanel.AlignHorizontalCenterWithPanel="True"></PasswordBox>
+            <Slider Value="{Binding ElementName=PortSlider,Path=Value, Mode=TwoWay}" RelativePanel.Below="Password" Width="255" Maximum="255"  RelativePanel.AlignHorizontalCenterWithPanel="True"></Slider>
+            <TextBox Text="{Binding ElementName=PortSlider,Path=Value}" RelativePanel.Below="Password" Margin="250,0,0,0"  RelativePanel.AlignHorizontalCenterWithPanel="True"></TextBox>
+            <Button Name="SetData" Click="SetData_Click" RelativePanel.Below="Password" Margin="0,60,0,0"  RelativePanel.AlignHorizontalCenterWithPanel="True">Set</Button>
+            <Button Name="CancelTransmission" Click="CancelTransmission_Click" RelativePanel.RightOf="SetData" Margin="30,60,0,0" RelativePanel.Below="Password" >Cancel</Button>
+        </RelativePanel>
     </Grid>
 </Page>

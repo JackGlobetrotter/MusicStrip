@@ -23,6 +23,7 @@ using Windows.Networking;
 using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
 using Windows.UI.ViewManagement;
+using Windows.UI.Popups;
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace WindowsControl
@@ -114,7 +115,7 @@ namespace WindowsControl
     {
         Windows.Storage.ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
         Windows.Storage.StorageFolder localFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
-
+        bool WifiDataChanged=false;
         StreamSocket ESP;
         IPAddress _ESP_IP;
         string _SSID;
@@ -129,7 +130,7 @@ namespace WindowsControl
         bool firstchange = true;
         public  MainPage()
         {
-
+            
             ESP_Port = 80;
             ESP_IP = IPAddress.Parse("192.168.4.1");
             Led1 = new SolidColorBrush(Colors.CadetBlue);
@@ -273,6 +274,7 @@ namespace WindowsControl
                 return;
             ESP_Stream.WriteByte((byte)Controler);
             ESP_Stream.WriteBytes(Data);
+            ESP_Stream.WriteByte((byte)ControlByte.Stop);
             await ESP_Stream.StoreAsync();
             await ESP_Stream.FlushAsync();
 
@@ -406,26 +408,49 @@ namespace WindowsControl
         }
 
 
-        private async void WriteWifiData_Click(object sender, RoutedEventArgs e)
-        {
+        //private async void WriteWifiData_Click(object sender, RoutedEventArgs e)
+        //{
 
-            ArduinoSend(ControlByte.SSID, GetBytes(SSIDBox.Text));
-           await System.Threading.Tasks.Task.Delay(300);
-            ArduinoSend(ControlByte.Port, new byte[] { (byte)PortSlider.Value });
-            await System.Threading.Tasks.Task.Delay(300);
-            ArduinoSend(ControlByte.PWD, GetBytes(PWDBox.Text));
+        //    ArduinoSend(ControlByte.SSID, GetBytes(SSIDBox.Text));
+        //   await System.Threading.Tasks.Task.Delay(300);
+        //    ArduinoSend(ControlByte.Port, new byte[] { (byte)PortSlider.Value });
+        //    await System.Threading.Tasks.Task.Delay(300);
+        //    ArduinoSend(ControlByte.PWD, GetBytes(PWDBox.Text));
 
-            Windows.Storage.ApplicationDataCompositeValue composite = new Windows.Storage.ApplicationDataCompositeValue();
-            composite["Port"] = PortSlider.Value;
-            composite["SSID"] = SSIDBox.Text;
-            composite["PWD"] = PWDBox.Text;
-            composite["IP"] = IPBox.Text;
-            localSettings.Values["WifiConfig"] = composite;
-        }
+        //    Windows.Storage.ApplicationDataCompositeValue composite = new Windows.Storage.ApplicationDataCompositeValue();
+        //    composite["Port"] = PortSlider.Value;
+        //    composite["SSID"] = SSIDBox.Text;
+        //    composite["PWD"] = PWDBox.Text;
+        //    composite["IP"] = IPBox.Text;
+        //    localSettings.Values["WifiConfig"] = composite;
+        //}
 
    
 
-        private async void OTAUpdateMode_Click(object sender, RoutedEventArgs e)
+
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as Button;
+            var result = await SettingsDialog.ShowAsync();
+            btn.Content = "Result: " + result;
+            if (WifiDataChanged)
+            {
+                var dialog = new MessageDialog("Changed on Wifi Data will take effect on reboot. \r\nDo you want to reboot Now?","Reboot?");
+                dialog.Commands.Add(new UICommand { Label = "Yes", Id = 0 });
+                dialog.Commands.Add(new UICommand { Label = "No", Id = 1 });
+                var res = await dialog.ShowAsync();
+
+                if ((int)res.Id == 0)
+                { ArduinoSend(ControlByte.Reconnect, new byte[0]); }
+            }
+        }
+
+        private void SettingsSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private async void WifiSettingsPage_OTAModeSet(object sender, EventArgs e)
         {
             ESP_Stream.WriteByte((byte)ControlByte.OTAUpdate);
 
@@ -433,17 +458,9 @@ namespace WindowsControl
             await ESP_Stream.FlushAsync();
         }
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
+        private void WifiSettingsPage_WifiDataSet(object sender, WifiEventArgs e)
         {
-            var btn = sender as Button;
-            var result = await SettingsDialog.ShowAsync();
-            btn.Content = "Result: " + result;
-
-        }
-
-        private void SettingsSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
+            WifiDataChanged = true;
         }
     }
 

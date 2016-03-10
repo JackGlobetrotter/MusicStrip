@@ -79,12 +79,8 @@ xmlns:controls="using:ColorPicker"
                 <Button Name="ArduinoConnect" Click="Connect_Click">Connect</Button>
                 
             </StackPanel>
-            <TextBox Name="SSIDBox" RelativePanel.Below="S1" Text="{Binding SSID}"></TextBox>
-            <TextBox Name="PWDBox" RelativePanel.Below="SSIDBox" Text="{Binding PWD}"></TextBox>
-            <Button Name="WriteSSIDData"  RelativePanel.RightOf="SSIDBox"  RelativePanel.AlignVerticalCenterWith="SSIDBox" Click="WriteWifiData_Click">Write Wifi Data</Button>
 
-            <Button Name="OTAUpdateMode"  RelativePanel.Below="PWDBox" RelativePanel.RightOf="WriteSSIDData" Click="OTAUpdateMode_Click">OTAUpdate</Button>
-            <Button RelativePanel.Below="OTAUpdateMode" Click="Button_Click">Settings</Button>
+            <Button RelativePanel.Below="S1" Click="Button_Click">Settings</Button>
 
         </RelativePanel>
         <RelativePanel Grid.Column="1" HorizontalAlignment="Stretch">
@@ -128,7 +124,7 @@ xmlns:controls="using:ColorPicker"
       
             <RelativePanel Grid.Column="1" >
 
-                    <local:WifiSettings Visibility="{Binding ElementName=WifiSettingsTab, Path=IsSelected, Converter={StaticResource BoolToVis}}"></local:WifiSettings>
+                    <local:WifiSettings Visibility="{Binding ElementName=WifiSettingsTab, Path=IsSelected, Converter={StaticResource BoolToVis}}" x:Name="WifiSettingsPage" OTAModeSet="WifiSettingsPage_OTAModeSet" WifiDataSet="WifiSettingsPage_WifiDataSet"></local:WifiSettings>
                     <local:GeneralSettings  Visibility="{Binding ElementName=GeneralSettingsTab, Path=IsSelected, Converter={StaticResource BoolToVis}}">
                     </local:GeneralSettings>
                 </RelativePanel>
