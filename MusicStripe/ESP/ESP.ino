@@ -14,7 +14,7 @@
 #define OTAMode 26
 
 
-
+int tport;
 uint8_t value;
 long address;
 int run = 0;
@@ -188,7 +188,7 @@ if (digitalRead(2) == LOW)
 	WiFi.softAP("ESPCONFIG");
 
 	IPAddress myIP = WiFi.softAPIP();
-
+	delay(200);
 	Serial.print(myIP);
 
 	Serial.print(":"+(String)port);
@@ -369,14 +369,17 @@ void loop() {
 			while (client.available()) {
 				byte go = 0;
 				byte req = client.read();
-				// Read the first line of the request
+				Serial.println(req);
+				
 				switch (req)
 				{
 				case Reconnect:
+					if(Serial.read()==Stop)
 					WifiDeconnect();
 					break;
 				case GetLightState:
 					Serial.write(req);
+					if (Serial.read() == Stop)
 					while (Serial.available() <= 0)
 						delay(50);
 					client.write(Serial.read());
@@ -397,6 +400,8 @@ void loop() {
 							delay(50);
 						buffer[i] = (char)Serial.read();
 					}
+					if (Serial.read() != Stop)
+						break;
 					ssid = String(buffer);
 
 					storeData_WIFI();
@@ -419,16 +424,21 @@ void loop() {
 							delay(50);
 						buffer1[i] = (char)Serial.read();
 					}
+					if (Serial.read() != Stop)
+						break;
 					password = String(buffer1);
 
 					storeData_WIFI();
 					delete[] buffer1;
 					break;
 				case ControlByte::Port:
-					while (client.available() <= 3)
+					while (client.available() <= 1)
 						delay(50);
 
-					port = client.read();
+					 tport = client.read();
+					if (Serial.read() != Stop)
+						break;
+					port = tport;
 					storeData_WIFI();
 					break;
 
@@ -437,41 +447,73 @@ void loop() {
 					Serial.write(req);
 					for (byte i = 0; i < 3; i++)
 					{
-						while (Serial.available() <= 0)
+						while (client.available() <= 0)
 							delay(50);
-						client.write(Serial.read());
+						Serial.write(client.read());
 					}
-
+					while (client.available() <= 0)
+						delay(50);
+					Serial.write(client.read());
 					break;
 				case LED1Frequency:
 					Serial.write(req);
-					while (Serial.available() <= 0)
+					while (client.available() <= 0)
 						delay(50);
-					client.write(Serial.read());
+					Serial.write(client.read()); 
+					while (client.available() <= 0)
+						delay(50);
+					Serial.write(client.read());
 					break;
 				case LED1SwitchStade:
 					Serial.write(req);
-					while (Serial.available() <= 0)
+					while (client.available() <= 0)
 						delay(50);
-					client.write(Serial.read());
+					Serial.write(client.read()); 
+					while (client.available() <= 0)
+						delay(50);
+					Serial.write(client.read());
+				
 					break;
 					//LED2_CRTL
 				case LED2Data:
 					Serial.write(req);
+					for (byte i = 0; i < 3; i++)
+					{
+						while (client.available() <= 0)
+							delay(50);
+						Serial.write(client.read());
+					}
+					while (client.available() <= 0)
+						delay(50);
+					Serial.write(client.read());
 					break;
 				case LED2Frequency:
 					Serial.write(req);
-					while (Serial.available() <= 0)
+					while (client.available() <= 0)
 						delay(50);
-					client.write(Serial.read());
+					Serial.write(client.read());
+					while (client.available() <= 0)
+						delay(50);
+					Serial.write(client.read());
 					break;
 				case LED2SwitchStade:
 					Serial.write(req);
-					while (Serial.available() <= 0)
+					while (client.available() <= 0)
 						delay(50);
-					client.write(Serial.read());
+					Serial.write(client.read()); while (client.available() <= 0)
+						delay(50);
+					Serial.write(client.read());
+		
 					break;
-
+				case LEDState:
+					Serial.write(req);
+					while (client.available() <= 1)
+						delay(50);
+					Serial.write(client.read());
+					Serial.write(client.read()); while (client.available() <= 0)
+						delay(50);
+					Serial.write(client.read());
+					break;
 				case OTAUpdate:
 					Serial.write(req);
 
@@ -479,20 +521,27 @@ void loop() {
 					EEPROM.commit();
 					ESP.restart();
 					break;
-
+				case Stop:
+					break;
+			
 
 				}
-
+				yield();
 			}
+			
+			if(!client.connected())
+			Serial.write(ClientLeft);
 
 			while (!client.connected()) {
 
-
+				delay(2);
 				client.stop();                                    // not connected, so terminate any prior client
 				client = server.available();
 
-
+				if(client.connected())
+					Serial.write(ClientArrived);
 			}
+
 		}
 	}
 	else

@@ -50,7 +50,9 @@ enum ControlByte : uint8_t {
 	FixColorState,
 
 	LED1Frequency,
-	LED2Frequency
+	LED2Frequency,
+	ClientLeft,
+	ClientArrived
 };
 
 #endif

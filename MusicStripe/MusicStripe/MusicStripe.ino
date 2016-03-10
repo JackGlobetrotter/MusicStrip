@@ -82,6 +82,9 @@ int LED2pulsedelay = 0;
 
 // ----- RuntimeVariabes
 
+uint8_t temp[10];
+uint8_t run = 0;
+uint8_t ctrl = 0;
 //-------Fade-------------
 
 
@@ -116,7 +119,7 @@ String _ssid = "test";
 String _pwd = "1234567890";
 uint8_t _port = 80;
 bool WifiIsConnected = false;
-
+String IPString = "";
 bool LightStat = true;
 int EEPROM_Pointer = 0;
 
@@ -131,7 +134,7 @@ void ResetEEPROM()
 
 }
 
-String InitalizeWifi(bool Updated) {
+void InitalizeWifi(bool Updated) {
 	if (!Updated)
 
 	{
@@ -143,11 +146,16 @@ String InitalizeWifi(bool Updated) {
 	}
 
 	String ret;
+	int timer;
 		 int IpPointCounter = 0;
 		 while (true)
 		 {
-			 while (Serial.available() < 5)
+			 while (Serial.available() < 5) {
 				 delay(50);
+				 timer++;
+				 if (timer == 5000)
+					 ESPHardReset();
+			 }
 			  ret = Serial.readString();
 
 			 for (size_t i = 0; i < ret.length(); i++)
@@ -159,13 +167,15 @@ String InitalizeWifi(bool Updated) {
 			 {
 				 IpPointCounter = 0;
 			 }
+			 else if (ret == "failed")
+				 ESPHardReset();
 			 else
 				 break;
 		 }
+		 IPString = ret;
 		 if (ret.substring(ret.length() - 3, ret.length()) == "OTA")
 			 WifiUpdate();
-		 else
-		return ret;
+
 
 }
 
@@ -186,8 +196,8 @@ void setup()
 	pinMode(ESPReset, OUTPUT);
 	pinMode(ESPFactory, OUTPUT);
 
-	lcd.print(InitalizeWifi(false));
-
+	InitalizeWifi(false);
+	DisplayIP();
 
 
 	pinMode(LightPin, OUTPUT);
@@ -413,6 +423,51 @@ byte flash[8] = {
 	0b10000
 };
 
+void ESPHardReset()
+{
+	lcd.clear();
+	lcd.print("ESP Hard Reset");
+
+	digitalWrite(ESPReset, LOW);
+	delay(50);
+	digitalWrite(ESPFactory, HIGH);
+	digitalWrite(ESPReset, HIGH);
+	delay(50);
+	digitalWrite(ESPFactory, LOW);
+
+	delay(200);
+	
+	delay(300);
+	Serial.flush();
+	digitalWrite(ESPFactory, HIGH);
+
+
+	String ret;
+	int IpPointCounter;
+	while (true)
+	{
+		while (Serial.available() < 5) {
+			delay(50);
+
+		}
+		ret = Serial.readString();
+
+		for (size_t i = 0; i < ret.length(); i++)
+		{
+			if (ret[i] == '.')
+				IpPointCounter++;
+		}
+		if (IpPointCounter == 3)
+			break;
+		else
+			IpPointCounter = 0;
+		
+	
+	}
+	IPString = ret;
+	DisplayIP();
+	while (true) { delay(1000); };
+}
 
 void WifiUpdate()
 {
@@ -467,138 +522,188 @@ void WifiUpdate()
 		
 	}
 
-	lcd.clear();
-	lcd.print(InitalizeWifi(true));
+	InitalizeWifi(true);
+	DisplayIP();
 }
 
 void loop()
 {
-	uint8_t run = 0;
-	uint8_t ctrl = 0;
-	uint8_t temp = 0;
-	if (Serial.available() > 0) {
+	yield();
+	while (Serial.available()) {
+
+
+		Serial.println((uint8_t)Serial.read());
 	
-	
-		ctrl = (uint8_t)Serial.read();
 		//if (bitRead(ctrl, 0) {
+		//Serial.println(Serial.read());
+		//switch (ctrl) {
+		//case OTAUpdate:
+		//	WifiUpdate();
+		//	break;
 
-		switch (ctrl) {
-		case OTAUpdate:
-			WifiUpdate();
-			break;
+		//case LED1SwitchStade:
+		//	/*if (Serial.available() <= 0)
+		//		delay(50);
+		//	temp[0] = Serial.read();
+		//	if (Serial.read()==Stop)
+		//	LED1ChanceState(temp[0]);*/
+		//	while (Serial.available())
+		//		Serial.println(Serial.read());
+		//	break;
 
-		case LED1SwitchStade:
-			if (Serial.available() <= 0)
-				delay(50);
-		
-			LED1ChanceState(Serial.read());
+		//case LED2SwitchStade:
+		//	if (Serial.available() <= 0)
+		//		delay(50);
 
-			break;		
-		case LED2SwitchStade:
-				if (Serial.available() <= 0)
-					delay(50);
+		//	LED2ChanceState(Serial.read());
 
-				LED2ChanceState(Serial.read());
+		//	break;
+		//case LightToggle:
+		//	if (Serial.available() <= 0)
+		//		delay(50);
+		//	temp[0] = Serial.read();
+		//	EEPROM.write(0, temp[0]);
+		//	ToggleLightSwitch((bool)temp[0]);
 
-				break;
-		case LightToggle:
-			if (Serial.available() <= 0)
-				delay(50);
-			temp = Serial.read();
-			EEPROM.write(0, temp);
-			ToggleLightSwitch((bool)temp);
+		//	//	}
+		//	break;
+		//case GetLightState:
 
-			//	}
-			break;
-		case GetLightState:
+		//	Serial.write((uint8_t)LightStat);
 
-			Serial.write((uint8_t)LightStat);
+		//	break;
 
-			break;
+		//case LED1Data:
 
-		case LED1Data:
+		//	if (Serial.available() <= 0)
+		//		delay(50);
+		//	Serial.readBytes(temp, 3);
+		//	if (Serial.read() == Stop) {
+		//		color0[0] = temp[0];
+		//		color0[1] = temp[1];
+		//		color0[2] = temp[2];
+		//		LED1ChanceState(LED1_mode);
+		//		EEPROM.write(4, color0[0]);
+		//		EEPROM.write(5, color0[1]);
+		//		EEPROM.write(6, color0[2]);
 
-			if (Serial.available() <= 0)
-				delay(50);
-			Serial.readBytes(color0, 3); 
-			LED1ChanceState(LED1_mode);
-			EEPROM.write(4, color0[0] );
-			EEPROM.write(5, color0[1]);
-			EEPROM.write(6, color0[2]);
-			break;
-		case LED2Data:
-			if (Serial.available() <= 0)
-				delay(50);
-			Serial.readBytes(color1, 3); LED2ChanceState(LED2_mode);
-			EEPROM.write(10, color0[0]);
-			EEPROM.write(11, color0[1]);
-			EEPROM.write(12, color0[2]);
-			break;
-		case LEDState:
-			if (Serial.available() <= 0)
-				delay(50);
-			if (!(bool)Serial.read()) {
-				LED1_active = (bool)Serial.read();
-				EEPROM.write(1, LED1_active);
-				LED1ChanceState(LED1_mode);
-			}
-			else {
-				LED2_active = (bool)Serial.read();
-				EEPROM.write(7, LED2_active);
-				LED2ChanceState(LED2_mode);
-			}
+		//	}
+		//	delete[] temp;
+		//	break;
+		//case LED2Data:
+
+		//	if (Serial.available() <= 0)
+		//		delay(50);
+		//	Serial.readBytes(temp, 3);
+		//	if (Serial.read() == Stop) {
+		//		color0[0] = temp[0];
+		//		color0[1] = temp[1];
+		//		color0[2] = temp[2];
+		//		LED1ChanceState(LED1_mode);
+		//		EEPROM.write(10, color0[0]);
+		//		EEPROM.write(11, color0[1]);
+		//		EEPROM.write(12, color0[2]);
+		//	}
+		//	delete[] temp;
+		//	break;
+		//case LEDState:
+		//	if (Serial.available() <= 2)
+		//		delay(50);
+		//	temp[0] = Serial.read();
+		//	temp[1] = Serial.read();
+		//	if (Serial.read() != Stop)
+		//		break;
+		//	if (temp[0]) {
+		//		LED1_active = temp[1];
+		//		EEPROM.write(1, LED1_active);
+		//		LED1ChanceState(LED1_mode);
+
+		//	}
+		//	else {
+		//		LED2_active = temp[1];
+		//		EEPROM.write(7, LED2_active);
+		//		LED2ChanceState(LED2_mode);
+		//	}
+
+		//case LED1Frequency:
+		//	temp[0] = Serial.read();
+		//	if (Serial.read() != Stop)
+		//		break;
+		//	LED1_freq = temp[0];
+		//	EEPROM.write(3, LED1_freq);
+		//	break;
+		//case LED2Frequency:
+		//	temp[0] = Serial.read();
+		//	if (Serial.read() != Stop)
+		//		break;
+		//	LED2_freq = temp[0];
+		//	EEPROM.write(9, LED1_freq);
+		//	break;
+		//case ClientLeft:
+		//	DisplayIP();
+		//	break;
+
+		//case ClientArrived:
+		//	//DisplayColorStripe();
+		//	break;
+		//default:
+		//		break;
+		//}
 	
-		case LED1Frequency:
-			LED1_freq = Serial.read();
-			EEPROM.write(3, LED1_freq);
-			break;
-		case LED2Frequency:
-			LED2_freq = Serial.read();
-			EEPROM.write(9, LED2_freq);
-			break;
-		}
-	
 
 	}
-	if (LED1_active) {
-		switch (LED1_mode) {
-		case FlashState:
-			Flash(false);
-			break;
+	//if (LED1_active) {
+	//	switch (LED1_mode) {
+	//	case FlashState:
+	//		Flash(false);
+	//		break;
 
-		case FadeState:
-			Fadeing(false);
-	
-			break;
+	//	case FadeState:
+	//		Fadeing(false);
+	//
+	//		break;
 
-		case SmoothState:
-			Smooth(false);
-			break;
-		}
-	}
-	if (LED2_active)
-	{
-		switch (LED2_mode) {
-		case FlashState:
-			Flash(true);
-			break;
-		case FadeState:
-			Fadeing(true);
-			
-			break;
+	//	case SmoothState:
+	//		Smooth(false);
+	//		break;
+	//	}
+	//}
+	//if (LED2_active)
+	//{
+	//	switch (LED2_mode) {
+	//	case FlashState:
+	//		Flash(true);
+	//		break;
+	//	case FadeState:
+	//		Fadeing(true);
+	//		
+	//		break;
 
-		case SmoothState:
-			Smooth(true);
-			break;
-		}
-		
-	}
-	if (Display_scroll)
-	{
-		ScrollDisplay(true);
-	}
+	//	case SmoothState:
+	//		Smooth(true);
+	//		break;
+	//	}
+	//	
+	//}
+	//if (Display_scroll)
+	//{
+	//	ScrollDisplay(true);
+	//}
 }
 
+void 	DisplayIP() {
+	Display_scroll = false;
+	lcd.clear();
+	if (IPString.length() > 16) {
+		lcd.print(IPString.substring(0,15));
+		lcd.setCursor(0, 1);
+		lcd.print(IPString.substring
+			(16, IPString.length()));
+	}
+	else
+	lcd.print(IPString);
+
+}
 //LED1/2_freq, LED1/2_active > LED1/2_mscounter
 void Flash(bool LEDStripe)
 {
@@ -675,7 +780,7 @@ void Smooth(bool LEDStripe )
 
 void DisplayColorStripe()
 {
-
+	lcd.clear();
 	lcd.print("Stripe 1:");
 	if (LED1_active)
 	{
