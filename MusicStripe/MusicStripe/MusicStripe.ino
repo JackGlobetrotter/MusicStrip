@@ -530,10 +530,7 @@ void loop()
 {
 	yield();
 	while (Serial.available()) {
-
-
-		Serial.println((uint8_t)Serial.read());
-	
+		Serial.println((uint8_t)Serial.read());	
 		//if (bitRead(ctrl, 0) {
 		//Serial.println(Serial.read());
 		//switch (ctrl) {

@@ -355,6 +355,15 @@ loadData();
 	
 }
 
+void ReadRest(int Looper) {
+	for (size_t i = 0; i < Looper; i++)
+	{
+		while (!client.available)
+			delay(10);
+		Serial.write(client.read());
+	}
+
+}
 
 void loop() {
 	if (!OTAUpdateReq) {
@@ -364,167 +373,123 @@ void loop() {
 		}
 		else
 		{
-
+			while(client.connected()){
 			// Check if a client has connected
-			while (client.available()) {
-				byte go = 0;
-				byte req = client.read();
-				Serial.println(req);
-				
-				switch (req)
-				{
-				case Reconnect:
-					if(Serial.read()==Stop)
-					WifiDeconnect();
-					break;
-				case GetLightState:
-					Serial.write(req);
-					if (Serial.read() == Stop)
-					while (Serial.available() <= 0)
-						delay(50);
-					client.write(Serial.read());
-					break;
-				case ControlByte::SSID:
-					while (client.available() <= 3)
-						delay(50);
-
-					ssid = "";
-
-					run = client.read();
-					if (run == 0)
-						break;
-					char buffer[run];
-					for (int i = 0; i < run; i++)
+				while (client.available()) {
+					byte go = 0;
+					byte req = client.read();
+					switch (req)
 					{
-						if (Serial.available() <= 0)
-							delay(50);
-						buffer[i] = (char)Serial.read();
-					}
-					if (Serial.read() != Stop)
+					case Reconnect:
+						if (Serial.read() == Stop)
+							WifiDeconnect();
 						break;
-					ssid = String(buffer);
-
-					storeData_WIFI();
-					delete[] buffer;
-					break;
-				case ControlByte::PWD:
-
-					while (client.available() <= 3)
-						delay(50);
-
-					password = "";
-
-					run = client.read();
-					if (run == 0)
+					case GetLightState:
+						Serial.write(req);
+						if (Serial.read() == Stop)
+							while (Serial.available() <= 0)
+								delay(50);
+						client.write(Serial.read());
 						break;
-					char buffer1[run];
-					for (int i = 0; i < run; i++)
-					{
-						if (Serial.available() <= 0)
+					case ControlByte::SSID:
+						while (client.available() <= 3)
 							delay(50);
-						buffer1[i] = (char)Serial.read();
-					}
-					if (Serial.read() != Stop)
+
+						ssid = "";
+
+						run = client.read();
+						if (run == 0)
+							break;
+						char buffer[run];
+						for (int i = 0; i < run; i++)
+						{
+							if (Serial.available() <= 0)
+								delay(50);
+							buffer[i] = (char)Serial.read();
+						}
+						if (Serial.read() != Stop)
+							break;
+						ssid = String(buffer);
+
+						storeData_WIFI();
+						delete[] buffer;
 						break;
-					password = String(buffer1);
+					case ControlByte::PWD:
 
-					storeData_WIFI();
-					delete[] buffer1;
-					break;
-				case ControlByte::Port:
-					while (client.available() <= 1)
-						delay(50);
+						while (client.available() <= 3)
+							delay(50);
 
-					 tport = client.read();
-					if (Serial.read() != Stop)
+						password = "";
+
+						run = client.read();
+						if (run == 0)
+							break;
+						char buffer1[run];
+						for (int i = 0; i < run; i++)
+						{
+							if (Serial.available() <= 0)
+								delay(50);
+							buffer1[i] = (char)Serial.read();
+						}
+						if (Serial.read() != Stop)
+							break;
+						password = String(buffer1);
+
+						storeData_WIFI();
+						delete[] buffer1;
 						break;
-					port = tport;
-					storeData_WIFI();
-					break;
-
-					//LED1_CRTL
-				case LED1Data:
-					Serial.write(req);
-					for (byte i = 0; i < 3; i++)
-					{
-						while (client.available() <= 0)
+					case ControlByte::Port:
+						while (client.available() <= 1)
 							delay(50);
-						Serial.write(client.read());
-					}
-					while (client.available() <= 0)
-						delay(50);
-					Serial.write(client.read());
-					break;
-				case LED1Frequency:
-					Serial.write(req);
-					while (client.available() <= 0)
-						delay(50);
-					Serial.write(client.read()); 
-					while (client.available() <= 0)
-						delay(50);
-					Serial.write(client.read());
-					break;
-				case LED1SwitchStade:
-					Serial.write(req);
-					while (client.available() <= 0)
-						delay(50);
-					Serial.write(client.read()); 
-					while (client.available() <= 0)
-						delay(50);
-					Serial.write(client.read());
-				
-					break;
-					//LED2_CRTL
-				case LED2Data:
-					Serial.write(req);
-					for (byte i = 0; i < 3; i++)
-					{
-						while (client.available() <= 0)
-							delay(50);
-						Serial.write(client.read());
-					}
-					while (client.available() <= 0)
-						delay(50);
-					Serial.write(client.read());
-					break;
-				case LED2Frequency:
-					Serial.write(req);
-					while (client.available() <= 0)
-						delay(50);
-					Serial.write(client.read());
-					while (client.available() <= 0)
-						delay(50);
-					Serial.write(client.read());
-					break;
-				case LED2SwitchStade:
-					Serial.write(req);
-					while (client.available() <= 0)
-						delay(50);
-					Serial.write(client.read()); while (client.available() <= 0)
-						delay(50);
-					Serial.write(client.read());
-		
-					break;
-				case LEDState:
-					Serial.write(req);
-					while (client.available() <= 1)
-						delay(50);
-					Serial.write(client.read());
-					Serial.write(client.read()); while (client.available() <= 0)
-						delay(50);
-					Serial.write(client.read());
-					break;
-				case OTAUpdate:
-					Serial.write(req);
 
-					EEPROM.write(0, OTAMode);
-					EEPROM.commit();
-					ESP.restart();
-					break;
-				case Stop:
-					break;
-			
+						tport = client.read();
+						if (Serial.read() != Stop)
+							break;
+						port = tport;
+						storeData_WIFI();
+						break;
 
+						//LED1_CRTL
+					case LED1Data:
+						Serial.write(req);
+						ReadRest(4);
+						break;
+					case LED1Frequency:
+						Serial.write(req);
+						ReadRest(2);
+						break;
+					case LED1SwitchStade:
+						Serial.write(req);
+						ReadRest(2);
+
+						break;
+						//LED2_CRTL
+					case LED2Data:
+						Serial.write(req);
+						ReadRest(4);
+						break;
+					case LED2Frequency:
+						Serial.write(req);
+						ReadRest(2);
+						break;
+					case LED2SwitchStade:
+						Serial.write(req);
+						ReadRest(2);
+
+						break;
+					case LEDState:
+						Serial.write(req);
+						ReadRest(2);
+						break;
+					case OTAUpdate:
+						Serial.write(req);
+
+						EEPROM.write(0, OTAMode);
+						EEPROM.commit();
+						ESP.restart();
+						break;
+					}
+					yield();
 				}
 				yield();
 			}
