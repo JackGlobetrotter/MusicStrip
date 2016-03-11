@@ -122,7 +122,7 @@ bool WifiIsConnected = false;
 String IPString = "";
 bool LightStat = true;
 int EEPROM_Pointer = 0;
-
+uint8_t buffer[3];
 SoftwareSerial ss(13,12);
 
 void ResetEEPROM()
@@ -147,9 +147,10 @@ void InitalizeWifi(bool Updated) {
 
 	String ret;
 	int timer;
-		 int IpPointCounter = 0;
+	int IpPointCounter = 0;
 		 while (true)
 		 {
+			 
 			 while (Serial.available() < 5) {
 				 delay(50);
 				 timer++;
@@ -157,7 +158,7 @@ void InitalizeWifi(bool Updated) {
 					 ESPHardReset();
 			 }
 			  ret = Serial.readString();
-
+		
 			 for (size_t i = 0; i < ret.length(); i++)
 			 {
 				 if (ret[i] == '.')
@@ -176,12 +177,10 @@ void InitalizeWifi(bool Updated) {
 		 if (ret.substring(ret.length() - 3, ret.length()) == "OTA")
 			 WifiUpdate();
 
-
 }
 
 void setup()
 {
-	ss.begin(115200);
 	Serial.begin(115200);
 
 	pinMode(Reset, INPUT);
@@ -278,140 +277,7 @@ void ToggleLightSwitch(bool OnOff)
 
 }
 
-void CHECK_IR() {
-	//while (irrecv.decode(&results)) {
-	//	LED1_mscounter = 0;
 
-
-	//	switch (results.value)
-	//	{
-	//	case 16195807: //RED
-	//		if (LED1_active) {
-	//			color0[0] = 255;
-	//			color0[1] = 0;
-	//			color0[2] = 0;
-	//		}
-	//		if (LED2_active) {
-	//			color1[0] = 255;
-	//			color1[1] = 0;
-	//			color1[2] = 0;
-	//		}
-	//		break;
-	//	case 16228447:  //GREEN
-	//		if (LED1_active) {
-	//			color0[0] = 0;
-	//			color0[1] = 255;
-	//			color0[2] = 0;
-	//		}
-	//		if (LED2_active) {
-	//			color1[0] = 0;
-	//			color1[1] = 255;
-	//			color1[2] = 0;
-	//		}
-	//		break;
-	//	case 16212127:  //BLUE
-	//		if (LED1_active) {
-	//			color0[0] = 0;
-	//			color0[1] = 0;
-	//			color0[2] = 255;
-	//		}
-	//		if (LED2_active) {
-	//			color1[0] = 0;
-	//			color1[1] = 0;
-	//			color1[2] = 255;
-	//		}
-	//		break;
-	//	case 16244767:  //WHITE
-	//		if (LED1_active) {
-	//			color0[0] = 255;
-	//			color0[1] = 255;
-	//			color0[2] = 255;
-	//		}
-	//		if (LED2_active) {
-	//			color1[0] = 255;
-	//			color1[1] = 255;
-	//			color1[2] = 255;
-	//		}
-	//		break;
-	//	case 16240687: //FLASH
-	//		LED1_mode = FlashState;
-	//		break;
-	//	case 16248847: //STROBE
-	//		LED1_mode = FixColorState;
-	//		break;
-	//	case 16238647: //FADE
-	//		LED1_mode = FadeState;
-	//		break;
-	//	case 16246807: //SMOOTH
-	//		LED1_mode = SmoothState;
-	//		//	fadeup = true;
-	//		break;
-
-	//	}
-
-
-	//	//		delay(100);
-
-	//	irrecv.resume(); // Receive the next value
-	//}
-}
-
-void ScrollDisplay(bool Continous) {
-	
-	if (Continous) {
-		if (Display_mscounter == Display_freq) {
-			//	Serial.println(Display_counter >= Display_max * 2);
-			if (Display_counter >= Display_max + 16)
-			{
-
-				for (int i = 0; i < Display_max + 16; i++)
-				{
-					lcd.scrollDisplayRight();
-				}
-				Display_counter = 0;
-			}
-			else
-			{
-				//Serial.println(Display_counter);
-				lcd.scrollDisplayLeft();
-				Display_counter++;
-			}
-			Display_mscounter = 0;
-		}
-		else {
-			delay(10);
-			Display_mscounter++;
-		}
-	}
-	else
-	{
-		if (Display_mscounter == Display_freq) {
-			//	Serial.println(Display_counter >= Display_max * 2);
-			if (Display_counter >= Display_max + 16)
-			{
-
-				for (int i = 0; i < Display_max + 16; i++)
-				{
-					lcd.scrollDisplayRight();
-				}
-				Display_counter = 0;
-			}
-			else
-			{
-				//Serial.println(Display_counter);
-				lcd.scrollDisplayLeft();
-				Display_counter++;
-			}
-			Display_mscounter = 0;
-		}
-		else {
-			delay(10);
-			Display_mscounter++;
-		}
-	}
-
-
-}
 byte flash[8] = {
 	0b10000,
 	0b11000,
@@ -526,170 +392,134 @@ void WifiUpdate()
 	DisplayIP();
 }
 
+bool GetVerified(int count)
+{
+	for (size_t i = 0; i < count; i++)
+	{
+		while (!Serial.available())
+			delay(10);
+		buffer[i] = Serial.read();
+
+	}
+	Serial.println();
+	if (Serial.read() == Stop)
+		return true;
+	else return false;
+
+}
+
 void loop()
 {
-	yield();
-	while (Serial.available()) {
-		Serial.println((uint8_t)Serial.read());	
-		//if (bitRead(ctrl, 0) {
-		//Serial.println(Serial.read());
-		//switch (ctrl) {
-		//case OTAUpdate:
-		//	WifiUpdate();
-		//	break;
+	
+	while (Serial.available()){
+		ctrl = Serial.read();
+		switch (ctrl) {
+		case OTAUpdate:
+			WifiUpdate();
+			break;
 
-		//case LED1SwitchStade:
-		//	/*if (Serial.available() <= 0)
-		//		delay(50);
-		//	temp[0] = Serial.read();
-		//	if (Serial.read()==Stop)
-		//	LED1ChanceState(temp[0]);*/
-		//	while (Serial.available())
-		//		Serial.println(Serial.read());
-		//	break;
+		case LED1SwitchStade:
+			if(GetVerified(1))
+			ChangeLEDState(true,buffer[0]);
+		
+			break;
 
-		//case LED2SwitchStade:
-		//	if (Serial.available() <= 0)
-		//		delay(50);
+		case LED2SwitchStade:
+			if (GetVerified(1))
+				ChangeLEDState(false,buffer[0]);
+			break;
+		case LightToggle:
+			if (Serial.available() <= 0)
+				delay(50);
+			temp[0] = Serial.read();
+			EEPROM.write(0, temp[0]);
+			ToggleLightSwitch((bool)temp[0]);
 
-		//	LED2ChanceState(Serial.read());
+			//	}
+			break;
+		case GetLightState:
 
-		//	break;
-		//case LightToggle:
-		//	if (Serial.available() <= 0)
-		//		delay(50);
-		//	temp[0] = Serial.read();
-		//	EEPROM.write(0, temp[0]);
-		//	ToggleLightSwitch((bool)temp[0]);
+			Serial.write((uint8_t)LightStat);
 
-		//	//	}
-		//	break;
-		//case GetLightState:
+			break;
 
-		//	Serial.write((uint8_t)LightStat);
+		case LED1Data:
+			if (!GetVerified(3))
+				break;
+	
+			if (Serial.read() == Stop) {
+				color0[0] = buffer[0];
+				color0[1] = buffer[1];
+				color0[2] = buffer[2];
+				ChangeLEDState(true, LED1_mode);
+				EEPROM.write(4, color0[0]);
+				EEPROM.write(5, color0[1]);
+				EEPROM.write(6, color0[2]);
 
-		//	break;
+			}
+		
+			break;
+		case LED2Data:
 
-		//case LED1Data:
+			if (!GetVerified(3))
+				break;
+			if (Serial.read() == Stop) {
+				color0[0] = buffer[0];
+				color0[1] = buffer[1];
+				color0[2] = buffer[2];
+				ChangeLEDState(false,LED2_mode);
+				EEPROM.write(10, color0[0]);
+				EEPROM.write(11, color0[1]);
+				EEPROM.write(12, color0[2]);
+			}
+			
+			break;
+		case LEDState:
+			if (!GetVerified(2))
+				break;
 
-		//	if (Serial.available() <= 0)
-		//		delay(50);
-		//	Serial.readBytes(temp, 3);
-		//	if (Serial.read() == Stop) {
-		//		color0[0] = temp[0];
-		//		color0[1] = temp[1];
-		//		color0[2] = temp[2];
-		//		LED1ChanceState(LED1_mode);
-		//		EEPROM.write(4, color0[0]);
-		//		EEPROM.write(5, color0[1]);
-		//		EEPROM.write(6, color0[2]);
+			if (!buffer[0]) {
+				LED1_active = buffer[1];
+				EEPROM.write(1, LED1_active);
+				ChangeLEDState(true, LED1_mode);
 
-		//	}
-		//	delete[] temp;
-		//	break;
-		//case LED2Data:
+			}
+			else {
+				LED2_active = buffer[1];
+				EEPROM.write(7, LED2_active);
+				ChangeLEDState(false,LED2_mode);
+			}break;
 
-		//	if (Serial.available() <= 0)
-		//		delay(50);
-		//	Serial.readBytes(temp, 3);
-		//	if (Serial.read() == Stop) {
-		//		color0[0] = temp[0];
-		//		color0[1] = temp[1];
-		//		color0[2] = temp[2];
-		//		LED1ChanceState(LED1_mode);
-		//		EEPROM.write(10, color0[0]);
-		//		EEPROM.write(11, color0[1]);
-		//		EEPROM.write(12, color0[2]);
-		//	}
-		//	delete[] temp;
-		//	break;
-		//case LEDState:
-		//	if (Serial.available() <= 2)
-		//		delay(50);
-		//	temp[0] = Serial.read();
-		//	temp[1] = Serial.read();
-		//	if (Serial.read() != Stop)
-		//		break;
-		//	if (temp[0]) {
-		//		LED1_active = temp[1];
-		//		EEPROM.write(1, LED1_active);
-		//		LED1ChanceState(LED1_mode);
+		case LED1Frequency:
+			if (!GetVerified(1))
+				break;
+			LED1_freq = buffer[0];
+			EEPROM.write(3, LED1_freq);
+			break;
+		case LED2Frequency:
+			if (!GetVerified(1))
+				break;
+			LED2_freq = buffer[0];
+			EEPROM.write(9, LED1_freq);
+			break;
+		case ClientLeft:
+			DisplayIP();
+			break;
 
-		//	}
-		//	else {
-		//		LED2_active = temp[1];
-		//		EEPROM.write(7, LED2_active);
-		//		LED2ChanceState(LED2_mode);
-		//	}
-
-		//case LED1Frequency:
-		//	temp[0] = Serial.read();
-		//	if (Serial.read() != Stop)
-		//		break;
-		//	LED1_freq = temp[0];
-		//	EEPROM.write(3, LED1_freq);
-		//	break;
-		//case LED2Frequency:
-		//	temp[0] = Serial.read();
-		//	if (Serial.read() != Stop)
-		//		break;
-		//	LED2_freq = temp[0];
-		//	EEPROM.write(9, LED1_freq);
-		//	break;
-		//case ClientLeft:
-		//	DisplayIP();
-		//	break;
-
-		//case ClientArrived:
-		//	//DisplayColorStripe();
-		//	break;
-		//default:
-		//		break;
-		//}
+		case ClientArrived:
+			//DisplayColorStripe();
+			break;
+		default:
+			
+				break;
+		}
 	
 
 	}
-	//if (LED1_active) {
-	//	switch (LED1_mode) {
-	//	case FlashState:
-	//		Flash(false);
-	//		break;
 
-	//	case FadeState:
-	//		Fadeing(false);
-	//
-	//		break;
-
-	//	case SmoothState:
-	//		Smooth(false);
-	//		break;
-	//	}
-	//}
-	//if (LED2_active)
-	//{
-	//	switch (LED2_mode) {
-	//	case FlashState:
-	//		Flash(true);
-	//		break;
-	//	case FadeState:
-	//		Fadeing(true);
-	//		
-	//		break;
-
-	//	case SmoothState:
-	//		Smooth(true);
-	//		break;
-	//	}
-	//	
-	//}
-	//if (Display_scroll)
-	//{
-	//	ScrollDisplay(true);
-	//}
 }
 
 void 	DisplayIP() {
-	Display_scroll = false;
 	lcd.clear();
 	if (IPString.length() > 16) {
 		lcd.print(IPString.substring(0,15));
@@ -777,140 +607,95 @@ void Smooth(bool LEDStripe )
 
 void DisplayColorStripe()
 {
+
 	lcd.clear();
-	lcd.print("Stripe 1:");
-	if (LED1_active)
-	{
-		lcd.print((String)color0[0] + "/" + (String)color0[1] + "/" + (String)color0[2]);
-		Display_max = ((String)color0[0] + "/" + (String)color0[1] + "/" + (String)color0[2]).length() + 9;
-		//Serial.println(Display_max);
+	lcd.print(GetDisplayString()[0]);
+	lcd.setCursor(0, 1);
+	lcd.print(GetDisplayString()[1]);
+}
+
+void ChangeLEDState(bool One, uint8_t State) {
+	if (One) {
+		LED1_mode = State;
+		EEPROM.write(2, State);
+		
 	}
 	else {
-		lcd.print("---");
+		LED2_mode = State;
+		EEPROM.write(8, State);
 	}
-	lcd.setCursor(0, 1);
-	lcd.print("Stripe 2:");
+	StateWriter(One, State);
+	
+}
 
+void StateWriter(bool One, uint8_t State)
+{
+	switch (State)
+	{
+	case FixColorState:
+		
+
+		if (One&&LED1_active) {
+			setColor(color0, 0);
+		}
+		else if (One&&!LED1_active) {
+			setColor(new byte[3]{ 0,0,0 }, 0);
+		}
+		else if(!One&&LED1_active) {
+			setColor(color1, 1);
+		}
+		else {
+			setColor(new byte[3]{ 0,0,0 }, 1);
+		}
+
+		break;
+
+	case FadeState:
+
+		Fadeing(One);
+		break;
+	case FlashState:
+		if (One)
+			LED1_mscounter = 0;
+		else
+			LED1_mscounter = 0;
+		// = 0;
+		fadeup = true;
+
+		break;
+	}
+
+	DisplayColorStripe();
+
+}
+
+String* GetDisplayString()
+{
+
+
+
+	String ret[2];
+	if (LED1_active)
+	{
+		ret[0] = (String)LED1_mode + ": "+ (String)color0[0] + "/" + (String)color0[1] + "/" + (String)color0[2];
+	}
+	else
+	{
+		ret[0] = "------------";
+	}
 
 	if (LED2_active)
 	{
-		lcd.print((String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2]);
-		if (((String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2]).length() + 9> Display_max)
-			Display_max = ((String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2]).length() + 9;
-
+		ret[1] = (String)LED2_mode + ": " + (String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2];
 	}
-	else {
-		lcd.print("---");
-	}
-	//Serial.println(Display_max);
-	if (Display_max > 16)
-		Display_scroll = true;
 	else
-		Display_scroll = false;
-	if(Display_scroll)
-	for (size_t i = 0; i < 16; i++)
 	{
-		lcd.scrollDisplayRight();
+		ret[1] = "------------";
 	}
-
-}
-void LED1ChanceState(uint8_t State)
-{
-	lcd.clear();
-	LED1_mode = State;
-	Display_max = 0;
-	Display_counter = 0;
-	Display_mscounter = 0;
-	EEPROM.write(2, State);
-
-	switch (State)
-	{
-	case FixColorState:
-
-
-		if (LED1_active) {
-			setColor(color0, 0);
-		}
-		else {
-			setColor(new byte[3]{ 0,0,0 }, 0);
-		}
-	
-		Display_freq = 70;
-		DisplayColorStripe();
-
-		break;
-
-	case FadeState:
-		Display_freq = 70;
-		DisplayColorStripe();
-		Fadeing(false);
-		break;
-	case FlashState:
-		Display_freq = 70;
-		DisplayColorStripe();
-		LED1_mscounter = 0;
-		// = 0;
-		fadeup = true;
-
-		break;
-	case SmoothState:
-		Display_freq = 70;
-		LED1_freq = 10;
-		DisplayColorStripe();
-		break;
-
-	}
-
+	return ret;
 }
 
-void LED2ChanceState(uint8_t State)
-{
-	lcd.clear();
-	LED1_mode = State;
-	Display_max = 0;
-	Display_counter = 0;
-	Display_mscounter = 0;
-	EEPROM.write(8, State);
 
-	switch (State)
-	{
-	case FixColorState:
-
-
-		if (LED2_active) {
-			setColor(color1, 0);
-		}
-		else {
-			setColor(new byte[3]{ 0,0,0 }, 0);
-		}
-
-		Display_freq = 70;
-		DisplayColorStripe();
-
-		break;
-
-	case FadeState:
-		Display_freq = 70;
-		DisplayColorStripe();
-		Fadeing(true);
-		break;
-	case FlashState:
-		Display_freq = 70;
-		DisplayColorStripe();
-		LED2_mscounter = 0;
-		// = 0;
-		fadeup = true;
-
-		break;
-	case SmoothState:
-		Display_freq = 70;
-		LED2_freq = 10;
-		DisplayColorStripe();
-		break;
-
-	}
-
-}
 
 void Fadeing(bool LEDStripe) //LED1_counter over 100 =  {X} over {color0[1,2,3]}
 {

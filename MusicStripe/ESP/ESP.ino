@@ -358,7 +358,7 @@ loadData();
 void ReadRest(int Looper) {
 	for (size_t i = 0; i < Looper; i++)
 	{
-		while (!client.available)
+		while (!client.available())
 			delay(10);
 		Serial.write(client.read());
 	}
@@ -380,76 +380,76 @@ void loop() {
 					byte req = client.read();
 					switch (req)
 					{
-					case Reconnect:
-						if (Serial.read() == Stop)
-							WifiDeconnect();
-						break;
-					case GetLightState:
-						Serial.write(req);
-						if (Serial.read() == Stop)
-							while (Serial.available() <= 0)
-								delay(50);
-						client.write(Serial.read());
-						break;
-					case ControlByte::SSID:
-						while (client.available() <= 3)
-							delay(50);
+					//case Reconnect:
+					//	if (Serial.read() == Stop)
+					//		WifiDeconnect();
+					//	break;
+					//case GetLightState:
+					//	Serial.write(req);
+					//	if (Serial.read() == Stop)
+					//		while (Serial.available() <= 0)
+					//			delay(50);
+					//	client.write(Serial.read());
+					//	break;
+					//case ControlByte::SSID:
+					//	while (client.available() <= 3)
+					//		delay(50);
 
-						ssid = "";
+					//	ssid = "";
 
-						run = client.read();
-						if (run == 0)
-							break;
-						char buffer[run];
-						for (int i = 0; i < run; i++)
-						{
-							if (Serial.available() <= 0)
-								delay(50);
-							buffer[i] = (char)Serial.read();
-						}
-						if (Serial.read() != Stop)
-							break;
-						ssid = String(buffer);
+					//	run = client.read();
+					//	if (run == 0)
+					//		break;
+					//	char buffer[run];
+					//	for (int i = 0; i < run; i++)
+					//	{
+					//		if (Serial.available() <= 0)
+					//			delay(50);
+					//		buffer[i] = (char)Serial.read();
+					//	}
+					//	if (Serial.read() != Stop)
+					//		break;
+					//	ssid = String(buffer);
 
-						storeData_WIFI();
-						delete[] buffer;
-						break;
-					case ControlByte::PWD:
+					//	storeData_WIFI();
+					//	delete[] buffer;
+					//	break;
+					//case ControlByte::PWD:
 
-						while (client.available() <= 3)
-							delay(50);
+					//	while (client.available() <= 3)
+					//		delay(50);
 
-						password = "";
+					//	password = "";
 
-						run = client.read();
-						if (run == 0)
-							break;
-						char buffer1[run];
-						for (int i = 0; i < run; i++)
-						{
-							if (Serial.available() <= 0)
-								delay(50);
-							buffer1[i] = (char)Serial.read();
-						}
-						if (Serial.read() != Stop)
-							break;
-						password = String(buffer1);
+					//	run = client.read();
+					//	if (run == 0)
+					//		break;
+					//	char buffer1[run];
+					//	for (int i = 0; i < run; i++)
+					//	{
+					//		if (Serial.available() <= 0)
+					//			delay(50);
+					//		buffer1[i] = (char)Serial.read();
+					//	}
+					//	if (Serial.read() != Stop)
+					//		break;
+					//	password = String(buffer1);
 
-						storeData_WIFI();
-						delete[] buffer1;
-						break;
-					case ControlByte::Port:
-						while (client.available() <= 1)
-							delay(50);
+					//	storeData_WIFI();
+					//	delete[] buffer1;
+					//	break;
+					//case ControlByte::Port:
+					//	while (client.available() <= 1)
+					//		delay(50);
 
-						tport = client.read();
-						if (Serial.read() != Stop)
-							break;
-						port = tport;
-						storeData_WIFI();
-						break;
+					//	tport = client.read();
+					//	if (Serial.read() != Stop)
+					//		break;
+					//	port = tport;
+					//	storeData_WIFI();
+					//	break;
 
-						//LED1_CRTL
+					//	//LED1_CRTL
 					case LED1Data:
 						Serial.write(req);
 						ReadRest(4);
@@ -466,7 +466,7 @@ void loop() {
 						//LED2_CRTL
 					case LED2Data:
 						Serial.write(req);
-						ReadRest(4);
+						ReadRest(3);
 						break;
 					case LED2Frequency:
 						Serial.write(req);
@@ -479,7 +479,7 @@ void loop() {
 						break;
 					case LEDState:
 						Serial.write(req);
-						ReadRest(2);
+						ReadRest(3);
 						break;
 					case OTAUpdate:
 						Serial.write(req);
@@ -487,6 +487,10 @@ void loop() {
 						EEPROM.write(0, OTAMode);
 						EEPROM.commit();
 						ESP.restart();
+						break;
+					default:
+						while (client.available())
+							Serial.print((byte)100);
 						break;
 					}
 					yield();
@@ -499,7 +503,8 @@ void loop() {
 
 			while (!client.connected()) {
 
-				delay(2);
+				yield();
+				
 				client.stop();                                    // not connected, so terminate any prior client
 				client = server.available();
 

@@ -162,6 +162,14 @@ namespace WindowsControl
             LED1State.Items.Add(ControlByte.SmoothState.ToString());
             LED1State.Items.Add(ControlByte.FlashState.ToString());
             LED1State.SelectedIndex = 0;
+
+            LED2State.Items.Add(ControlByte.FadeState.ToString());
+            LED2State.Items.Add(ControlByte.FixColorState.ToString());
+            LED2State.Items.Add(ControlByte.MusicState.ToString());
+            LED2State.Items.Add(ControlByte.SmoothState.ToString());
+            LED2State.Items.Add(ControlByte.FlashState.ToString());
+            LED2State.SelectedIndex = 0;
+
             loading = false;
 
             // Composite setting
@@ -329,6 +337,8 @@ namespace WindowsControl
 
         private async void Connect_Click(object sender, RoutedEventArgs e)
         {
+            StreamSocketListener listener = new StreamSocketListener();
+        
             // connect ESP, read Lightstat
             ESP = new StreamSocket();
             HostName hostName
