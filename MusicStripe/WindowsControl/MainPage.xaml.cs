@@ -138,6 +138,7 @@ namespace WindowsControl
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        SerialDevice device;
         Windows.Storage.ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
         Windows.Storage.StorageFolder localFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
         bool WifiDataChanged=false;
@@ -204,7 +205,33 @@ namespace WindowsControl
         }
 
        
+        public async void FakeConnectESP()
+        {
+            var aqsFilter = SerialDevice.GetDeviceSelector("COM4");
+            var devices = await DeviceInformation.FindAllAsync(aqsFilter);
+            if (devices.Any())
+            {
+                var deviceId = devices.First().Id;
+                this.device = await SerialDevice.FromIdAsync(deviceId);
 
+                if (this.device != null)
+                {
+                    this.device.BaudRate = 115200;
+                    this.device.StopBits = SerialStopBitCount.One;
+                    this.device.DataBits = 8;
+                    this.device.Parity = SerialParity.None;
+                    this.device.Handshake = SerialHandshake.None;
+
+                    this.ESP_Stream =new DataWriter( device.OutputStream);
+                }
+            }
+
+            ESP_Stream.WriteByte((byte)ControlByte.IP);
+            ESP_Stream.WriteString("192.168.1.2:50");
+            await ESP_Stream.StoreAsync();
+    
+
+        }
         public bool LightState
         {
             get
@@ -357,33 +384,28 @@ namespace WindowsControl
 
         private async void Connect_Click(object sender, RoutedEventArgs e)
         {
+            FakeConnectESP();
         
-            // connect ESP, read Lightstat
-            ESP = new StreamSocket();
-            HostName hostName
-                 = new HostName( IPBox.Text.ToString());
+            //// connect ESP, read Lightstat
+            //ESP = new StreamSocket();
+            //HostName hostName
+            //     = new HostName( IPBox.Text.ToString());
         
             
 
-            // If necessary, tweak the socket's control options before carrying out the connect operation.
-            // Refer to the StreamSocketControl class' MSDN documentation for the full list of control options.
-            ESP.Control.KeepAlive = false;
+            //// If necessary, tweak the socket's control options before carrying out the connect operation.
+            //// Refer to the StreamSocketControl class' MSDN documentation for the full list of control options.
+            //ESP.Control.KeepAlive = false;
 
-            // Save the socket, so subsequent steps can use it.
+            //// Save the socket, so subsequent steps can use it.
   
-                    await ESP.ConnectAsync(hostName,PortBox.Text);
+            //        await ESP.ConnectAsync(hostName,PortBox.Text);
             
-            ESP_Stream = new DataWriter( ESP.OutputStream);
+            //ESP_Stream = new DataWriter( ESP.OutputStream);
             IsConnected = true;
             ConnectionState.Fill = new SolidColorBrush(Colors.Green);
         }
 
-        private void CheckConnectionState()
-        {
-           
-
-
-        }
 
         private void LED1OnOff_Toggled(object sender, RoutedEventArgs e)
         {
