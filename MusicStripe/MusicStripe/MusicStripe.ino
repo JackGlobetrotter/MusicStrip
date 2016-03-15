@@ -46,8 +46,8 @@
 bool LED2_active = false;
 bool LED1_active = false;
 
-byte color0[] = { 128,10,70 };
-byte color1[] = { 255,180,125 };
+byte color0[] = { 0,0,0 };
+byte color1[] = { 0,0,0 };
 
 //long deltas[3] = { 5, 6, 7 };
 long LED1Smooth[3];
@@ -95,7 +95,7 @@ int LED2_counter = 0; //+-5
 
 int LED1_mscounter = 0; //ms to freq
 int LED2_mscounter = 0;
-
+bool LED1_FlashOn;
 int Display_freq ;
 int Display_mscounter;
 int Display_counter;
@@ -103,8 +103,8 @@ bool Display_scroll = false;
 
 uint8_t Display_max;
 
-uint8_t LED1_mode = 1;
-uint8_t LED2_mode = 1;
+uint8_t LED1_mode = FixColorState;
+uint8_t LED2_mode = FixColorState;
 bool blinking = false;
 
 
@@ -115,15 +115,11 @@ uint8_t fadecount = 0;
 LiquidCrystal lcd(RS, Enable, DR4, DR5, DR6, DR7);
 
 
-String _ssid = "test";
-String _pwd = "1234567890";
-uint8_t _port = 80;
 bool WifiIsConnected = false;
 String IPString = "";
-bool LightStat = true;
+bool LightStat = false;
 int EEPROM_Pointer = 0;
-uint8_t buffer[3];
-SoftwareSerial ss(13,12);
+uint8_t buffer[4];
 
 void ResetEEPROM()
 {
@@ -168,8 +164,6 @@ void InitalizeWifi(bool Updated) {
 			 {
 				 IpPointCounter = 0;
 			 }
-			 else if (ret == "failed")
-				 ESPHardReset();
 			 else
 				 break;
 		 }
@@ -225,44 +219,45 @@ void setup()
 
 void loadData()
 {
-	LightStat = EEPROM.read(EEPROM_Pointer);
-	EEPROM_Pointer++;
-	//LED1
-	LED1_active = EEPROM.read(EEPROM_Pointer);
-	EEPROM_Pointer++;
-
-	LED1_mode = EEPROM.read(EEPROM_Pointer);
-	EEPROM_Pointer++;
-
-	LED1_freq = EEPROM.read(EEPROM_Pointer);
-	EEPROM_Pointer++;
-
-	for (byte i = 0; i < 3; i++)
-	{
-		color0[i] = EEPROM.read(EEPROM_Pointer);
+	if (EEPROM.read(1) != 0) {
+		EEPROM_Pointer = 0;
+		//LED1
+		LED1_active = EEPROM.read(EEPROM_Pointer);
 		EEPROM_Pointer++;
 
-	}
-
-	//LED2
-
-	LED2_active = EEPROM.read(EEPROM_Pointer);
-	EEPROM_Pointer++;
-
-	LED2_mode = EEPROM.read(EEPROM_Pointer);
-	EEPROM_Pointer++;
-
-	LED2_freq = EEPROM.read(EEPROM_Pointer);
-	EEPROM_Pointer++;
-
-	for (byte i = 0; i < 3; i++)
-	{
-		color1[i] = EEPROM.read(EEPROM_Pointer);
+		LED1_mode = EEPROM.read(EEPROM_Pointer);
 		EEPROM_Pointer++;
 
+		LED1_freq = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
+
+		for (byte i = 0; i < 3; i++)
+		{
+			color0[i] = EEPROM.read(EEPROM_Pointer);
+			EEPROM_Pointer++;
+
+		}
 	}
+	if (EEPROM.read(EEPROM_Pointer + 1) != 0) {
+		//LED2
 
+		LED2_active = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
 
+		LED2_mode = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
+
+		LED2_freq = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
+
+		for (byte i = 0; i < 3; i++)
+		{
+			color1[i] = EEPROM.read(EEPROM_Pointer);
+			EEPROM_Pointer++;
+
+		}
+
+	}
 	
 	
 }
@@ -432,7 +427,7 @@ void loop()
 			if (Serial.available() <= 0)
 				delay(50);
 			temp[0] = Serial.read();
-			EEPROM.write(0, temp[0]);
+
 			ToggleLightSwitch((bool)temp[0]);
 
 			//	}
@@ -446,32 +441,28 @@ void loop()
 		case LED1Data:
 			if (!GetVerified(3))
 				break;
-	
-			if (Serial.read() == Stop) {
+		
+
 				color0[0] = buffer[0];
 				color0[1] = buffer[1];
 				color0[2] = buffer[2];
 				ChangeLEDState(true, LED1_mode);
-				EEPROM.write(4, color0[0]);
-				EEPROM.write(5, color0[1]);
-				EEPROM.write(6, color0[2]);
 
-			}
+
+			
 		
 			break;
 		case LED2Data:
 
 			if (!GetVerified(3))
 				break;
-			if (Serial.read() == Stop) {
-				color0[0] = buffer[0];
-				color0[1] = buffer[1];
-				color0[2] = buffer[2];
+			
+				color1[0] = buffer[0];
+				color1[1] = buffer[1];
+				color1[2] = buffer[2];
 				ChangeLEDState(false,LED2_mode);
-				EEPROM.write(10, color0[0]);
-				EEPROM.write(11, color0[1]);
-				EEPROM.write(12, color0[2]);
-			}
+
+			
 			
 			break;
 		case LEDState:
@@ -480,13 +471,11 @@ void loop()
 
 			if (!buffer[0]) {
 				LED1_active = buffer[1];
-				EEPROM.write(1, LED1_active);
 				ChangeLEDState(true, LED1_mode);
 
 			}
 			else {
 				LED2_active = buffer[1];
-				EEPROM.write(7, LED2_active);
 				ChangeLEDState(false,LED2_mode);
 			}break;
 
@@ -494,20 +483,24 @@ void loop()
 			if (!GetVerified(1))
 				break;
 			LED1_freq = buffer[0];
-			EEPROM.write(3, LED1_freq);
 			break;
 		case LED2Frequency:
 			if (!GetVerified(1))
 				break;
 			LED2_freq = buffer[0];
-			EEPROM.write(9, LED1_freq);
+		
 			break;
 		case ClientLeft:
 			DisplayIP();
 			break;
-
+		case SaveStartupCFG:
+			while (Serial.available() <= 0)
+				delay(10);
+			if (Serial.read() == Stop)
+				WriteStartupCFG();
+			break;
 		case ClientArrived:
-			//DisplayColorStripe();
+			DisplayColorStripe();
 			break;
 		default:
 			
@@ -516,7 +509,39 @@ void loop()
 	
 
 	}
+	if(LED1_active)
+	switch (LED1_mode )
+	{
+	case SmoothState:
+		Smooth(0);
+		
+		break;
+	case FadeState:
+		Fadeing(false);
+		break;
+	case FlashState:
+		if (LED1_freq == LED1_mscounter) {
+			if (LED1_FlashOn) {
+				setColor(new byte[3]{ 0,0,0 }, 0);
+				LED1_FlashOn = false;
+			}
+			else
+			{
+				setColor(color0, 0);
+				LED1_FlashOn = true;
+			}
+			LED1_mscounter=0;
 
+		}
+		else {
+			LED1_mscounter++;
+			delay(5);
+		}
+		break;
+
+
+
+	}
 }
 
 void 	DisplayIP() {
@@ -569,7 +594,7 @@ void Flash(bool LEDStripe)
 //Spped with LED1_freq, LED1/2_active
 void Smooth(bool LEDStripe )
 {
-	
+	int divider = !LED1_active * 6 + !LED2_active*+6;
 
 	if (LED1_active && !LEDStripe) {
 
@@ -585,7 +610,7 @@ void Smooth(bool LEDStripe )
 		analogWrite(R1, LED1Smooth[0] * LED1bright[0] / 256);
 		analogWrite(G1, LED1Smooth[1] * LED1bright[1] / 256);
 		analogWrite(B1, LED1Smooth[2] * LED1bright[2] / 256);
-		delay(LED1_freq);
+		delay(LED1_freq / divider);
 	}
 	if (LED2_active && LEDStripe) {
 		LED2hue += HUE_DELTA;
@@ -599,7 +624,7 @@ void Smooth(bool LEDStripe )
 		analogWrite(R2, LED2Smooth[0] * LED2bright[0] / 256);
 		analogWrite(G2, LED2Smooth[1] * LED2bright[1] / 256);
 		analogWrite(B2, LED2Smooth[2] * LED2bright[2] / 256);
-		delay(LED2_freq);
+		delay(LED2_freq / divider);
 	}
 	
 }
@@ -609,24 +634,26 @@ void DisplayColorStripe()
 {
 
 	lcd.clear();
-	lcd.print(GetDisplayString()[0]);
+	lcd.print(GetDisplayString(0));
 	lcd.setCursor(0, 1);
-	lcd.print(GetDisplayString()[1]);
+	lcd.print(GetDisplayString(1));
 }
 
 void ChangeLEDState(bool One, uint8_t State) {
 	if (One) {
 		LED1_mode = State;
-		EEPROM.write(2, State);
+	
 		
 	}
 	else {
 		LED2_mode = State;
-		EEPROM.write(8, State);
+
 	}
 	StateWriter(One, State);
 	
 }
+
+void HardSaveData(){}
 
 void StateWriter(bool One, uint8_t State)
 {
@@ -652,7 +679,10 @@ void StateWriter(bool One, uint8_t State)
 
 	case FadeState:
 
-		Fadeing(One);
+		LED1_counter = 0;
+		LED1_mscounter = 0;
+		fadeup = true;
+
 		break;
 	case FlashState:
 		if (One)
@@ -669,69 +699,129 @@ void StateWriter(bool One, uint8_t State)
 
 }
 
-String* GetDisplayString()
+String GetDisplayString(bool Line)
 {
 
-
-
-	String ret[2];
-	if (LED1_active)
-	{
-		ret[0] = (String)LED1_mode + ": "+ (String)color0[0] + "/" + (String)color0[1] + "/" + (String)color0[2];
+	String ret;
+	if (!Line) {
+		if (LED1_active)
+		{
+			ret = String(LED1_mode, DEC) + ": " + (String)color0[0] + "/" + (String)color0[1] + "/" + (String)color0[2];
+		}
+		else
+		{
+			ret = "------------";
+		}
 	}
-	else
-	{
-		ret[0] = "------------";
-	}
-
-	if (LED2_active)
-	{
-		ret[1] = (String)LED2_mode + ": " + (String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2];
-	}
-	else
-	{
-		ret[1] = "------------";
+	else {
+		if (LED2_active)
+		{
+			ret = String(LED2_mode, DEC) + ": " + (String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2];
+		}
+		else
+		{
+			ret = "------------";
+		}
 	}
 	return ret;
 }
+
+void WriteStartupCFG()
+{
+
+	EEPROM_Pointer = 0;
+
+
+
+		EEPROM.write(EEPROM_Pointer, LED1_active);
+		EEPROM_Pointer++;
+
+		EEPROM.write(EEPROM_Pointer, LED1_mode);
+		EEPROM_Pointer++;
+
+		EEPROM.write(EEPROM_Pointer, LED1_freq);
+
+		EEPROM_Pointer++;
+
+		for (byte i = 0; i < 3; i++)
+		{
+
+			EEPROM.write(EEPROM_Pointer, color0[i]);
+
+			EEPROM_Pointer++;
+
+		}
+		EEPROM.write(EEPROM_Pointer, LED2_active);
+
+
+		EEPROM_Pointer++;
+		EEPROM.write(EEPROM_Pointer, LED2_mode);
+
+		EEPROM_Pointer++;
+		EEPROM.write(EEPROM_Pointer, LED2_freq);
+
+
+		EEPROM_Pointer++;
+
+		for (byte i = 0; i < 3; i++)
+		{
+			EEPROM.write(EEPROM_Pointer, color1[i]);		
+			EEPROM_Pointer++;
+
+		}
+
+	}
+
+
 
 
 
 void Fadeing(bool LEDStripe) //LED1_counter over 100 =  {X} over {color0[1,2,3]}
 {
+	int divider = LED1_active *4+ LED2_active*+ 4;
+
 	if (LED1_active && !LEDStripe) {
-		if (LED1_mscounter == LED1_freq) {
+		if (LED1_mscounter >= LED1_freq/ divider) {
+			LED1_mscounter = 0;
 			if (fadeup)
-				LED1_counter = LED1_counter + 5;
+				LED1_counter = LED1_counter + 1;
 			else
-				LED1_counter = LED1_counter - 5;
+				LED1_counter = LED1_counter - 1;
 			byte currentcolor[] = { (color0[0] * LED1_counter / 100),(color0[1] * LED1_counter / 100) ,(color0[2] * LED1_counter / 100) };
 			setColor(currentcolor, 0);
+		
+				if (LED1_counter == 100)
+					fadeup = false;
+				if (LED1_counter == 0)
+					fadeup = true;
 
-			if (LED1_counter == 100)
-				fadeup = false;
-			if (LED1_counter == 0)
-				fadeup = true;
-		}
+			
+		}else
 		LED1_mscounter++;
+	
 	}
 
 	if (LED2_active && LEDStripe) {
-		if (LED2_mscounter == LED2_freq) {
+		if (LED2_mscounter >= LED2_freq / divider) {
+			LED2_mscounter = 0;
 			if (fadeup)
-				LED2_counter = LED2_counter + 5;
+				LED2_counter = LED2_counter + 1;
 			else
-				LED2_counter = LED2_counter - 5;
-			byte currentcolor[] = { ((color1[0] * LED2_counter) / 100),((color1[1] * LED2_counter) / 100) ,((color1[2] * LED2_counter) / 100) };
-			setColor(currentcolor, 1);
+				LED2_counter = LED2_counter - 1;
+			byte currentcolor[] = { (color1[0] * LED2_counter / 100),(color1[1] * LED2_counter / 100) ,(color1[2] * LED2_counter / 100) };
+			setColor(currentcolor, 0);
+			
+				if (LED2_counter == 100)
+					fadeup = false;
+				if (LED2_counter == 0)
+					fadeup = true;
 
-			if (LED2_counter == 100)
-				fadeup = false;
-			if (LED2_counter == 0)
-				fadeup = true;
+			
 		}
-		LED2_mscounter++;
+		else
+			LED2_mscounter++;
 	}
+	delay(1);
 }
 
 
@@ -753,17 +843,6 @@ void SoundPulsation()
 
 void setColor(byte *mlt, bool stripe) {
 
-	//	for (short i = 0; i < 3; i++)
-	//	{
-	//		/*Serial.print(i);
-	//		Serial.print(" : ");
-	//		Serial.println(((int)((float)255 * mlt[i])));
-	//		Serial.println(mlt[i]);*/
-	//		analogWrite(rgbPin[i], mlt[i]);
-	//
-	//	}
-	//	delay(pulsedelay);
-	//	Serial.println((String)(mlt[0] + ';' + mlt[1] + ';' + mlt[2]));
 
 	if (!stripe)
 	{

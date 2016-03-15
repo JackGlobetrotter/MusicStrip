@@ -54,7 +54,32 @@ namespace WindowsControl
             return v == null ? (object)null : v.Value == Visibility.Visible;
         }
     }
+    public class BooleanToVisibilityInvertedConverter : IValueConverter
+    {
+        /// <summary>
+        /// Converts a bool value to a Visibility value.
+        /// </summary>
+        /// <returns>
+        /// Returns Visibility.Visible if true, else Visibility.Collapsed.
+        /// </returns>
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            var b = value as bool?;
+            return b == null ? Visibility.Visible : (b.Value ? Visibility.Collapsed : Visibility.Visible);
+        }
 
+        /// <summary>
+        /// Converts a Visibility value to a bool value.
+        /// </summary>
+        /// <returns>
+        /// Returns true if Visiblility.Visible, else false.
+        /// </returns>
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            var v = value as Visibility?;
+            return v == null ? (object)null : v.Value == Visibility.Collapsed;
+        }
+    }
     public class RGBToBrush : IValueConverter
     { 
         public object Convert(object value, Type targetType, object parameter, string language)
@@ -77,13 +102,13 @@ namespace WindowsControl
                 {
                     switch (System.Convert.ToInt32(parameter)) {
                         case 1:
-                            return new SolidColorBrush(Color.FromArgb(System.Convert.ToByte(value), System.Convert.ToByte(value), 0, 0));
+                            return new SolidColorBrush(Color.FromArgb(System.Convert.ToByte(value), 255, 0, 0));
                             break;
                         case 2:
-                            return new SolidColorBrush(Color.FromArgb(System.Convert.ToByte(value),0, System.Convert.ToByte(value), 0));
+                            return new SolidColorBrush(Color.FromArgb(System.Convert.ToByte(value),0, 255, 0));
                             break;
                         case 3:
-                            return new SolidColorBrush(Color.FromArgb(System.Convert.ToByte(value),0,0, System.Convert.ToByte(value)));
+                            return new SolidColorBrush(Color.FromArgb(System.Convert.ToByte(value),0,0, 255));
                             break;
 
                     } }
@@ -128,6 +153,7 @@ namespace WindowsControl
         private bool _LightState;
         bool LEDDetailed = false;
         bool firstchange = true;
+        bool IsConnected;
         public  MainPage()
         {
             
@@ -153,7 +179,7 @@ namespace WindowsControl
             this.DataContext = this;
             LED1 = new byte[] { 255, 255, 0 };
             this.InitializeComponent();
-            VisualStateManager.GoToState(this, LEDMixedState.Name, true);
+        //    VisualStateManager.GoToState(this, LEDMixedState.Name, true);
             LightState = true;
 
             LED1State.Items.Add(ControlByte.FadeState.ToString());
@@ -262,25 +288,16 @@ namespace WindowsControl
         
         }
 
-        private void LED1Slider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-        {
-
-            if (!loading & ESP != null)
-            {
-                LED1Color.SelectedColor = new SolidColorBrush(Color.FromArgb(255, (byte)LED1R.Value, (byte)LED1G.Value, (byte)LED1B.Value));
-                LED1Color.SelectedColor = new SolidColorBrush(Color.FromArgb(255, (byte)LED1R.Value, (byte)LED1G.Value, (byte)LED1B.Value));
-
-                //    LED1Color_SelectedColorChanged(sender, new EventArgs());
-            }
-        }
-
+    
 
 
         private async void ArduinoSend(ControlByte Controler, byte[] Data)
         {
             if (ESP_Stream == null)
                 return;
+            
             ESP_Stream.WriteByte((byte)Controler);
+            if(Data.Length>0)
             ESP_Stream.WriteBytes(Data);
             ESP_Stream.WriteByte((byte)ControlByte.Stop);
             await ESP_Stream.StoreAsync();
@@ -325,26 +342,28 @@ namespace WindowsControl
             FixColorState,
 
             LED1Frequency,
-            LED2Frequency
+            LED2Frequency,
+            ClientLeft,
+            ClientArrived,
+            SaveStartupCFG
         };
 
         private void LED1State_SelectionChanged(object sender, SelectionChangedEventArgs e)
 
         {
-            ArduinoSend(ControlByte.LED1SwitchStade, new byte[] { (byte)Enum.Parse(typeof(ControlByte), (sender as ComboBox).SelectedItem.ToString(), true) });
+            ArduinoSend(ControlByte.LED1SwitchStade, new byte[] { (byte)Enum.Parse(typeof(ControlByte), (sender as ListBox).SelectedItem.ToString(), true) });
             
         }
 
         private async void Connect_Click(object sender, RoutedEventArgs e)
         {
-            StreamSocketListener listener = new StreamSocketListener();
         
             // connect ESP, read Lightstat
             ESP = new StreamSocket();
             HostName hostName
                  = new HostName( IPBox.Text.ToString());
         
-
+            
 
             // If necessary, tweak the socket's control options before carrying out the connect operation.
             // Refer to the StreamSocketControl class' MSDN documentation for the full list of control options.
@@ -353,9 +372,17 @@ namespace WindowsControl
             // Save the socket, so subsequent steps can use it.
   
                     await ESP.ConnectAsync(hostName,PortBox.Text);
-
+            
             ESP_Stream = new DataWriter( ESP.OutputStream);
+            IsConnected = true;
             ConnectionState.Fill = new SolidColorBrush(Colors.Green);
+        }
+
+        private void CheckConnectionState()
+        {
+           
+
+
         }
 
         private void LED1OnOff_Toggled(object sender, RoutedEventArgs e)
@@ -377,17 +404,7 @@ namespace WindowsControl
 
         }
 
-        private void LED1Color_SelectedColorChanged(object sender, EventArgs e)
-        {
-            if (!firstchange)
-            {
-                ArduinoSend(ControlByte.LED1Data, new byte[] { (byte)LED1Color.SelectedColor.Color.R, (byte)LED1Color.SelectedColor.Color.G, (byte)LED1Color.SelectedColor.Color.B });
-                firstchange = !firstchange;
-            }
-            else
-                firstchange = !firstchange;
 
-        }
 
    
         static byte[] GetBytes(string str)
@@ -471,6 +488,48 @@ namespace WindowsControl
         private void WifiSettingsPage_WifiDataSet(object sender, WifiEventArgs e)
         {
             WifiDataChanged = true;
+        }
+
+        private void Slider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            ArduinoSend(ControlByte.LED1Frequency, new byte[] { (byte)(sender as Slider).Value });
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            ArduinoSend(ControlByte.SaveStartupCFG, new byte[0]);
+        }
+
+        private void LED2StateToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void LED2Color_PointerReleased(object sender, PointerRoutedEventArgs e)
+        {
+
+        }
+
+        private void LED2Color_SelectedColorChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void LED1ColorCTRL_ColorChanged(object sender, ColorEventArgs e)
+        {
+            ArduinoSend(ControlByte.LED1Data, new byte[] { e.RedValue, e.GreenValue, e.BlueValue });
+        }
+
+        private void LED2ColorCTRL_ColorChanged(object sender, ColorEventArgs e)
+        {
+            ArduinoSend(ControlByte.LED2Data, new byte[] { e.RedValue, e.GreenValue, e.BlueValue });
+
+        }
+
+        private void LED1ColorCTRL_FrequenzyChanged(object sender, FrequenzyEventArgs e)
+        {
+            ArduinoSend(ControlByte.LED1Frequency, new byte[] { e.Frequenzy });
+
         }
     }
 

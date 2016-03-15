@@ -52,7 +52,8 @@ enum ControlByte : uint8_t {
 	LED1Frequency,
 	LED2Frequency,
 	ClientLeft,
-	ClientArrived
+	ClientArrived,
+	SaveStartupCFG
 };
 
 #endif

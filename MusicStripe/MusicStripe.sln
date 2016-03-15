@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsControl", "WindowsCo
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MusicStripe", "MusicStripe\MusicStripe.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test\Test.vcxproj", "{0DA48D24-86F7-42F9-B094-54370895DE3A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -66,6 +68,14 @@ Global
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x64.ActiveCfg = Release|Win32
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.ActiveCfg = Release|Win32
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.Build.0 = Release|Win32
+		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Debug|ARM.ActiveCfg = Debug|Win32
+		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Debug|x64.ActiveCfg = Debug|Win32
+		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Debug|x86.ActiveCfg = Debug|Win32
+		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Debug|x86.Build.0 = Debug|Win32
+		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Release|ARM.ActiveCfg = Release|Win32
+		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Release|x64.ActiveCfg = Release|Win32
+		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Release|x86.ActiveCfg = Release|Win32
+		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

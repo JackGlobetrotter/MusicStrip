@@ -98,6 +98,9 @@
     <Compile Include="GeneralSettings.xaml.cs">
       <DependentUpon>GeneralSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="LEDColorControl.xaml.cs">
+      <DependentUpon>LEDColorControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WifiSettings.xaml.cs">
       <DependentUpon>WifiSettings.xaml</DependentUpon>
     </Compile>
@@ -137,6 +140,10 @@
     <Page Include="GeneralSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="LEDColorControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="WifiSettings.xaml">
       <SubType>Designer</SubType>

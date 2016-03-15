@@ -1,0 +1,50 @@
+﻿<UserControl
+    x:Class="WindowsControl.LEDColorControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WindowsControl"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    xmlns:controls="using:ColorPicker"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+    <UserControl.Resources>
+        <local:RGBToBrush x:Key="RGBToBrushConverter"></local:RGBToBrush>
+        <local:BooleanToVisibilityConverter x:Key="BoolToVis" />
+   
+        <local:BooleanToVisibilityInvertedConverter x:Key="BoolToVisInv" />
+    </UserControl.Resources>
+    <Grid>
+
+
+
+
+        <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  >
+            <TextBlock Name="LEDName" Text="{x:Bind LEDNameString, Mode=TwoWay}" RelativePanel.AlignHorizontalCenterWithPanel="True"></TextBlock>
+            <ToggleSwitch Name="LEDStateToggle" OffContent="Mixed" OnContent="Details" RelativePanel.Below="LEDName" RelativePanel.AlignHorizontalCenterWithPanel="True"></ToggleSwitch>
+            <Slider ValueChanged="LED_Freq_ValueChanged" Header="Frequenzy" Name="LED_Freq" RelativePanel.Below="LEDStateToggle" RelativePanel.AlignHorizontalCenterWithPanel="True" Width="255" Maximum="255"></Slider>
+            <TextBlock Text="{Binding ElementName=LED_Freq, Path=Value}" RelativePanel.RightOf="LED_Freq" RelativePanel.AlignVerticalCenterWith="LED_Freq"></TextBlock>
+            <controls:ColorPicker  Width="400" Name="LED_Color" SelectedColor="{Binding LED_}" RelativePanel.Below="LED_Freq" RelativePanel.AlignHorizontalCenterWithPanel="True" Visibility="{Binding ElementName=LEDStateToggle,Path=IsOn, Converter={StaticResource BoolToVis}}"></controls:ColorPicker>
+
+            <RelativePanel Name="RGBSeperate" RelativePanel.AlignHorizontalCenterWithPanel="True" Visibility="{Binding ElementName=LEDStateToggle,Path=IsOn, Converter={StaticResource BoolToVisInv}}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RelativePanel.Below="LED_Freq">
+                <Slider ValueChanged="LED_R_ValueChanged" Value="{Binding ElementName=LED_Color,Path=RedValue, Mode=TwoWay}" Name="LED_R" RelativePanel.AlignHorizontalCenterWithPanel="True"                 Minimum="0" 
+                    Maximum="255"
+                    TickFrequency="1"
+                    TickPlacement="Outside" Width="255"  ></Slider>
+                <Rectangle Name="LED_RShape" RelativePanel.RightOf="LED_R" Width="30" Height="30"  RelativePanel.AlignVerticalCenterWith="LED_R"   Fill="{Binding ElementName=LED_R, Path=Value,ConverterParameter=1,Converter={StaticResource RGBToBrushConverter}}"  RelativePanel.Above="" ></Rectangle>
+                <Slider ValueChanged="LED_G_ValueChanged" Name="LED_G" RelativePanel.Below="LED_R" SmallChange="1" Value="{Binding ElementName=LED_Color,Path=GreenValue, Mode=TwoWay}"    RelativePanel.AlignHorizontalCenterWithPanel="True"             Minimum="0" 
+                    Maximum="255"
+                    TickFrequency="1"
+                    TickPlacement="Outside" Width="255" ></Slider>
+                <Rectangle Name="LED_GShape" RelativePanel.RightOf="LED_G"  RelativePanel.AlignVerticalCenterWith="LED_G" Width="30" Height="30"  Fill="{Binding ElementName=LED_G, Path=Value,ConverterParameter=2, Mode=TwoWay, Converter={StaticResource RGBToBrushConverter}}" ></Rectangle>
+                <Slider ValueChanged="LED_B_ValueChanged" Value="{Binding ElementName=LED_Color,Path=BlueValue, Mode=TwoWay}" Name="LED_B" RelativePanel.Below="LED_G"     RelativePanel.AlignHorizontalCenterWithPanel="True"            Minimum="0" 
+                    Maximum="255"
+                    TickFrequency="1"
+                    TickPlacement="Outside" Width="255" ></Slider>
+                <Rectangle Name="LED_BShape" RelativePanel.RightOf="LED_B" RelativePanel.AlignVerticalCenterWith="LED_B" Width="30" Height="30"  Fill="{Binding ElementName=LED_B, Path=Value,ConverterParameter=3, Mode=TwoWay, Converter={StaticResource RGBToBrushConverter}}" ></Rectangle>
+            </RelativePanel>
+
+        </RelativePanel>
+    </Grid>
+</UserControl>

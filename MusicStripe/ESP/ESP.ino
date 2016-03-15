@@ -83,7 +83,6 @@ void loadData()
 
 void storeData_WIFI()
 {
-	EEPROM_Clear();
 	int EEPROM_Pointer = 1;
 	EEPROM.write(EEPROM_Pointer
 		, (uint8_t)ssid.length());
@@ -116,9 +115,6 @@ String WifiConnect()
 {
 
 
-
-	
-
 	WiFi.begin(ssid.c_str(), password.c_str());
 
 	server = WiFiServer(port);
@@ -127,16 +123,14 @@ String WifiConnect()
 	while (WiFi.status() != WL_CONNECTED) {
 		i++;
 		if (i == 20)
-			return "failed";
+			FallBack();
 		delay(500);
 	}
 
 
 	connected = true;
 
-	return (WiFi.localIP().toString() + ":" + port);//
-
-													//return true;
+	return (WiFi.localIP().toString() + ":" + port);
 
 }
 
@@ -165,24 +159,9 @@ bool WifiDeconnect()
 
 #ifdef NORMAL
 
-void setup() {
-	
-
-	ssid = "ESP8266";
-	password = "1234567890";
-	port = 23;
-	pinMode(2, INPUT);
-	WiFiServer server(23);
-
-	connected = false;
-	OTAUpdateReq = false;
-	run = 0;
-	Serial.begin(115200);
-	EEPROM.begin(128);
-	delay(200);
-
-if (digitalRead(2) == LOW)
+void FallBack()
 {
+
 
 	WiFi.mode(WIFI_AP);
 	WiFi.softAP("ESPCONFIG");
@@ -191,28 +170,28 @@ if (digitalRead(2) == LOW)
 	delay(200);
 	Serial.print(myIP);
 
-	Serial.print(":"+(String)port);
+	Serial.print(":" + (String)port);
 
 	server.begin();
 
 	byte go = 0;
 	int counter = 0;
-	bool gotdata[3] = { false,false,false };		
+	bool gotdata[3] = { false,false,false };
 	while (!client.connected()) {
 		// try to connect to a new client
-		client = server.available();// delay(100);
+		client = server.available(); delay(10);
 	}
 	while (counter < 3) {
-	
+
 		while (client.connected()) {
 			if (counter == 3)
 				break;
 			delay(100);
-			
+
 			while (client.available()>0) {
 				//Serial.println(counter);
 				byte req = client.read();
-			
+
 				// Read the first line of the request
 				if (req == ControlByte::SSID) {
 					while (client.available() <= 4)
@@ -244,16 +223,16 @@ if (digitalRead(2) == LOW)
 					run = client.read();
 					if (run == 0)
 						break;
-	
+
 					char buffer1[run];
-			
+
 					for (int i = 0; i < run; i++)
 					{
 						buffer1[i] = (char)client.read();
 					}
-		
+
 					password = String(buffer1);
-					password.remove(run, password.length()  - run);
+					password.remove(run, password.length() - run);
 					if (!gotdata[1])
 						counter++;
 					gotdata[1] = true;
@@ -277,7 +256,7 @@ if (digitalRead(2) == LOW)
 					if (counter == 3)
 						break;
 				}
-				
+
 
 			}
 		}
@@ -285,18 +264,39 @@ if (digitalRead(2) == LOW)
 
 			if (counter == 3)
 				break;
-			client.stop(); 
-		// not connected, so terminate any prior client
+			client.stop();
+			// not connected, so terminate any prior client
 			client = server.available();
-			delay(100);
+			delay(10);
 
 
 		}
-		
+
 
 	}
-	storeData_WIFI(); WiFi.softAPdisconnect();
+	storeData_WIFI(); ESP.restart();
 }
+
+
+
+
+
+void setup() {
+	
+
+	ssid = "ESP8266";
+	password = "1234567890";
+	port = 23;
+	pinMode(2, INPUT);
+	WiFiServer server(23);
+
+	connected = false;
+	OTAUpdateReq = false;
+	run = 0;
+	Serial.begin(115200);
+	EEPROM.begin(128);
+	delay(200);
+
 
 loadData();
 
@@ -309,9 +309,9 @@ loadData();
 			i++;
 			if (i == 20)
 			{
-				Serial.print("Connection Failed! Rebooting...");
-
-				ESP.restart();
+				EEPROM.write(0, 0);
+				EEPROM.commit();
+				FallBack();
 			}
 			delay(500);
 		}
@@ -380,74 +380,7 @@ void loop() {
 					byte req = client.read();
 					switch (req)
 					{
-					//case Reconnect:
-					//	if (Serial.read() == Stop)
-					//		WifiDeconnect();
-					//	break;
-					//case GetLightState:
-					//	Serial.write(req);
-					//	if (Serial.read() == Stop)
-					//		while (Serial.available() <= 0)
-					//			delay(50);
-					//	client.write(Serial.read());
-					//	break;
-					//case ControlByte::SSID:
-					//	while (client.available() <= 3)
-					//		delay(50);
-
-					//	ssid = "";
-
-					//	run = client.read();
-					//	if (run == 0)
-					//		break;
-					//	char buffer[run];
-					//	for (int i = 0; i < run; i++)
-					//	{
-					//		if (Serial.available() <= 0)
-					//			delay(50);
-					//		buffer[i] = (char)Serial.read();
-					//	}
-					//	if (Serial.read() != Stop)
-					//		break;
-					//	ssid = String(buffer);
-
-					//	storeData_WIFI();
-					//	delete[] buffer;
-					//	break;
-					//case ControlByte::PWD:
-
-					//	while (client.available() <= 3)
-					//		delay(50);
-
-					//	password = "";
-
-					//	run = client.read();
-					//	if (run == 0)
-					//		break;
-					//	char buffer1[run];
-					//	for (int i = 0; i < run; i++)
-					//	{
-					//		if (Serial.available() <= 0)
-					//			delay(50);
-					//		buffer1[i] = (char)Serial.read();
-					//	}
-					//	if (Serial.read() != Stop)
-					//		break;
-					//	password = String(buffer1);
-
-					//	storeData_WIFI();
-					//	delete[] buffer1;
-					//	break;
-					//case ControlByte::Port:
-					//	while (client.available() <= 1)
-					//		delay(50);
-
-					//	tport = client.read();
-					//	if (Serial.read() != Stop)
-					//		break;
-					//	port = tport;
-					//	storeData_WIFI();
-					//	break;
+				
 
 					//	//LED1_CRTL
 					case LED1Data:
@@ -466,7 +399,7 @@ void loop() {
 						//LED2_CRTL
 					case LED2Data:
 						Serial.write(req);
-						ReadRest(3);
+						ReadRest(4);
 						break;
 					case LED2Frequency:
 						Serial.write(req);
@@ -488,6 +421,9 @@ void loop() {
 						EEPROM.commit();
 						ESP.restart();
 						break;
+					case SaveStartupCFG:
+						Serial.write(req);
+						ReadRest(1);
 					default:
 						while (client.available())
 							Serial.print((byte)100);
