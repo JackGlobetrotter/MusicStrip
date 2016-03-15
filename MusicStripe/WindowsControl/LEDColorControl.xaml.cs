@@ -167,6 +167,7 @@ namespace WindowsControl
 
         private void LED_Freq_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
+            if(FrequenzyChanged!=null)               
             FrequenzyChanged(this, new FrequenzyEventArgs((byte)LED_Freq.Value));
         }
     }

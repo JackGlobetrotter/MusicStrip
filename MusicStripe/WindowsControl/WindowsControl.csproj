@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WindowsControl</RootNamespace>
     <AssemblyName>WindowsControl</AssemblyName>
-    <DefaultLanguage>en-US</DefaultLanguage>
+    <DefaultLanguage>fr-FR</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.10586.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
@@ -101,6 +101,9 @@
     <Compile Include="LEDColorControl.xaml.cs">
       <DependentUpon>LEDColorControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ModuleSettings.xaml.cs">
+      <DependentUpon>ModuleSettings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WifiSettings.xaml.cs">
       <DependentUpon>WifiSettings.xaml</DependentUpon>
     </Compile>
@@ -113,6 +116,8 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
+    <PRIResource Include="strings\en-US\Resources.resw" />
+    <PRIResource Include="strings\fr-FR\Resources.resw" />
     <None Include="WindowsControl_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +150,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="ModuleSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="WifiSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -153,6 +162,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="strings\de-DE\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

@@ -531,6 +531,11 @@ namespace WindowsControl
             ArduinoSend(ControlByte.LED1Frequency, new byte[] { e.Frequenzy });
 
         }
+
+        private void LED2ColorCTRL_FrequenzyChanged(object sender, FrequenzyEventArgs e)
+        {
+            ArduinoSend(ControlByte.LED2Frequency, new byte[] { e.Frequenzy });
+        }
     }
 
 }

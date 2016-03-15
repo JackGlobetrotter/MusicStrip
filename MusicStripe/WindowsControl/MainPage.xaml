@@ -88,16 +88,15 @@ xmlns:controls="using:ColorPicker"
             </StackPanel>
 
            <Button RelativePanel.Below="S1" Click="Button_Click">Settings</Button>
-            <Slider Header="LEDLED1State1 Frequenz" RelativePanel.Below="S1" Margin="0,60,0,0" ValueChanged="Slider_ValueChanged" Minimum="0" Maximum="255" Width="255"></Slider>
-            <Button RelativePanel.Below="S1" Margin="0,120,0,0" Click="Button_Click_1" >Save as Startup Configuration</Button>
+          
         </RelativePanel>
         <RelativePanel Grid.Column="1">
         <local:LEDColorControl FrequenzyChanged="LED1ColorCTRL_FrequenzyChanged" LEDNameString="LED1" ColorChanged="LED1ColorCTRL_ColorChanged" x:Name="LED1ColorCTRL"  Visibility="{Binding ElementName=LED1OnOff,Path=IsOn, Converter={StaticResource BoolToVis}}"></local:LEDColorControl>
 
-        <local:LEDColorControl LEDNameString="LED2" ColorChanged="LED2ColorCTRL_ColorChanged" x:Name="LED2ColorCTRL" RelativePanel.Below="LED1ColorCTRL" Visibility="{Binding ElementName=LED2OnOff, Path=IsOn, Converter={StaticResource BoolToVis}}"></local:LEDColorControl>
+        <local:LEDColorControl FrequenzyChanged="LED2ColorCTRL_FrequenzyChanged" LEDNameString="LED2" ColorChanged="LED2ColorCTRL_ColorChanged" x:Name="LED2ColorCTRL" RelativePanel.Below="LED1ColorCTRL" Visibility="{Binding ElementName=LED2OnOff, Path=IsOn, Converter={StaticResource BoolToVis}}"></local:LEDColorControl>
         </RelativePanel>
         <AppBarSeparator HorizontalAlignment="Left" Margin="-1013,194,0,0" VerticalAlignment="Top"/>
-        <ContentDialog x:Name="SettingsDialog"
+        <ContentDialog x:Name="SettingsDialog" x:Uid="SettingsDialog"
                         VerticalAlignment="Stretch"
                         Title="{Binding ElementName=SettingsSelect, Path=SelectedItem.Content}"
                         PrimaryButtonText="OK"
@@ -118,9 +117,10 @@ xmlns:controls="using:ColorPicker"
                     </local:GeneralSettings>
                 </RelativePanel>
                 <ListView Grid.Column="0" Name="SettingsSelect" SelectedIndex="0" SelectionChanged="SettingsSelect_SelectionChanged">
-                    <ListViewItem Name="GeneralSettingsTab">General Settings</ListViewItem>
+                    <ListViewItem x:Uid="GeneralSettings" Name="GeneralSettingsTab">General Settings</ListViewItem>
 
-                    <ListViewItem Name="WifiSettingsTab" IsSelected="True">Wifi Settings</ListViewItem>
+                    <ListViewItem x:Uid="WifiSettings" Name="WifiSettingsTab" IsSelected="True">Wifi Settings</ListViewItem>
+                    <ListViewItem x:Uid="ModuleSettings" Name="ModuleSettingsTab" >Module</ListViewItem>
                 </ListView>
             </Grid>
         </ContentDialog>
