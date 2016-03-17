@@ -101,4 +101,6 @@ extern "C" void __cxa_pure_virtual() {;}
 #define portInputRegister(P)
 #define portModeRegister(P)
 #include <..\ESP\ESP.ino>
+#include <..\MusicLibrary\src\_micro-api\libraries\MusicLibraryLib\src\MusicStripLib.cpp>
+#include <..\MusicLibrary\src\_micro-api\libraries\MusicLibraryLib\src\MusicStripLib.h>
 #endif
