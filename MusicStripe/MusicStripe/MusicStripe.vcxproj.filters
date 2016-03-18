@@ -15,11 +15,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="MusicStripe.ino" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="__vm\.MusicStripe.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="y.ino" />
   </ItemGroup>
 </Project>

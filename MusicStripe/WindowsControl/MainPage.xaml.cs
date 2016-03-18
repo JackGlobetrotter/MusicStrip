@@ -328,7 +328,7 @@ namespace WindowsControl
             ESP_Stream.WriteBytes(Data);
             ESP_Stream.WriteByte((byte)ControlByte.Stop);
             await ESP_Stream.StoreAsync();
-            await ESP_Stream.FlushAsync();
+         //   await ESP_Stream.FlushAsync();
 
         }
 
