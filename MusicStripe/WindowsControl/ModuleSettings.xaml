@@ -10,8 +10,8 @@
     d:DesignWidth="400">
 
     <Grid>
-        <RelativePanel>
-            <Button x:Uid="WriteStartupData" Name="WriteStartupData"></Button>
-        </RelativePanel>
+      
+            <Button x:Uid="WriteStartupData" Name="WriteStartupData" Click="WriteStartupData_Click">Write StartupData</Button>
+      
     </Grid>
 </UserControl>

@@ -17,11 +17,23 @@ using Windows.UI.Xaml.Navigation;
 
 namespace WindowsControl
 {
-    public sealed partial class ModuleSettings : UserControl
+    public delegate void StartupDataHandel(object sender, EventArgs e);
+
+    /// <summary>
+    /// Une page vide peut être utilisée seule ou constituer une page de destination au sein d'un frame.
+    /// </summary>
+
+        public sealed partial class ModuleSettings : UserControl
     {
+        public event StartupDataHandel StartupDataSet;
         public ModuleSettings()
         {
             this.InitializeComponent();
+        }
+
+        private void WriteStartupData_Click(object sender, RoutedEventArgs e)
+        {
+            StartupDataSet(this, EventArgs.Empty);
         }
     }
 }

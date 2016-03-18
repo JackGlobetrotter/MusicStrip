@@ -18,33 +18,19 @@
 #define HUE_MAX  6.0
 #define HUE_DELTA 0.01
 
-//----pinout def--------
+#define LightPin 15
 
-
-#define Reset 13
-#define LightPin 4
-#define ESPReset 7
-#define ESPFactory 8
-//-----display
-
-#define DR4 A0
-#define DR5 A1
-#define DR6 A2
-#define DR7 A3
-
-#define Enable A4
-#define RS  A5
 
 //----------LED1
-#define R1 3
+#define R1 4
 #define G1 5
-#define B1 6
+#define B1 16
 
 //---------LED 2
 
-#define R2 9
-#define G2 10
-#define B2 11
+#define R2 12
+#define G2 13
+#define B2 14
 
 
 bool LED2_active = false;
@@ -85,8 +71,8 @@ int LED2pulsedelay = 0;
 //decode_results results;
 
 // ----- RuntimeVariabes
-
-uint8_t temp[10];
+char WifiTemp[50];
+uint8_t temp[3];
 uint8_t run = 0;
 uint8_t ctrl = 0;
 //-------Fade-------------
@@ -116,13 +102,13 @@ bool scrollup = true;
 bool fadeup = true;
 uint8_t scrollcount = 0;
 uint8_t fadecount = 0;
-LiquidCrystal lcd(RS, Enable, DR4, DR5, DR6, DR7);
-
+//LiquidCrystal lcd(RS, Enable, DR4, DR5, DR6, DR7);
+int go;
 
 bool WifiIsConnected = false;
 String IPString = "";
 bool LightStat = false;
-int EEPROM_Pointer = 0;
+
 uint8_t buffer[4];
 
 #define OTAMode 26
@@ -131,7 +117,7 @@ uint8_t buffer[4];
 int tport;
 uint8_t value;
 long address;
-int run = 0;
+
 String ssid = "ESP8266";
 String password = "1234567890";
 uint8_t port = 80;
@@ -153,81 +139,189 @@ void EEPROM_Clear()
 
 
 
-void storeData()
+void storeData(bool WIFI)
 {  //0 = OTA |LED_DATA  | active|mode|freq|color[3] |  WIFI_DATA | port|ssid|password
+	if (!WIFI) {
+		EEPROM_Pointer = 1;
 
-	EEPROM_Pointer = 1;
+		//LED_DATA  | active|mode|freq|color[3]
 
-	//LED_DATA  | active|mode|freq|color[3]
+		EEPROM.write(EEPROM_Pointer, LED1_active);
+		EEPROM_Pointer++;
 
-	EEPROM.write(EEPROM_Pointer, LED1_active);
-	EEPROM_Pointer++;
+		EEPROM.write(EEPROM_Pointer, LED1_mode);
+		EEPROM_Pointer++;
 
-	EEPROM.write(EEPROM_Pointer, LED1_mode);
-	EEPROM_Pointer++;
-
-	EEPROM.write(EEPROM_Pointer, LED1_freq);
-
-	EEPROM_Pointer++;
-
-	for (byte i = 0; i < 3; i++)
-	{
-
-		EEPROM.write(EEPROM_Pointer, color0[i]);
+		EEPROM.write(EEPROM_Pointer, LED1_freq);
 
 		EEPROM_Pointer++;
 
-	}
-	EEPROM.write(EEPROM_Pointer, LED2_active);
+		for (byte i = 0; i < 3; i++)
+		{
+
+			EEPROM.write(EEPROM_Pointer, color0[i]);
+
+			EEPROM_Pointer++;
+
+		}
+		EEPROM.write(EEPROM_Pointer, LED2_active);
 
 
-	EEPROM_Pointer++;
-	EEPROM.write(EEPROM_Pointer, LED2_mode);
+		EEPROM_Pointer++;
+		EEPROM.write(EEPROM_Pointer, LED2_mode);
 
-	EEPROM_Pointer++;
-	EEPROM.write(EEPROM_Pointer, LED2_freq);
+		EEPROM_Pointer++;
+		EEPROM.write(EEPROM_Pointer, LED2_freq);
 
 
-	EEPROM_Pointer++;
-
-	for (byte i = 0; i < 3; i++)
-	{
-		EEPROM.write(EEPROM_Pointer, color1[i]);
 		EEPROM_Pointer++;
 
+		for (byte i = 0; i < 3; i++)
+		{
+			EEPROM.write(EEPROM_Pointer, color1[i]);
+			EEPROM_Pointer++;
+
+		}
+
 	}
-
-
-	//WIFI_DATA | port|ssid|password
-
-	EEPROM.write(EEPROM_Pointer
-		, port);
-
-	EEPROM.write(EEPROM_Pointer
-		, (uint8_t)ssid.length());
-	EEPROM_Pointer++;
-
-
-	for (uint8_t i = 0; i < ssid.length(); i++)
+	else
 	{
-		EEPROM.write(EEPROM_Pointer, (uint8_t)ssid.charAt(i));
+		EEPROM_Pointer = 13;
+		//WIFI_DATA | port|ssid|password
+	//	Serial.println((String)EEPROM_Pointer + ":" + (String)port);
+
+		EEPROM.write(EEPROM_Pointer
+			, port);
+
 		EEPROM_Pointer++;
-	}
-	EEPROM.write(EEPROM_Pointer
-		, (uint8_t)password.length());
+		//Serial.println((String)EEPROM_Pointer + ": l: " + (String)ssid.length()+" ssid: "+ssid);
 
-	EEPROM_Pointer++;
-
-	for (uint8_t i = 0; i < password.length(); i++)
-	{
-		EEPROM.write(EEPROM_Pointer, (uint8_t)password.charAt(i));
+		EEPROM.write(EEPROM_Pointer
+			, (uint8_t)ssid.length());
 		EEPROM_Pointer++;
+
+
+		for (uint8_t i = 0; i < ssid.length(); i++)
+		{
+			EEPROM.write(EEPROM_Pointer, (uint8_t)ssid.charAt(i));
+			EEPROM_Pointer++;
+		}
+
+		//Serial.println((String)EEPROM_Pointer + ": l: " + (String)password.length() + " password: " + password);
+
+		EEPROM.write(EEPROM_Pointer
+			, (uint8_t)password.length());
+
+		EEPROM_Pointer++;
+
+		for (uint8_t i = 0; i < password.length(); i++)
+		{
+			EEPROM.write(EEPROM_Pointer, (uint8_t)password.charAt(i));
+			EEPROM_Pointer++;
+		}
+
 	}
-
-
 	EEPROM.commit();
 
 }
+
+
+
+void loadData()
+{
+	//0 = OTA |LED_DATA  | active|mode|freq|color[3] |  WIFI_DATA | port|ssid|password
+	int	EEPROM_Pointer = 0;
+	int mode = EEPROM.read(EEPROM_Pointer);
+	if (mode == OTAMode)
+		OTAUpdateReq = true;
+	//LED 
+	if (EEPROM.read(EEPROM_Pointer + 1) != 0) {
+		EEPROM_Pointer = 1;
+		//LED1
+		LED1_active = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
+
+		LED1_mode = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
+
+		LED1_freq = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
+
+		for (byte i = 0; i < 3; i++)
+		{
+			color0[i] = EEPROM.read(EEPROM_Pointer);
+			EEPROM_Pointer++;
+
+		}
+	}
+	else
+		EEPROM_Pointer = 7;
+	if (EEPROM.read(EEPROM_Pointer + 1) != 0) {
+		//LED2
+
+		LED2_active = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
+
+		LED2_mode = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
+
+		LED2_freq = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
+
+		for (byte i = 0; i < 3; i++)
+		{
+			color1[i] = EEPROM.read(EEPROM_Pointer);
+			EEPROM_Pointer++;
+
+		}
+
+	}
+	else
+		EEPROM_Pointer = 13;
+
+//	Serial.println((String)EEPROM_Pointer);
+	go = EEPROM.read(EEPROM_Pointer);
+	if (go != 0)
+		port = go;
+	EEPROM_Pointer++;
+
+	go = EEPROM.read(EEPROM_Pointer);
+
+	EEPROM_Pointer++;
+	char ssidtemp[go];
+	for (int i = 0; i < go; i++)
+	{
+		ssidtemp[i] = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
+	}
+
+
+	if (go != 0)
+		ssid = String(ssidtemp);
+	ssid.remove(go, ssid.length() - go);
+	go = EEPROM.read(EEPROM_Pointer);
+	memset(ssidtemp, 0, sizeof(ssidtemp));
+	*ssidtemp = NULL;
+	EEPROM_Pointer++;
+	char temp1[go];
+
+
+	for (int i = 0; i < go; i++)
+	{
+		temp1[i] = EEPROM.read(EEPROM_Pointer);
+		EEPROM_Pointer++;
+	}
+
+	if (go != 0)
+		password = temp1;
+
+	//Serial.println(port);
+	//Serial.println(ssid);
+	//Serial.println(password);
+
+
+}
+
 
 String WifiConnect()
 {
@@ -240,9 +334,11 @@ String WifiConnect()
 	int i = 10;
 	while (WiFi.status() != WL_CONNECTED) {
 		i++;
-		if (i == 20)
+		if (i == 5) {
 			FallBack();
-		delay(500);
+			return "";
+		}
+			delay(500);
 	}
 
 
@@ -252,38 +348,18 @@ String WifiConnect()
 
 }
 
-bool WifiDeconnect()
-{
-	Serial.write(ControlByte::Reconnect);
-	connected = false;
-	WiFi.disconnect();
-	int i = 0;
-	while (WiFi.status() != WL_DISCONNECTED) {
-		delay(500);
-		if (i == 10)
-			return false;
-		i++;
-	}
-	return true;
-
-
-}
-
 
 
 void FallBack()
 {
-
-
+	Serial.println("Fallback");
+	
 	WiFi.mode(WIFI_AP);
 	WiFi.softAP("ESPCONFIG");
 
-	IPAddress myIP = WiFi.softAPIP();
-	delay(200);
-	Serial.print(myIP);
-
-	Serial.print(":" + (String)port);
-
+	IPAddress ip = WiFi.softAPIP();
+	IPString = (String)ip.toString() + ":"+(String)port;
+	DisplayIP();
 	server.begin();
 
 	byte go = 0;
@@ -293,6 +369,7 @@ void FallBack()
 		// try to connect to a new client
 		client = server.available(); delay(10);
 	}
+
 	while (counter < 3) {
 
 		while (client.connected()) {
@@ -306,51 +383,32 @@ void FallBack()
 
 				// Read the first line of the request
 				if (req == ControlByte::SSID) {
-					while (client.available() <= 4)
-						delay(50);
-					run = client.read();
-					if (run == 0)
-						break;
-					char buffer[run];
-					for (int i = 0; i < run; i++)
-					{
-
-						buffer[i] = (char)client.read();
-					}
-					ssid = String(buffer);
-					ssid.remove(run, ssid.length() - run);
+					if(!GetVerified(client.read(), true))
+					break;
+					ssid = String(WifiTemp);
+					
 
 					if (!gotdata[0])
 						counter++;
 					gotdata[0] = true;
-					client.flush();
+				//	Serial.println(ssid);
 					if (counter == 3)
 						break;
+				
 				}
 
 				else if (req == ControlByte::PWD) {
 
-					while (client.available() <= 4)
-						delay(50);
-					run = client.read();
-					if (run == 0)
+					if (!GetVerified(client.read(), true))
 						break;
-
-					char buffer1[run];
-
-					for (int i = 0; i < run; i++)
-					{
-						buffer1[i] = (char)client.read();
-					}
-
-					password = String(buffer1);
-					password.remove(run, password.length() - run);
+					password = String(WifiTemp);
+				//	password.remove(run, password.length() - run);
 					if (!gotdata[1])
 						counter++;
 					gotdata[1] = true;
-					Serial.println(password);
+				//	Serial.println(password);
 
-					client.flush();
+					
 					if (counter == 3)
 						break;
 				}
@@ -360,11 +418,14 @@ void FallBack()
 						delay(50);
 
 					port = client.read();
-
+					while (!client.available())
+						delay(10);
+					if (client.read() != Stop)
+						break;
 					if (!gotdata[2])
 						counter++;
 					gotdata[2] = true;
-					client.flush();
+				
 					if (counter == 3)
 						break;
 				}
@@ -386,7 +447,8 @@ void FallBack()
 
 
 	}
-	storeData_WIFI(); ESP.restart();
+	//Serial.println("ENDED");
+	storeData(true); ESP.restart();
 }
 
 
@@ -394,26 +456,32 @@ void FallBack()
 
 
 void setup() {
-	
 
+	pinMode(LightPin, OUTPUT);
+
+
+
+	EEPROM.begin(512);
+	Serial.begin(115200);
+	//lcd.begin(16, 2);
 	ssid = "ESP8266";
 	password = "1234567890";
 	port = 23;
-	pinMode(2, INPUT);
+
 	WiFiServer server(23);
 
 	connected = false;
 	OTAUpdateReq = false;
 	run = 0;
-	Serial.begin(115200);
-	EEPROM.begin(128);
-	delay(200);
-
-
+	analogWriteRange(254);
+	analogWriteFreq(200);
+	//FallBack();
 loadData();
 
-
+//lcd.clear();
+//while (true) delay(100000);
 	if (OTAUpdateReq) {
+
 		WiFi.mode(WIFI_STA);
 		WiFi.begin(ssid.c_str(), password.c_str());
 		int i = 0;
@@ -421,9 +489,10 @@ loadData();
 			i++;
 			if (i == 20)
 			{
+				Serial.print("Connection err");
 				EEPROM.write(0, 0);
 				EEPROM.commit();
-				FallBack();
+				ESP.restart();
 			}
 			delay(500);
 		}
@@ -432,36 +501,39 @@ loadData();
 		connected = true;
 
 
-		Serial.print(WiFi.localIP().toString() + ":OTA");//
-
+		IPString = WiFi.localIP().toString() + ":OTA";//
+		DisplayIP();
 		ArduinoOTA.onStart([]() {
-			Serial.write(OTAStart);
+			Serial.print("Updating");
+		//	lcd.setCursor(0, 1);
 		});
 	//	ArduinoOTA.setPassword((const char *)"1234567890");
 		ArduinoOTA.onEnd([]() {
-			Serial.write(Start);
-			Serial.write(OTAEnd);
-			Serial.write(Stop);
+			Serial.print("finished");
 			EEPROM.write(0, 0);
 			EEPROM.commit();
 		});
 
 		ArduinoOTA.onError([](ota_error_t error) {
 			Serial.write(OTAError);
-			if (error == OTA_AUTH_ERROR) Serial.write(0);
-			else if (error == OTA_BEGIN_ERROR) Serial.write(1);
-			else if (error == OTA_CONNECT_ERROR) Serial.write(2);
-			else if (error == OTA_RECEIVE_ERROR) Serial.write(3);
-			else if (error == OTA_END_ERROR) Serial.write(4);
+			if (error == OTA_AUTH_ERROR) Serial.print("AUTH_ERROR");
+			else if (error == OTA_BEGIN_ERROR) Serial.print("BEGIN_ERROR");
+			else if (error == OTA_CONNECT_ERROR) Serial.print("CONNECT_ERROR");
+			else if (error == OTA_RECEIVE_ERROR) Serial.print("RECEIVE_ERROR");
+			else if (error == OTA_END_ERROR) Serial.print("END_ERROR");
 		});
 		ArduinoOTA.begin();
 		OTAUpdateReq = true;
 	}
 	else{
 		WiFi.mode(WIFI_STA);
-		Serial.print(WifiConnect());
-
-
+		IPString = WifiConnect();
+		DisplayIP();
+		yield();
+		StateWriter(0, LED1_mode);
+		yield();
+		StateWriter(1, LED2_mode);
+		yield();
 	}
 	
 	
@@ -484,138 +556,102 @@ void loop() {
 					byte req = client.read();
 					switch (req)
 					{
-						
-						case OTAUpdate:
-							WifiUpdate();
-							break;
 
-						case LED1SwitchStade:
-							if (GetVerified(1))
-								ChangeLEDState(true, buffer[0]);
-
-							break;
-
-						case LED2SwitchStade:
-							if (GetVerified(1))
-								ChangeLEDState(false, buffer[0]);
-							break;
-						case LightToggle:
-							if (Serial.available() <= 0)
-								delay(50);
-							temp[0] = Serial.read();
-
-							ToggleLightSwitch((bool)temp[0]);
-
-							//	}
-							break;
-						case GetLightState:
-
-							Serial.write((uint8_t)LightStat);
-
-							break;
-
-						case LED1Data:
-							if (!GetVerified(3))
-								break;
-
-
-							color0[0] = buffer[0];
-							color0[1] = buffer[1];
-							color0[2] = buffer[2];
-							ChangeLEDState(true, LED1_mode);
-
-
-
-
-							break;
-						case LED2Data:
-
-							if (!GetVerified(3))
-								break;
-
-							color1[0] = buffer[0];
-							color1[1] = buffer[1];
-							color1[2] = buffer[2];
-							ChangeLEDState(false, LED2_mode);
-
-
-
-							break;
-						case LEDState:
-							if (!GetVerified(2))
-								break;
-
-							if (!buffer[0]) {
-								LED1_active = buffer[1];
-								ChangeLEDState(true, LED1_mode);
-
-							}
-							else {
-								LED2_active = buffer[1];
-								ChangeLEDState(false, LED2_mode);
-							}break;
-
-						case LED1Frequency:
-							if (!GetVerified(1))
-								break;
-							LED1_freq = buffer[0];
-							break;
-						case LED2Frequency:
-							if (!GetVerified(1))
-								break;
-							LED2_freq = buffer[0];
-
-							break;
-			
-						case SaveStartupCFG:
-							while (client.available() <= 0)
-								delay(10);
-							if (client.read() == Stop)
-								WriteStartupCFG();
-							break;
-					
-						
-					case LED1Data:
-						Serial.write(req);
-						ReadRest(4);
-						break;
-					case LED1Frequency:
-						Serial.write(req);
-						ReadRest(2);
-						break;
 					case LED1SwitchStade:
-						Serial.write(req);
-						ReadRest(2);
+						if (GetVerified(1,false))
+							ChangeLEDState(true, buffer[0]);
 
 						break;
-						//LED2_CRTL
-					case LED2Data:
-						Serial.write(req);
-						ReadRest(4);
-						break;
-					case LED2Frequency:
-						Serial.write(req);
-						ReadRest(2);
-						break;
+
 					case LED2SwitchStade:
-						Serial.write(req);
-						ReadRest(2);
+						if (GetVerified(1, false))
+							ChangeLEDState(false, buffer[0]);
+						break;
+					case LightToggle:
+						if (client.available() <= 0)
+							delay(50);
+						temp[0] = client.read();
+
+						ToggleLightSwitch((bool)temp[0]);
+
+						//	}
+						break;
+					case GetLightState:
+
+						client.write((uint8_t)LightStat);
+
+						break;
+
+					case LED1Data:
+						if (!GetVerified(3, false))
+							break;
+
+
+						color0[0] = buffer[0];
+						color0[1] = buffer[1];
+						color0[2] = buffer[2];
+						ChangeLEDState(0, LED1_mode);
+
+
+
+
+						break;
+					case LED2Data:
+
+						if (!GetVerified(3, false))
+							break;
+
+						color1[0] = buffer[0];
+						color1[1] = buffer[1];
+						color1[2] = buffer[2];
+						ChangeLEDState(1, LED2_mode);
+
+
 
 						break;
 					case LEDState:
-						Serial.write(req);
-						ReadRest(3);
+						if (!GetVerified(2, false))
+							break;
+
+						if (!buffer[0]) {
+							LED1_active = buffer[1];
+							ChangeLEDState(true, LED1_mode);
+
+						}
+						else {
+							LED2_active = buffer[1];
+							ChangeLEDState(false, LED2_mode);
+						}break;
+
+					case LED1Frequency:
+						if (!GetVerified(1, false))
+							break;
+						LED1_freq = buffer[0];
 						break;
+					case LED2Frequency:
+						if (!GetVerified(1, false))
+							break;
+						LED2_freq = buffer[0];
+
+						break;
+
+					case SaveStartupCFG:
+						while (client.available() <= 0)
+							delay(10);
+						if (client.read() == Stop)
+							storeData(false);
+						break;
+
+
+				
 					case OTAUpdate:
-						Serial.write(req);
+
 
 						EEPROM.write(0, OTAMode);
 						EEPROM.commit();
 						ESP.restart();
 						break;
-					case SaveStartupCFG:
-						Serial.write(req);
-						ReadRest(1);
+			
 					default:
 						while (client.available())
 							Serial.print((byte)100);
@@ -636,7 +672,7 @@ void loop() {
 				
 				client.stop();                                    // not connected, so terminate any prior client
 				client = server.available();
-
+				LoopLedCall();
 				if(client.connected())
 					DisplayColorStripe();
 			}
@@ -692,201 +728,7 @@ void LoopLedCall()
 
 
 
-}
-
-#endif
-
-
-
-
-
-
-
-
-
-void ResetEEPROM()
-{
-
-	for (int i = 0; i < EEPROM.length(); i++) {
-		EEPROM.write(i, 0);
-	}
-
-}
-
-void InitalizeWifi(bool Updated) {
-	if (!Updated)
-
-	{
-		digitalWrite(ESPReset, LOW);
-		delay(50);
-		digitalWrite(ESPFactory, HIGH);
-		digitalWrite(ESPReset, HIGH);
-
-	}
-
-	String ret;
-	int timer;
-	int IpPointCounter = 0;
-	while (true)
-	{
-
-		while (Serial.available() < 5) {
-			delay(50);
-			timer++;
-			if (timer == 5000)
-				ESPHardReset();
 		}
-		ret = Serial.readString();
-
-		for (size_t i = 0; i < ret.length(); i++)
-		{
-			if (ret[i] == '.')
-				IpPointCounter++;
-		}
-		if (IpPointCounter != 3)
-		{
-			IpPointCounter = 0;
-		}
-		else
-			break;
-	}
-	IPString = ret;
-	if (ret.substring(ret.length() - 3, ret.length()) == "OTA")
-		WifiUpdate();
-
-}
-
-void setup()
-{
-	Serial.begin(115200);
-
-	pinMode(Reset, INPUT);
-
-	if (!digitalRead(Reset))
-		ResetEEPROM();
-	else
-		loadData();
-
-	lcd.begin(16, 2);
-	lcd.clear();
-	pinMode(ESPReset, OUTPUT);
-	pinMode(ESPFactory, OUTPUT);
-
-	InitalizeWifi(false);
-	DisplayIP();
-
-
-	pinMode(LightPin, OUTPUT);
-	pinMode(R1, OUTPUT);
-	pinMode(R2, OUTPUT);
-	pinMode(G1, OUTPUT);
-	pinMode(G2, OUTPUT);
-	pinMode(B1, OUTPUT);
-	pinMode(B2, OUTPUT);
-
-
-	digitalWrite(R1, LOW);
-	digitalWrite(R2, LOW);
-	digitalWrite(G1, LOW);
-	digitalWrite(G2, LOW);
-	digitalWrite(B1, LOW);
-	digitalWrite(B2, LOW);
-
-
-
-
-
-}
-
-
-
-void loadData()
-{
-	//0 = OTA |LED_DATA  | active|mode|freq|color[3] |  WIFI_DATA | port|ssid|password
-	int	EEPROM_Pointer = 0;
-	int mode = EEPROM.read(EEPROM_Pointer);
-	if (mode == OTAMode)
-		OTAUpdateReq = true;
-	//LED 
-	if (EEPROM.read(EEPROM_Pointer+1) != 0) {
-		EEPROM_Pointer = 0;
-		//LED1
-		LED1_active = EEPROM.read(EEPROM_Pointer);
-		EEPROM_Pointer++;
-
-		LED1_mode = EEPROM.read(EEPROM_Pointer);
-		EEPROM_Pointer++;
-
-		LED1_freq = EEPROM.read(EEPROM_Pointer);
-		EEPROM_Pointer++;
-
-		for (byte i = 0; i < 3; i++)
-		{
-			color0[i] = EEPROM.read(EEPROM_Pointer);
-			EEPROM_Pointer++;
-
-		}
-	}
-	if (EEPROM.read(EEPROM_Pointer + 1) != 0) {
-		//LED2
-
-		LED2_active = EEPROM.read(EEPROM_Pointer);
-		EEPROM_Pointer++;
-
-		LED2_mode = EEPROM.read(EEPROM_Pointer);
-		EEPROM_Pointer++;
-
-		LED2_freq = EEPROM.read(EEPROM_Pointer);
-		EEPROM_Pointer++;
-
-		for (byte i = 0; i < 3; i++)
-		{
-			color1[i] = EEPROM.read(EEPROM_Pointer);
-			EEPROM_Pointer++;
-
-		}
-
-	}
-
-	go = EEPROM.read(EEPROM_Pointer);
-	if (go != 0)
-		port = go;
-	EEPROM_Pointer++;
-	EEPROM_Pointer++;
-	uint8_t go = EEPROM.read(EEPROM_Pointer);
-
-	EEPROM_Pointer++;
-	char ssidtemp[go];
-	for (int i = 0; i < go; i++)
-	{
-		ssidtemp[i] = EEPROM.read(EEPROM_Pointer);
-		EEPROM_Pointer++;
-	}
-
-
-	if (go != 0)
-		ssid = String(ssidtemp);
-	ssid.remove(go, ssid.length() - go);
-	go = EEPROM.read(EEPROM_Pointer);
-	memset(ssidtemp, 0, sizeof(ssidtemp));
-	*ssidtemp = NULL;
-	EEPROM_Pointer++;
-	char temp1[go];
-
-
-	for (int i = 0; i < go; i++)
-	{
-		temp1[i] = EEPROM.read(EEPROM_Pointer);
-		EEPROM_Pointer++;
-	}
-
-	if (go != 0)
-		password = temp1;
-
-
-
-
-
 }
 
 
@@ -894,8 +736,8 @@ void loadData()
 void ToggleLightSwitch(bool OnOff)
 {
 	LightStat = OnOff;
-	digitalWrite(LightPin, !LightStat);
-
+	digitalWrite(LightPin, LightStat);
+	
 
 }
 
@@ -911,276 +753,192 @@ byte flash[8] = {
 	0b10000
 };
 
-void ESPHardReset()
+
+
+
+bool GetVerified(int count,bool Fallback)
 {
-	lcd.clear();
-	lcd.print("ESP Hard Reset");
-
-	digitalWrite(ESPReset, LOW);
-	delay(50);
-	digitalWrite(ESPFactory, HIGH);
-	digitalWrite(ESPReset, HIGH);
-	delay(50);
-	digitalWrite(ESPFactory, LOW);
-
-	delay(200);
-
-	delay(300);
-	Serial.flush();
-	digitalWrite(ESPFactory, HIGH);
-
-
-	String ret;
-	int IpPointCounter;
-	while (true)
-	{
-		while (Serial.available() < 5) {
-			delay(50);
-
-		}
-		ret = Serial.readString();
-
-		for (size_t i = 0; i < ret.length(); i++)
+	if (!Fallback) {
+		for (size_t i = 0; i < count; i++)
 		{
-			if (ret[i] == '.')
-				IpPointCounter++;
-		}
-		if (IpPointCounter == 3)
-			break;
-		else
-			IpPointCounter = 0;
-
-
-	}
-	IPString = ret;
-	DisplayIP();
-	while (true) { delay(1000); };
-}
-
-void WifiUpdate()
-{
-	lcd.createChar(0, flash);
-	lcd.clear();
-	lcd.print("ESP Updating");
-	lcd.setCursor(0, 1);
-	lcd.print("----------------");
-	lcd.noCursor();
-	lcd.setCursor(0, 1);
-	int passing = -1;
-	int print = 0;
-	bool gotend = false;
-	byte combination[3];
-	while (!gotend) {
-		while (Serial.available() > 2)
-		{
-			combination[2] = combination[1];
-			combination[1] = combination[0];
-			combination[0] = Serial.read();
-
-			if (combination[2] == Start&&combination[1] == OTAEnd &&combination[0] == Stop) {
-				gotend = true;
-
-				break;
-			}
-		}
-
-		if (print == 3)
-		{
-			passing++;
-			if (passing == 0) {
-				lcd.setCursor(16, 1);
-
-				lcd.print("-");
-				lcd.setCursor(0, 1);
-				lcd.write(byte(0));
-
-			}
-			else {
-				lcd.setCursor(passing - 1, 1);
-				lcd.print("-");
-				lcd.write(byte(0));
-				if (passing == 16)
-					passing = -1;
-			}
-			print = 0;
-		}
-		else
-			print++;
-		delay(50);
-
-	}
-
-	InitalizeWifi(true);
-	DisplayIP();
-}
-
-bool GetVerified(int count)
-{
-	for (size_t i = 0; i < count; i++)
-	{
-		while (!client.available())
-			delay(10);
-		buffer[i] = Serial.read();
-
-	}
-
-	if (client.read() == Stop)
-		return true;
-	else return false;
-
-}
-
-void loop()
-{
-
-	while (Serial.available()) {
-		ctrl = Serial.read();
-		switch (ctrl) {
-		case OTAUpdate:
-			WifiUpdate();
-			break;
-
-		case LED1SwitchStade:
-			if (GetVerified(1))
-				ChangeLEDState(true, buffer[0]);
-
-			break;
-
-		case LED2SwitchStade:
-			if (GetVerified(1))
-				ChangeLEDState(false, buffer[0]);
-			break;
-		case LightToggle:
-			if (Serial.available() <= 0)
-				delay(50);
-			temp[0] = Serial.read();
-
-			ToggleLightSwitch((bool)temp[0]);
-
-			//	}
-			break;
-		case GetLightState:
-
-			Serial.write((uint8_t)LightStat);
-
-			break;
-
-		case LED1Data:
-			if (!GetVerified(3))
-				break;
-
-
-			color0[0] = buffer[0];
-			color0[1] = buffer[1];
-			color0[2] = buffer[2];
-			ChangeLEDState(true, LED1_mode);
-
-
-
-
-			break;
-		case LED2Data:
-
-			if (!GetVerified(3))
-				break;
-
-			color1[0] = buffer[0];
-			color1[1] = buffer[1];
-			color1[2] = buffer[2];
-			ChangeLEDState(false, LED2_mode);
-
-
-
-			break;
-		case LEDState:
-			if (!GetVerified(2))
-				break;
-
-			if (!buffer[0]) {
-				LED1_active = buffer[1];
-				ChangeLEDState(true, LED1_mode);
-
-			}
-			else {
-				LED2_active = buffer[1];
-				ChangeLEDState(false, LED2_mode);
-			}break;
-
-		case LED1Frequency:
-			if (!GetVerified(1))
-				break;
-			LED1_freq = buffer[0];
-			break;
-		case LED2Frequency:
-			if (!GetVerified(1))
-				break;
-			LED2_freq = buffer[0];
-
-			break;
-		case ClientLeft:
-			DisplayIP();
-			break;
-		case SaveStartupCFG:
-			while (Serial.available() <= 0)
+			while (!client.available())
 				delay(10);
-			if (Serial.read() == Stop)
-				WriteStartupCFG();
-			break;
-		case ClientArrived:
-			DisplayColorStripe();
-			break;
-		default:
+			buffer[i] = client.read();
 
-			break;
 		}
 
-
+		if (client.read() == Stop)
+			return true;
+		else return false;
 	}
-	if (LED1_active)
-		switch (LED1_mode)
+	else
+	{
+	//	Serial.println(count);
+		for (size_t i = 0; i < count; i++)
 		{
-		case SmoothState:
-			Smooth(0);
-
-			break;
-		case FadeState:
-			Fadeing(false);
-			break;
-		case FlashState:
-			if (LED1_freq == LED1_mscounter) {
-				if (LED1_FlashOn) {
-					setColor(new byte[3]{ 0,0,0 }, 0);
-					LED1_FlashOn = false;
-				}
-				else
-				{
-					setColor(color0, 0);
-					LED1_FlashOn = true;
-				}
-				LED1_mscounter = 0;
-
-			}
-			else {
-				LED1_mscounter++;
-				delay(5);
-			}
-			break;
-
-
+			while (!client.available())
+				delay(10);
+			WifiTemp[i] = client.read();
 
 		}
+
+		if (client.read() == Stop)
+			return true;
+		else return false;
+	}
 }
+
+//void loop()
+//{
+//
+//	while (Serial.available()) {
+//		ctrl = Serial.read();
+//		switch (ctrl) {
+//		case OTAUpdate:
+//			WifiUpdate();
+//			break;
+//
+//		case LED1SwitchStade:
+//			if (GetVerified(1))
+//				ChangeLEDState(true, buffer[0]);
+//
+//			break;
+//
+//		case LED2SwitchStade:
+//			if (GetVerified(1))
+//				ChangeLEDState(false, buffer[0]);
+//			break;
+//		case LightToggle:
+//			if (Serial.available() <= 0)
+//				delay(50);
+//			temp[0] = Serial.read();
+//
+//			ToggleLightSwitch((bool)temp[0]);
+//
+//			//	}
+//			break;
+//		case GetLightState:
+//
+//			Serial.write((uint8_t)LightStat);
+//
+//			break;
+//
+//		case LED1Data:
+//			if (!GetVerified(3))
+//				break;
+//
+//
+//			color0[0] = buffer[0];
+//			color0[1] = buffer[1];
+//			color0[2] = buffer[2];
+//			ChangeLEDState(true, LED1_mode);
+//
+//
+//
+//
+//			break;
+//		case LED2Data:
+//
+//			if (!GetVerified(3))
+//				break;
+//
+//			color1[0] = buffer[0];
+//			color1[1] = buffer[1];
+//			color1[2] = buffer[2];
+//			ChangeLEDState(false, LED2_mode);
+//
+//
+//
+//			break;
+//		case LEDState:
+//			if (!GetVerified(2))
+//				break;
+//
+//			if (!buffer[0]) {
+//				LED1_active = buffer[1];
+//				ChangeLEDState(true, LED1_mode);
+//
+//			}
+//			else {
+//				LED2_active = buffer[1];
+//				ChangeLEDState(false, LED2_mode);
+//			}break;
+//
+//		case LED1Frequency:
+//			if (!GetVerified(1))
+//				break;
+//			LED1_freq = buffer[0];
+//			break;
+//		case LED2Frequency:
+//			if (!GetVerified(1))
+//				break;
+//			LED2_freq = buffer[0];
+//
+//			break;
+//		case ClientLeft:
+//			DisplayIP();
+//			break;
+//		case SaveStartupCFG:
+//			while (Serial.available() <= 0)
+//				delay(10);
+//			if (Serial.read() == Stop)
+//				storeData(false);
+//			break;
+//		case ClientArrived:
+//			DisplayColorStripe();
+//			break;
+//		default:
+//
+//			break;
+//		}
+//
+//
+//	}
+//	if (LED1_active)
+//		switch (LED1_mode)
+//		{
+//		case SmoothState:
+//			Smooth(0);
+//
+//			break;
+//		case FadeState:
+//			Fadeing(false);
+//			break;
+//		case FlashState:
+//			if (LED1_freq == LED1_mscounter) {
+//				if (LED1_FlashOn) {
+//					setColor(new byte[3]{ 0,0,0 }, 0);
+//					LED1_FlashOn = false;
+//				}
+//				else
+//				{
+//					setColor(color0, 0);
+//					LED1_FlashOn = true;
+//				}
+//				LED1_mscounter = 0;
+//
+//			}
+//			else {
+//				LED1_mscounter++;
+//				delay(5);
+//			}
+//			break;
+//
+//
+//
+//		}
+//}
 
 void 	DisplayIP() {
-	lcd.clear();
+	//lcd.clear();
 	if (IPString.length() > 16) {
-		lcd.print(IPString.substring(0, 15));
-		lcd.setCursor(0, 1);
-		lcd.print(IPString.substring
+		Serial.print(IPString.substring(0, 15));
+	//	lcd.setCursor(0, 1);
+		Serial.print(IPString.substring
 			(16, IPString.length()));
 	}
 	else
-		lcd.print(IPString);
+		Serial.println(IPString);
 
 }
 //LED1/2_freq, LED1/2_active > LED1/2_mscounter
@@ -1260,10 +1018,10 @@ void Smooth(bool LEDStripe)
 void DisplayColorStripe()
 {
 
-	lcd.clear();
-	lcd.print(GetDisplayString(0));
-	lcd.setCursor(0, 1);
-	lcd.print(GetDisplayString(1));
+	//lcd.clear();
+	Serial.println(GetDisplayString(0));
+	//lcd.setCursor(0, 1);
+	Serial.println(GetDisplayString(1));
 }
 
 void ChangeLEDState(bool One, uint8_t State) {
@@ -1289,13 +1047,13 @@ void StateWriter(bool One, uint8_t State)
 	case FixColorState:
 
 
-		if (One&&LED1_active) {
+		if (!One&&LED1_active) {
 			setColor(color0, 0);
 		}
-		else if (One&&!LED1_active) {
+		else if (!One&&!LED1_active) {
 			setColor(new byte[3]{ 0,0,0 }, 0);
 		}
-		else if (!One&&LED1_active) {
+		else if (One&&LED2_active) {
 			setColor(color1, 1);
 		}
 		else {
@@ -1430,9 +1188,9 @@ void setColor(byte *mlt, bool stripe) {
 
 	if (!stripe)
 	{
-		analogWrite(R1, mlt[0]);
-		analogWrite(G1, mlt[1]);
-		analogWrite(B1, mlt[2]);
+		analogWrite(R1, mlt[0]*4);
+		analogWrite(G1, mlt[1]*4);
+		analogWrite(B1, mlt[2]*4);
 
 
 	}

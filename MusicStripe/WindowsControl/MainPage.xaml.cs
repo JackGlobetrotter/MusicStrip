@@ -328,7 +328,7 @@ namespace WindowsControl
             ESP_Stream.WriteBytes(Data);
             ESP_Stream.WriteByte((byte)ControlByte.Stop);
             await ESP_Stream.StoreAsync();
-         //   await ESP_Stream.FlushAsync();
+            await ESP_Stream.FlushAsync();
 
         }
 
@@ -384,26 +384,32 @@ namespace WindowsControl
 
         private async void Connect_Click(object sender, RoutedEventArgs e)
         {
-            FakeConnectESP();
-        
-            //// connect ESP, read Lightstat
-            //ESP = new StreamSocket();
-            //HostName hostName
-            //     = new HostName( IPBox.Text.ToString());
-        
-            
 
-            //// If necessary, tweak the socket's control options before carrying out the connect operation.
-            //// Refer to the StreamSocketControl class' MSDN documentation for the full list of control options.
-            //ESP.Control.KeepAlive = false;
 
-            //// Save the socket, so subsequent steps can use it.
-  
-            //        await ESP.ConnectAsync(hostName,PortBox.Text);
-            
-            //ESP_Stream = new DataWriter( ESP.OutputStream);
+            // connect ESP, read Lightstat
+            ESP = new StreamSocket();
+            HostName hostName
+                 = new HostName(IPBox.Text.ToString());
+
+
+
+            // If necessary, tweak the socket's control options before carrying out the connect operation.
+            // Refer to the StreamSocketControl class' MSDN documentation for the full list of control options.
+            ESP.Control.KeepAlive = false;
+
+            // Save the socket, so subsequent steps can use it.
+
+            await ESP.ConnectAsync(hostName, PortBox.Text);
+
+            ESP_Stream = new DataWriter(ESP.OutputStream);
             IsConnected = true;
             ConnectionState.Fill = new SolidColorBrush(Colors.Green);
+            ESP_Stream.WriteByte((byte)ControlByte.GetLightState);
+            await ESP_Stream.StoreAsync();
+            var readBuf = new Windows.Storage.Streams.Buffer((uint)1);
+            var readOp = await ESP.InputStream.ReadAsync(readBuf, (uint)1, InputStreamOptions.Partial);
+            LightSwitch.IsOn=System.Convert.ToBoolean( readBuf.GetByte(0));
+
         }
 
 
@@ -507,8 +513,13 @@ namespace WindowsControl
             await ESP_Stream.FlushAsync();
         }
 
-        private void WifiSettingsPage_WifiDataSet(object sender, WifiEventArgs e)
+        private async void WifiSettingsPage_WifiDataSet(object sender, WifiEventArgs e)
         {
+            ArduinoSend(ControlByte.SSID, GetBytes( e.SSID));
+            await System.Threading.Tasks.Task.Delay(100);
+            ArduinoSend(ControlByte.PWD, GetBytes(e.PWD));
+            await System.Threading.Tasks.Task.Delay(100);
+            ArduinoSend(ControlByte.Port, new byte[] { e.Port });
             WifiDataChanged = true;
         }
 
@@ -557,6 +568,11 @@ namespace WindowsControl
         private void LED2ColorCTRL_FrequenzyChanged(object sender, FrequenzyEventArgs e)
         {
             ArduinoSend(ControlByte.LED2Frequency, new byte[] { e.Frequenzy });
+        }
+
+        private void ModuleSettings_StartupDataSet(object sender, EventArgs e)
+        {
+            ArduinoSend(ControlByte.SaveStartupCFG, new byte[0]);
         }
     }
 

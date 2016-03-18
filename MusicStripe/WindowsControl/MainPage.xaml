@@ -115,6 +115,7 @@ xmlns:controls="using:ColorPicker"
                     <local:WifiSettings Visibility="{Binding ElementName=WifiSettingsTab, Path=IsSelected, Converter={StaticResource BoolToVis}}" x:Name="WifiSettingsPage" OTAModeSet="WifiSettingsPage_OTAModeSet" WifiDataSet="WifiSettingsPage_WifiDataSet"></local:WifiSettings>
                     <local:GeneralSettings  Visibility="{Binding ElementName=GeneralSettingsTab, Path=IsSelected, Converter={StaticResource BoolToVis}}">
                     </local:GeneralSettings>
+                    <local:ModuleSettings  Visibility="{Binding ElementName=ModuleSettingsTab, Path=IsSelected, Converter={StaticResource BoolToVis}}" StartupDataSet="ModuleSettings_StartupDataSet"></local:ModuleSettings>
                 </RelativePanel>
                 <ListView Grid.Column="0" Name="SettingsSelect" SelectedIndex="0" SelectionChanged="SettingsSelect_SelectionChanged">
                     <ListViewItem x:Uid="GeneralSettings" Name="GeneralSettingsTab">General Settings</ListViewItem>
