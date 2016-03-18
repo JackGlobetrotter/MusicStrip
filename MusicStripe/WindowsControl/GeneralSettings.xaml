@@ -9,9 +9,9 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <RelativePanel>
-            <ToggleSwitch Header="Connect on startup:" Name="AutoConnect"></ToggleSwitch>
-            <ToggleSwitch Header="Start on Windows Startup" Name="StartUp" RelativePanel.Below="AutoConnect"></ToggleSwitch>
-            <ToggleSwitch Header="Minimize to tray" Name="Minimize" RelativePanel.Below="StartUp"></ToggleSwitch>
+            <ToggleSwitch Header="Connect on startup:" x:Uid="AutoConnect" Name="AutoConnect"></ToggleSwitch>
+            <ToggleSwitch Header="Start on Windows Startup" x:Uid="StartUp" Name="StartUp" RelativePanel.Below="AutoConnect"></ToggleSwitch>
+            <ToggleSwitch Header="Minimize to tray" Name="Minimize" x:Uid="Minimize" RelativePanel.Below="StartUp"></ToggleSwitch>
         </RelativePanel>
     </Grid>
 </Page>

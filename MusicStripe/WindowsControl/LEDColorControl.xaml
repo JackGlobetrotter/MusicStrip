@@ -22,8 +22,8 @@
 
         <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  >
             <TextBlock Name="LEDName" Text="{x:Bind LEDNameString, Mode=TwoWay}" RelativePanel.AlignHorizontalCenterWithPanel="True"></TextBlock>
-            <ToggleSwitch Name="LEDStateToggle" OffContent="Mixed" OnContent="Details" RelativePanel.Below="LEDName" RelativePanel.AlignHorizontalCenterWithPanel="True"></ToggleSwitch>
-            <Slider ValueChanged="LED_Freq_ValueChanged" Header="Frequenzy" Name="LED_Freq" RelativePanel.Below="LEDStateToggle" RelativePanel.AlignHorizontalCenterWithPanel="True" Width="255" Maximum="255"></Slider>
+            <ToggleSwitch Name="LEDStateToggle" x:Uid="LEDStateToggle" OffContent="Mixed" OnContent="Details" RelativePanel.Below="LEDName" RelativePanel.AlignHorizontalCenterWithPanel="True"></ToggleSwitch>
+            <Slider ValueChanged="LED_Freq_ValueChanged" Header="Frequenzy" x:Uid="LED_Freq" Name="LED_Freq" RelativePanel.Below="LEDStateToggle" RelativePanel.AlignHorizontalCenterWithPanel="True" Width="255" Maximum="255"></Slider>
             <TextBlock Text="{Binding ElementName=LED_Freq, Path=Value}" RelativePanel.RightOf="LED_Freq" RelativePanel.AlignVerticalCenterWith="LED_Freq"></TextBlock>
             <controls:ColorPicker  Width="400" Name="LED_Color" SelectedColor="{Binding LED_}" RelativePanel.Below="LED_Freq" RelativePanel.AlignHorizontalCenterWithPanel="True" Visibility="{Binding ElementName=LEDStateToggle,Path=IsOn, Converter={StaticResource BoolToVis}}"></controls:ColorPicker>
 

@@ -30,6 +30,7 @@ namespace WindowsControl
         public WifiSettings()
         {
             this.InitializeComponent();
+            VisualStateManager.GoToState(this, WifiSetDataState.Name, true);
         }
 
         private void SetOtaMode_Click(object sender, RoutedEventArgs e)

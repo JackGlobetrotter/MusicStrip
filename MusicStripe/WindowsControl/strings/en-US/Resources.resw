@@ -126,6 +126,15 @@
   <data name="GeneralSettings.Content" xml:space="preserve">
     <value>General Settings</value>
   </data>
+  <data name="LEDStateToggle.OffContent" xml:space="preserve">
+    <value>Mixed </value>
+  </data>
+  <data name="LEDStateToggle.OnContent" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="LED_Freq.Header" xml:space="preserve">
+    <value>Led Frequenzy</value>
+  </data>
   <data name="Minimize.Header" xml:space="preserve">
     <value>Minimize to tray</value>
   </data>

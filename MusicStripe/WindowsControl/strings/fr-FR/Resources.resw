@@ -126,6 +126,15 @@
   <data name="GeneralSettings.Content" xml:space="preserve">
     <value>Parametres principaux</value>
   </data>
+  <data name="LEDStateToggle.OffContent" xml:space="preserve">
+    <value>Détailé</value>
+  </data>
+  <data name="LEDStateToggle.OnContent" xml:space="preserve">
+    <value>Melangé</value>
+  </data>
+  <data name="LED_Freq.Header" xml:space="preserve">
+    <value>Frequence LED</value>
+  </data>
   <data name="Minimize.Header" xml:space="preserve">
     <value>Minimizer en arrièr plan</value>
   </data>
