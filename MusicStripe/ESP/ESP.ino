@@ -9,7 +9,13 @@
 #include <GDBStub\src\GDBStub.h>
 #include "MusicStripLib.h"
 #include <IPAddress.h>
-#include <LiquidCrystal.h>
+#include <Wire.h>
+#include <Wire.h> 
+#include <PCF8574_HD44780_I2C.h>
+
+// First LCD - Address 0x27, 16 chars, 2 line display
+
+
 
 #define WIFIPointer 0
 
@@ -23,14 +29,14 @@
 
 //----------LED1
 #define R1 4
-#define G1 5
+#define G1 14
 #define B1 16
 
 //---------LED 2
 
 #define R2 12
 #define G2 13
-#define B2 14
+#define B2 10
 
 
 bool LED2_active = false;
@@ -102,7 +108,7 @@ bool scrollup = true;
 bool fadeup = true;
 uint8_t scrollcount = 0;
 uint8_t fadecount = 0;
-//LiquidCrystal lcd(RS, Enable, DR4, DR5, DR6, DR7);
+PCF8574_HD44780_I2C lcd(0x27, 16,2);
 int go;
 
 bool WifiIsConnected = false;
@@ -188,13 +194,13 @@ void storeData(bool WIFI)
 	{
 		EEPROM_Pointer = 13;
 		//WIFI_DATA | port|ssid|password
-	//	Serial.println((String)EEPROM_Pointer + ":" + (String)port);
+	//	lcd.print((String)EEPROM_Pointer + ":" + (String)port);
 
 		EEPROM.write(EEPROM_Pointer
 			, port);
 
 		EEPROM_Pointer++;
-		//Serial.println((String)EEPROM_Pointer + ": l: " + (String)ssid.length()+" ssid: "+ssid);
+		//lcd.print((String)EEPROM_Pointer + ": l: " + (String)ssid.length()+" ssid: "+ssid);
 
 		EEPROM.write(EEPROM_Pointer
 			, (uint8_t)ssid.length());
@@ -207,7 +213,7 @@ void storeData(bool WIFI)
 			EEPROM_Pointer++;
 		}
 
-		//Serial.println((String)EEPROM_Pointer + ": l: " + (String)password.length() + " password: " + password);
+		//lcd.print((String)EEPROM_Pointer + ": l: " + (String)password.length() + " password: " + password);
 
 		EEPROM.write(EEPROM_Pointer
 			, (uint8_t)password.length());
@@ -279,7 +285,7 @@ void loadData()
 	else
 		EEPROM_Pointer = 13;
 
-//	Serial.println((String)EEPROM_Pointer);
+//	lcd.print((String)EEPROM_Pointer);
 	go = EEPROM.read(EEPROM_Pointer);
 	if (go != 0)
 		port = go;
@@ -315,9 +321,9 @@ void loadData()
 	if (go != 0)
 		password = temp1;
 
-	//Serial.println(port);
-	//Serial.println(ssid);
-	//Serial.println(password);
+	//lcd.print(port);
+	//lcd.print(ssid);
+	//lcd.print(password);
 
 
 }
@@ -352,7 +358,7 @@ String WifiConnect()
 
 void FallBack()
 {
-	Serial.println("Fallback");
+	lcd.print("Fallback");
 	
 	WiFi.mode(WIFI_AP);
 	WiFi.softAP("ESPCONFIG");
@@ -378,7 +384,7 @@ void FallBack()
 			delay(100);
 
 			while (client.available()>0) {
-				//Serial.println(counter);
+				//lcd.print(counter);
 				byte req = client.read();
 
 				// Read the first line of the request
@@ -391,7 +397,7 @@ void FallBack()
 					if (!gotdata[0])
 						counter++;
 					gotdata[0] = true;
-				//	Serial.println(ssid);
+				//	lcd.print(ssid);
 					if (counter == 3)
 						break;
 				
@@ -406,7 +412,7 @@ void FallBack()
 					if (!gotdata[1])
 						counter++;
 					gotdata[1] = true;
-				//	Serial.println(password);
+				//	lcd.print(password);
 
 					
 					if (counter == 3)
@@ -447,23 +453,37 @@ void FallBack()
 
 
 	}
-	//Serial.println("ENDED");
+	//lcd.print("ENDED");
 	storeData(true); ESP.restart();
 }
 
-
+byte flash[8] = { 0b10000,
+0b11000,
+0b11100,
+0b11110,
+0b11110,
+0b11100,
+0b11000,
+0b10000 };
 
 
 
 void setup() {
-
+	
 	pinMode(LightPin, OUTPUT);
 
+
+		// create a new custom character
+	
+	lcd.init();           // LCD Initialization              
+	lcd.backlight();      // Backlight ON
+	lcd.clear();          // Clear the display
+	lcd.createChar((uint8_t)0, flash);
 
 
 	EEPROM.begin(512);
 	Serial.begin(115200);
-	//lcd.begin(16, 2);
+
 	ssid = "ESP8266";
 	password = "1234567890";
 	port = 23;
@@ -473,7 +493,7 @@ void setup() {
 	connected = false;
 	OTAUpdateReq = false;
 	run = 0;
-	analogWriteRange(254);
+//	analogWriteRange(254);
 	analogWriteFreq(200);
 	//FallBack();
 loadData();
@@ -481,7 +501,10 @@ loadData();
 //lcd.clear();
 //while (true) delay(100000);
 	if (OTAUpdateReq) {
-
+		lcd.clear();
+		lcd.print("Updating");
+		lcd.setCursor(0, 1);
+		lcd.print("----------------");
 		WiFi.mode(WIFI_STA);
 		WiFi.begin(ssid.c_str(), password.c_str());
 		int i = 0;
@@ -489,7 +512,7 @@ loadData();
 			i++;
 			if (i == 20)
 			{
-				Serial.print("Connection err");
+				lcd.print("Connection err");
 				EEPROM.write(0, 0);
 				EEPROM.commit();
 				ESP.restart();
@@ -501,26 +524,29 @@ loadData();
 		connected = true;
 
 
-		IPString = WiFi.localIP().toString() + ":OTA";//
-		DisplayIP();
 		ArduinoOTA.onStart([]() {
-			Serial.print("Updating");
-		//	lcd.setCursor(0, 1);
-		});
+			lcd.setCursor(0, 1);
+		})
+		;
+		
 	//	ArduinoOTA.setPassword((const char *)"1234567890");
 		ArduinoOTA.onEnd([]() {
-			Serial.print("finished");
+			lcd.setCursor(0, 1);
+			lcd.print("finished");
 			EEPROM.write(0, 0);
 			EEPROM.commit();
 		});
-
+		ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+			lcd.setCursor(0, 1);
+			lcd.print(progress / (total / 100));
+		});
 		ArduinoOTA.onError([](ota_error_t error) {
 			Serial.write(OTAError);
-			if (error == OTA_AUTH_ERROR) Serial.print("AUTH_ERROR");
-			else if (error == OTA_BEGIN_ERROR) Serial.print("BEGIN_ERROR");
-			else if (error == OTA_CONNECT_ERROR) Serial.print("CONNECT_ERROR");
-			else if (error == OTA_RECEIVE_ERROR) Serial.print("RECEIVE_ERROR");
-			else if (error == OTA_END_ERROR) Serial.print("END_ERROR");
+			if (error == OTA_AUTH_ERROR) lcd.print("AUTH_ERROR");
+			else if (error == OTA_BEGIN_ERROR) lcd.print("BEGIN_ERROR");
+			else if (error == OTA_CONNECT_ERROR) lcd.print("CONNECT_ERROR");
+			else if (error == OTA_RECEIVE_ERROR) lcd.print("RECEIVE_ERROR");
+			else if (error == OTA_END_ERROR) lcd.print("END_ERROR");
 		});
 		ArduinoOTA.begin();
 		OTAUpdateReq = true;
@@ -539,7 +565,25 @@ loadData();
 	
 }
 
+void SendData()
+{
+	client.write((uint8_t)!LightStat);
 
+	client.write((uint8_t)LED1_mode);
+	client.write((uint8_t)LED1_active);
+	client.write((uint8_t)LED1_freq);
+	client.write((uint8_t)color0[0]);
+	client.write((uint8_t)color0[1]);
+	client.write((uint8_t)color0[2]);
+
+	client.write((uint8_t)LED2_mode);
+	client.write((uint8_t)LED2_active);
+	client.write((uint8_t)LED2_freq);
+	client.write((uint8_t)color1[0]);
+	client.write((uint8_t)color1[1]);
+	client.write((uint8_t)color1[2]);
+
+}
 void loop() {
 	if (!OTAUpdateReq) {
 		if (!connected) {
@@ -551,7 +595,7 @@ void loop() {
 			while(client.connected()){
 
 		
-				while (client.available()) {
+				if (client.available()) {
 					byte go = 0;
 					byte req = client.read();
 					switch (req)
@@ -559,13 +603,13 @@ void loop() {
 
 					case LED1SwitchStade:
 						if (GetVerified(1,false))
-							ChangeLEDState(true, buffer[0]);
+							ChangeLEDState(0, buffer[0]);
 
 						break;
 
 					case LED2SwitchStade:
 						if (GetVerified(1, false))
-							ChangeLEDState(false, buffer[0]);
+							ChangeLEDState(1, buffer[0]);
 						break;
 					case LightToggle:
 						if (client.available() <= 0)
@@ -576,9 +620,9 @@ void loop() {
 
 						//	}
 						break;
-					case GetLightState:
+					case GetData:
 
-						client.write((uint8_t)LightStat);
+						SendData();
 
 						break;
 
@@ -592,7 +636,7 @@ void loop() {
 						color0[2] = buffer[2];
 						ChangeLEDState(0, LED1_mode);
 
-
+			
 
 
 						break;
@@ -615,12 +659,12 @@ void loop() {
 
 						if (!buffer[0]) {
 							LED1_active = buffer[1];
-							ChangeLEDState(true, LED1_mode);
+							ChangeLEDState(0, LED1_mode);
 
 						}
 						else {
 							LED2_active = buffer[1];
-							ChangeLEDState(false, LED2_mode);
+							ChangeLEDState(1, LED2_mode);
 						}break;
 
 					case LED1Frequency:
@@ -641,7 +685,8 @@ void loop() {
 						if (client.read() == Stop)
 							storeData(false);
 						break;
-
+				//	case MusicState:
+				//		SoundPulsation(); break;
 
 				
 					case OTAUpdate:
@@ -654,12 +699,13 @@ void loop() {
 			
 					default:
 						while (client.available())
-							Serial.print((byte)100);
+							lcd.print((byte)100);
 						break;
 					}
 					yield();
 				}
 				yield();
+		
 				LoopLedCall();
 			}
 			
@@ -682,8 +728,36 @@ void loop() {
 	else
 	{
 		ArduinoOTA.handle();
+		UpdateingAnimation();
 	}
 
+
+}
+
+void UpdateingAnimation()
+{
+	
+	if (Display_mscounter < 250)
+		Display_mscounter++;
+	else {
+		Display_mscounter = 0;
+		if (Display_counter == 16) {
+			lcd.setCursor(15, 1);
+			lcd.print("-");
+			lcd.setCursor(0, 1);
+			lcd.write((uint8_t)0);
+		}
+		else {
+			lcd.setCursor(Display_counter - 1, 1);
+			lcd.print("-");
+			lcd.write((uint8_t)0);
+		}
+		if (Display_counter < 16)
+			Display_counter++;
+		else 
+			Display_counter = 1;
+	}
+	delay(2);
 
 }
 
@@ -722,7 +796,7 @@ void LoopLedCall()
 			}
 			break;
 
-
+		 default:break;
 
 
 
@@ -742,16 +816,7 @@ void ToggleLightSwitch(bool OnOff)
 }
 
 
-byte flash[8] = {
-	0b10000,
-	0b11000,
-	0b11100,
-	0b11110,
-	0b11110,
-	0b11100,
-	0b11000,
-	0b10000
-};
+
 
 
 
@@ -761,8 +826,9 @@ bool GetVerified(int count,bool Fallback)
 	if (!Fallback) {
 		for (size_t i = 0; i < count; i++)
 		{
-			while (!client.available())
-				delay(10);
+			while (!client.available()) {
+				delay(10); yield();
+			}
 			buffer[i] = client.read();
 
 		}
@@ -773,7 +839,7 @@ bool GetVerified(int count,bool Fallback)
 	}
 	else
 	{
-	//	Serial.println(count);
+	//	lcd.print(count);
 		for (size_t i = 0; i < count; i++)
 		{
 			while (!client.available())
@@ -930,15 +996,15 @@ bool GetVerified(int count,bool Fallback)
 //}
 
 void 	DisplayIP() {
-	//lcd.clear();
+	lcd.clear();
 	if (IPString.length() > 16) {
-		Serial.print(IPString.substring(0, 15));
-	//	lcd.setCursor(0, 1);
-		Serial.print(IPString.substring
+		lcd.print(IPString.substring(0, 15));
+		lcd.setCursor(0, 1);
+		lcd.print(IPString.substring
 			(16, IPString.length()));
 	}
 	else
-		Serial.println(IPString);
+		lcd.print(IPString);
 
 }
 //LED1/2_freq, LED1/2_active > LED1/2_mscounter
@@ -1018,14 +1084,14 @@ void Smooth(bool LEDStripe)
 void DisplayColorStripe()
 {
 
-	//lcd.clear();
-	Serial.println(GetDisplayString(0));
-	//lcd.setCursor(0, 1);
-	Serial.println(GetDisplayString(1));
+	lcd.clear();
+	lcd.print(GetDisplayString(0));
+	lcd.setCursor(0, 1);
+	lcd.print(GetDisplayString(1));
 }
 
 void ChangeLEDState(bool One, uint8_t State) {
-	if (One) {
+	if (!One) {
 		LED1_mode = State;
 
 
@@ -1171,16 +1237,8 @@ void Fadeing(bool LEDStripe) //LED1_counter over 100 =  {X} over {color0[1,2,3]}
 
 void SoundPulsation()
 {
-	/*if (Serial.available() >= 3)
-	{
-
-	Serial.readBytes(mix, 3);
-	Serial.flush();
-	//delay(100);
-	}
-
-	//setColor(mix);
-	*/
+	GetVerified(3, false);
+	setColor(temp, 0);
 }
 
 void setColor(byte *mlt, bool stripe) {

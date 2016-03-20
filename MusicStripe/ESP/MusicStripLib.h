@@ -31,7 +31,7 @@ enum ControlByte : uint8_t {
 	//General
 	Start,
 	Stop,
-	GetLightState,
+	GetData,
 	RGBColor ,
 	MusicTitle,
 	//LED

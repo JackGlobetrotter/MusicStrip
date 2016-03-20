@@ -116,7 +116,15 @@ namespace WindowsControl
             LEDName.Text = LEDNameString;
            // VisualStateManager.GoToState(this, LEDMixedState.Name, true);
         }
+        public void SetData(byte[] DATA)
+        {
 
+            LEDStateToggle.IsOn = System.Convert.ToBoolean(DATA[0]);
+            LED_Freq.Value = DATA[1];
+            LED_R.Value = DATA[2];
+            LED_G.Value = DATA[3];
+            LED_B.Value = DATA[4];
+        }
         private void LED_R_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
             if (LED_R != null)

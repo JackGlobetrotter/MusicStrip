@@ -24,6 +24,8 @@ using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Popups;
+using System.Threading;
+using Windows.Security.Cryptography;
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace WindowsControl
@@ -350,7 +352,7 @@ namespace WindowsControl
             //General
             Start,
             Stop,
-            GetLightState,
+            GetData,
             RGBColor,
             MusicTitle,
             //LED
@@ -404,11 +406,23 @@ namespace WindowsControl
             ESP_Stream = new DataWriter(ESP.OutputStream);
             IsConnected = true;
             ConnectionState.Fill = new SolidColorBrush(Colors.Green);
-            ESP_Stream.WriteByte((byte)ControlByte.GetLightState);
+            ESP_Stream.WriteByte((byte)ControlByte.GetData);
             await ESP_Stream.StoreAsync();
-            var readBuf = new Windows.Storage.Streams.Buffer((uint)1);
-            var readOp = await ESP.InputStream.ReadAsync(readBuf, (uint)1, InputStreamOptions.Partial);
-            LightSwitch.IsOn=System.Convert.ToBoolean( readBuf.GetByte(0));
+            var readBuf = new Windows.Storage.Streams.Buffer((uint)26);
+            var readOp = await ESP.InputStream.ReadAsync(readBuf, (uint)26, InputStreamOptions.Partial);
+            //      var readOp1 = await ESP.InputStream.ReadAsync(readBuf, (uint)13, InputStreamOptions.Partial);
+            byte[] LED1 = new byte[26];
+            for (uint i = 0; i < 26; i++)
+            {
+                LED1[i] = readBuf.GetByte(i);
+            }
+            
+         //   LightSwitch.IsOn = System.Convert.ToBoolean(readBuf.GetByte(0));
+            int t = (readBuf.GetByte(1));
+            /*LED1State.SelectedIndex = (readBuf.GetByte(1)) - 22;
+            LED1ColorCTRL.SetData(readBuf.ToArray(2, 5));
+            LED2State.SelectedIndex = readBuf.GetByte(7) - 22;
+            LED2ColorCTRL.SetData(readBuf.ToArray(8,5));*/
 
         }
 
@@ -573,6 +587,21 @@ namespace WindowsControl
         private void ModuleSettings_StartupDataSet(object sender, EventArgs e)
         {
             ArduinoSend(ControlByte.SaveStartupCFG, new byte[0]);
+        }
+     //   Timer t1;
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+          //  t1 = new Timer(timerCallback, null, TimeSpan.FromMilliseconds(100).Milliseconds, Timeout.Infinite);
+        }
+      //  Random rnd = new Random();
+        private async void timerCallback(object state)
+        {
+            // do some work not connected with UI
+            
+            
+               /*     ESP_Stream.WriteByte((byte)rnd.Next(254)); ESP_Stream.WriteByte((byte)rnd.Next(254)); ESP_Stream.WriteByte((byte)rnd.Next(254)); ESP_Stream.WriteByte((byte)ControlByte.Stop);
+                    await ESP_Stream.StoreAsync();*/
+                
         }
     }
 

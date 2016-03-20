@@ -88,7 +88,7 @@ xmlns:controls="using:ColorPicker"
             </StackPanel>
 
            <Button RelativePanel.Below="S1" Click="Button_Click">Settings</Button>
-          
+            <Button RelativePanel.Below="S1" Margin="0,80,0,0" Click="Button_Click_2">Sound fake</Button>
         </RelativePanel>
         <RelativePanel Grid.Column="1">
         <local:LEDColorControl FrequenzyChanged="LED1ColorCTRL_FrequenzyChanged" LEDNameString="LED1" ColorChanged="LED1ColorCTRL_ColorChanged" x:Name="LED1ColorCTRL"  Visibility="{Binding ElementName=LED1OnOff,Path=IsOn, Converter={StaticResource BoolToVis}}"></local:LEDColorControl>
