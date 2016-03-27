@@ -567,7 +567,7 @@ loadData();
 
 void SendData()
 {
-	client.write((uint8_t)LightStat);
+	client.write((uint8_t)!LightStat);
 
 	client.write((uint8_t)LED1_mode);
 	client.write((uint8_t)LED1_active);
@@ -625,11 +625,7 @@ void loop() {
 						SendData();
 
 						break;
-					case MusicTitle:
-						while (!client.available())
-							delay(10);
-						 client.readString();
-						break;
+
 					case LED1Data:
 						if (!GetVerified(3, false))
 							break;
@@ -709,7 +705,7 @@ void loop() {
 					yield();
 				}
 				yield();
-				//client.write((uint8_t)174);
+		
 				LoopLedCall();
 			}
 			
