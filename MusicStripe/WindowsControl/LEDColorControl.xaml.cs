@@ -68,7 +68,7 @@ namespace WindowsControl
     public class FrequenzyEventArgs : EventArgs
     {
         byte _Frequenzy;
-
+    
     
 
         public byte Frequenzy
@@ -84,12 +84,13 @@ namespace WindowsControl
         public FrequenzyEventArgs(byte Freq)
         {
             this._Frequenzy = Freq;
-        } // eo ctor
+        } 
 
 
     }
     public sealed partial class LEDColorControl : UserControl
     {
+        bool setting = false;
         string _LEDName;
         byte count = 0;
 
@@ -118,16 +119,18 @@ namespace WindowsControl
         }
         public void SetData(byte[] DATA)
         {
+            setting = true;
+        
+            LED_Freq.Value = DATA[0];
+            LED_R.Value = DATA[1];
+            LED_G.Value = DATA[2];
 
-            LEDStateToggle.IsOn = System.Convert.ToBoolean(DATA[0]);
-            LED_Freq.Value = DATA[1];
-            LED_R.Value = DATA[2];
-            LED_G.Value = DATA[3];
-            LED_B.Value = DATA[4];
+            LED_B.Value = DATA[3];
+            setting = false;
         }
         private void LED_R_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
-            if (LED_R != null)
+            if (LED_R != null && !setting)
                 if (LEDStateToggle.IsOn && count == 0)
                 {
                     ColorChanged(this, new ColorEventArgs((byte)LED_R.Value, (byte)LED_G.Value, (byte)LED_B.Value));
@@ -143,7 +146,7 @@ namespace WindowsControl
 
         private void LED_G_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
-            if (LED_R != null)
+            if (LED_R != null&&!setting )
                 if (LEDStateToggle.IsOn && count == 0)
                 {
                     ColorChanged(this, new ColorEventArgs((byte)LED_R.Value, (byte)LED_G.Value, (byte)LED_B.Value));
@@ -159,7 +162,7 @@ namespace WindowsControl
 
         private void LED_B_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
-            if (LED_R != null)
+            if (LED_R != null && !setting)
                 if (LEDStateToggle.IsOn && count == 0)
                 {
                     ColorChanged(this, new ColorEventArgs((byte)LED_R.Value, (byte)LED_G.Value, (byte)LED_B.Value));
@@ -175,8 +178,8 @@ namespace WindowsControl
 
         private void LED_Freq_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
-            if(FrequenzyChanged!=null)               
-            FrequenzyChanged(this, new FrequenzyEventArgs((byte)LED_Freq.Value));
+            if(FrequenzyChanged!=null && !setting)
+                FrequenzyChanged(this, new FrequenzyEventArgs((byte)LED_Freq.Value));
         }
     }
 }

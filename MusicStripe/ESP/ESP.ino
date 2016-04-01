@@ -148,8 +148,8 @@ void EEPROM_Clear()
 void storeData(bool WIFI)
 {  //0 = OTA |LED_DATA  | active|mode|freq|color[3] |  WIFI_DATA | port|ssid|password
 	if (!WIFI) {
-		EEPROM_Pointer = 1;
-
+		EEPROM_Pointer = 0;
+		EEPROM.write(EEPROM_Pointer,LightStat);
 		//LED_DATA  | active|mode|freq|color[3]
 
 		EEPROM.write(EEPROM_Pointer, LED1_active);
@@ -612,9 +612,8 @@ void loop() {
 							ChangeLEDState(1, buffer[0]);
 						break;
 					case LightToggle:
-						if (client.available() <= 0)
-							delay(50);
-						temp[0] = client.read();
+						if (!GetVerified(1, false))
+							break;
 
 						ToggleLightSwitch((bool)temp[0]);
 

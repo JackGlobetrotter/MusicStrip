@@ -140,6 +140,7 @@ namespace WindowsControl
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        bool setting = false;
         SerialDevice device;
         Windows.Storage.ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
         Windows.Storage.StorageFolder localFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
@@ -184,19 +185,27 @@ namespace WindowsControl
             this.InitializeComponent();
         //    VisualStateManager.GoToState(this, LEDMixedState.Name, true);
             LightState = true;
-
-            LED1State.Items.Add(ControlByte.FadeState.ToString());
-            LED1State.Items.Add(ControlByte.FixColorState.ToString());
+            /*	
+	MusicState,23
+	MicroState,
+	FadeState,
+	SmoothState,
+	FlashState,
+	FixColorState,*/
             LED1State.Items.Add(ControlByte.MusicState.ToString());
+            LED1State.Items.Add(ControlByte.MicroState.ToString());
+            LED1State.Items.Add(ControlByte.FadeState.ToString());
             LED1State.Items.Add(ControlByte.SmoothState.ToString());
             LED1State.Items.Add(ControlByte.FlashState.ToString());
+            LED1State.Items.Add(ControlByte.FixColorState.ToString());
             LED1State.SelectedIndex = 0;
 
-            LED2State.Items.Add(ControlByte.FadeState.ToString());
-            LED2State.Items.Add(ControlByte.FixColorState.ToString());
             LED2State.Items.Add(ControlByte.MusicState.ToString());
+            LED2State.Items.Add(ControlByte.MicroState.ToString());
+            LED2State.Items.Add(ControlByte.FadeState.ToString());
             LED2State.Items.Add(ControlByte.SmoothState.ToString());
             LED2State.Items.Add(ControlByte.FlashState.ToString());
+            LED2State.Items.Add(ControlByte.FixColorState.ToString());
             LED2State.SelectedIndex = 0;
 
             loading = false;
@@ -322,7 +331,7 @@ namespace WindowsControl
 
         private async void ArduinoSend(ControlByte Controler, byte[] Data)
         {
-            if (ESP_Stream == null)
+            if (ESP_Stream == null||setting==true)
                 return;
             
             ESP_Stream.WriteByte((byte)Controler);
@@ -408,21 +417,33 @@ namespace WindowsControl
             ConnectionState.Fill = new SolidColorBrush(Colors.Green);
             ESP_Stream.WriteByte((byte)ControlByte.GetData);
             await ESP_Stream.StoreAsync();
-            var readBuf = new Windows.Storage.Streams.Buffer((uint)26);
-            var readOp = await ESP.InputStream.ReadAsync(readBuf, (uint)26, InputStreamOptions.Partial);
-            //      var readOp1 = await ESP.InputStream.ReadAsync(readBuf, (uint)13, InputStreamOptions.Partial);
-            byte[] LED1 = new byte[26];
-            for (uint i = 0; i < 26; i++)
-            {
-                LED1[i] = readBuf.GetByte(i);
-            }
+            var dr = new DataReader(ESP.InputStream);
+            dr.InputStreamOptions = InputStreamOptions.None;
+            byte[] led = new byte[13];
             
-         //   LightSwitch.IsOn = System.Convert.ToBoolean(readBuf.GetByte(0));
-            int t = (readBuf.GetByte(1));
-            /*LED1State.SelectedIndex = (readBuf.GetByte(1)) - 22;
-            LED1ColorCTRL.SetData(readBuf.ToArray(2, 5));
-            LED2State.SelectedIndex = readBuf.GetByte(7) - 22;
-            LED2ColorCTRL.SetData(readBuf.ToArray(8,5));*/
+            for (int i = 0; i < 13; i++)
+            {
+                await dr.LoadAsync(1);
+                led[i] = dr.ReadByte();
+            }
+
+            await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => {
+                setting = true;
+                LightSwitch.IsOn =System.Convert.ToBoolean(led[0]);
+                if(23<=led[1]&&led[1]<=28)
+                LED1State.SelectedIndex = led[1] - 23;
+                LED1OnOff.IsOn = System.Convert.ToBoolean(led[2]);
+                LED1ColorCTRL.SetData(led.ToList().GetRange(3, 4).ToArray());
+                if (23 <= led[7] && led[7] <= 28)
+                    LED2State.SelectedIndex = led[7] - 23;
+                LED2OnOff.IsOn = System.Convert.ToBoolean(led[8]);
+
+                LED2ColorCTRL.SetData(led.ToList().GetRange(9, 4).ToArray());
+                setting = false;
+            });
+
+
+        
 
         }
 
