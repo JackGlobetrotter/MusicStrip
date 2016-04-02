@@ -26,7 +26,6 @@ using Windows.UI.ViewManagement;
 using Windows.UI.Popups;
 using System.Threading;
 using Windows.Security.Cryptography;
-using System.Net.Sockets;
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace WindowsControl
@@ -141,11 +140,12 @@ namespace WindowsControl
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        bool setting = false;
         SerialDevice device;
         Windows.Storage.ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
         Windows.Storage.StorageFolder localFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
         bool WifiDataChanged=false;
-        Socket ESP;
+        StreamSocket ESP;
         IPAddress _ESP_IP;
         string _SSID;
         string _PWD;
@@ -161,7 +161,7 @@ namespace WindowsControl
         public  MainPage()
         {
             
-            ESP_Port = 23;
+            ESP_Port = 80;
             ESP_IP = IPAddress.Parse("192.168.4.1");
             Led1 = new SolidColorBrush(Colors.CadetBlue);
             Windows.Storage.ApplicationDataCompositeValue WifiConfig =
@@ -185,19 +185,27 @@ namespace WindowsControl
             this.InitializeComponent();
         //    VisualStateManager.GoToState(this, LEDMixedState.Name, true);
             LightState = true;
-
-            LED1State.Items.Add(ControlByte.FadeState.ToString());
-            LED1State.Items.Add(ControlByte.FixColorState.ToString());
+            /*	
+	MusicState,23
+	MicroState,
+	FadeState,
+	SmoothState,
+	FlashState,
+	FixColorState,*/
             LED1State.Items.Add(ControlByte.MusicState.ToString());
+            LED1State.Items.Add(ControlByte.MicroState.ToString());
+            LED1State.Items.Add(ControlByte.FadeState.ToString());
             LED1State.Items.Add(ControlByte.SmoothState.ToString());
             LED1State.Items.Add(ControlByte.FlashState.ToString());
+            LED1State.Items.Add(ControlByte.FixColorState.ToString());
             LED1State.SelectedIndex = 0;
 
-            LED2State.Items.Add(ControlByte.FadeState.ToString());
-            LED2State.Items.Add(ControlByte.FixColorState.ToString());
             LED2State.Items.Add(ControlByte.MusicState.ToString());
+            LED2State.Items.Add(ControlByte.MicroState.ToString());
+            LED2State.Items.Add(ControlByte.FadeState.ToString());
             LED2State.Items.Add(ControlByte.SmoothState.ToString());
             LED2State.Items.Add(ControlByte.FlashState.ToString());
+            LED2State.Items.Add(ControlByte.FixColorState.ToString());
             LED2State.SelectedIndex = 0;
 
             loading = false;
@@ -323,7 +331,7 @@ namespace WindowsControl
 
         private async void ArduinoSend(ControlByte Controler, byte[] Data)
         {
-            if (ESP_Stream == null)
+            if (ESP_Stream == null||setting==true)
                 return;
             
             ESP_Stream.WriteByte((byte)Controler);
@@ -388,234 +396,233 @@ namespace WindowsControl
         private async void Connect_Click(object sender, RoutedEventArgs e)
         {
 
-            string result = string.Empty;
-          
-            // Create DnsEndPoint. The hostName and port are passed in to this method.
-            DnsEndPoint hostEntry = new DnsEndPoint(IPBox.Text.ToString(), System.Convert.ToInt32(PortBox.Text));
 
-            // Create a stream-based, TCP socket using the InterNetwork Address Family. 
-            ESP = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-            // Create a SocketAsyncEventArgs object to be used in the connection request
-            SocketAsyncEventArgs socketEventArg = new SocketAsyncEventArgs();
-            socketEventArg.RemoteEndPoint = hostEntry;
-
-            // Inline event handler for the Completed event.
+            // connect ESP, read Lightstat
+            ESP = new StreamSocket();
+            HostName hostName
+                 = new HostName(IPBox.Text.ToString());
 
 
 
+            // If necessary, tweak the socket's control options before carrying out the connect operation.
+            // Refer to the StreamSocketControl class' MSDN documentation for the full list of control options.
+            ESP.Control.KeepAlive = false;
 
-            // Make an asynchronous Connect request over the socket
-            socketEventArg.Completed += SocketEventArg_Completed;
-            ESP.ConnectAsync(socketEventArg);
-            while (!completed)
-                await System.Threading.Tasks.Task.Delay(10);
+            // Save the socket, so subsequent steps can use it.
 
-            socketEventArg.SetBuffer(new byte[] { (byte)ControlByte.GetData }, 0, 1);
-            completed = false;
-            ESP.SendAsync(socketEventArg);
-           while(!completed)
-            await System.Threading.Tasks.Task.Delay(2);
-            socketEventArg.SetBuffer(new byte[13], 0, 13);
-            ESP.ReceiveAsync(socketEventArg);
+            await ESP.ConnectAsync(hostName, PortBox.Text);
 
-       
+            ESP_Stream = new DataWriter(ESP.OutputStream);
+            IsConnected = true;
+            ConnectionState.Fill = new SolidColorBrush(Colors.Green);
+            ESP_Stream.WriteByte((byte)ControlByte.GetData);
+            await ESP_Stream.StoreAsync();
+            var dr = new DataReader(ESP.InputStream);
+            dr.InputStreamOptions = InputStreamOptions.None;
+            byte[] led = new byte[13];
+            
+            for (int i = 0; i < 13; i++)
+            {
+                await dr.LoadAsync(1);
+                led[i] = dr.ReadByte();
+            }
 
-            /*     await ESP_Stream.StoreAsync();
-             // await ESP_Stream.FlushAsync();
-             StreamSocketListener listener = new StreamSocketListener();
-             listener.ConnectionReceived += Listener_ConnectionReceived;
-             await listener.BindEndpointAsync(hostName, PortBox.Text);
+            await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => {
+                setting = true;
+                LightSwitch.IsOn =System.Convert.ToBoolean(led[0]);
+                if(23<=led[1]&&led[1]<=28)
+                LED1State.SelectedIndex = led[1] - 23;
+                LED1OnOff.IsOn = System.Convert.ToBoolean(led[2]);
+                LED1ColorCTRL.SetData(led.ToList().GetRange(3, 4).ToArray());
+                if (23 <= led[7] && led[7] <= 28)
+                    LED2State.SelectedIndex = led[7] - 23;
+                LED2OnOff.IsOn = System.Convert.ToBoolean(led[8]);
 
-                 //   */
+                LED2ColorCTRL.SetData(led.ToList().GetRange(9, 4).ToArray());
+                setting = false;
+            });
+
+
+        
 
         }
-        bool completed = false;
-        private void SocketEventArg_Completed(object sender, SocketAsyncEventArgs e)
+
+
+        private void LED1OnOff_Toggled(object sender, RoutedEventArgs e)
         {
-         
-   }
+            if((sender as ToggleSwitch).Name.Contains("1"))
+            ArduinoSend(ControlByte.LEDState, new byte[] { 0, System.Convert.ToByte((sender as ToggleSwitch).IsOn) });
+            else
+                ArduinoSend(ControlByte.LEDState, new byte[] { 1, System.Convert.ToByte((sender as ToggleSwitch).IsOn) });
+        }
 
-   private void Listener_ConnectionReceived(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
-   {
+        private void LED2State_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
 
-   }
+        }
 
-   private void LED1OnOff_Toggled(object sender, RoutedEventArgs e)
-   {
-       if((sender as ToggleSwitch).Name.Contains("1"))
-       ArduinoSend(ControlByte.LEDState, new byte[] { 0, System.Convert.ToByte((sender as ToggleSwitch).IsOn) });
-       else
-           ArduinoSend(ControlByte.LEDState, new byte[] { 1, System.Convert.ToByte((sender as ToggleSwitch).IsOn) });
-   }
+        private void LED1Color_PointerReleased(object sender, PointerRoutedEventArgs e)
+        {
+      //      ArduinoSend(ControlByte.LED1Data, new byte[] { (byte)(sender as ColorPicker.ColorPicker).SelectedColor.Color.R, (byte)(sender as ColorPicker.ColorPicker).SelectedColor.Color.G, (byte)(sender as ColorPicker.ColorPicker).SelectedColor.Color.B });
 
-   private void LED2State_SelectionChanged(object sender, SelectionChangedEventArgs e)
-   {
-
-   }
-
-   private void LED1Color_PointerReleased(object sender, PointerRoutedEventArgs e)
-   {
- //      ArduinoSend(ControlByte.LED1Data, new byte[] { (byte)(sender as ColorPicker.ColorPicker).SelectedColor.Color.R, (byte)(sender as ColorPicker.ColorPicker).SelectedColor.Color.G, (byte)(sender as ColorPicker.ColorPicker).SelectedColor.Color.B });
-
-   }
+        }
 
 
 
+   
+        static byte[] GetBytes(string str)
+        {
+            byte[] bytes = new byte[str.Length+1];
+            bytes[0] =(byte) str.Length;
+            for (int i = 1; i <= str.Length; i++)
+            {
+                bytes[i]= (byte)str[i-1];
+            }
 
-   static byte[] GetBytes(string str)
-   {
-       byte[] bytes = new byte[str.Length+1];
-       bytes[0] =(byte) str.Length;
-       for (int i = 1; i <= str.Length; i++)
-       {
-           bytes[i]= (byte)str[i-1];
-       }
+            return bytes;
+        }
 
-       return bytes;
-   }
+        static string GetString(byte[] bytes)
+        {
+            char[] chars = new char[bytes.Length / sizeof(char)];
+            System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
+            return new string(chars);
+        }
+        private async void Disconnect_Click(object sender, RoutedEventArgs e)
+        {
 
-   static string GetString(byte[] bytes)
-   {
-       char[] chars = new char[bytes.Length / sizeof(char)];
-       System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
-       return new string(chars);
-   }
-   private async void Disconnect_Click(object sender, RoutedEventArgs e)
-   {
+            ESP_Stream.WriteByte((byte)ControlByte.Reconnect);
 
-       ESP_Stream.WriteByte((byte)ControlByte.Reconnect);
-
-       await ESP_Stream.StoreAsync();
-       await ESP_Stream.FlushAsync();
-   }
-
-
-   //private async void WriteWifiData_Click(object sender, RoutedEventArgs e)
-   //{
-
-   //    ArduinoSend(ControlByte.SSID, GetBytes(SSIDBox.Text));
-   //   await System.Threading.Tasks.Task.Delay(300);
-   //    ArduinoSend(ControlByte.Port, new byte[] { (byte)PortSlider.Value });
-   //    await System.Threading.Tasks.Task.Delay(300);
-   //    ArduinoSend(ControlByte.PWD, GetBytes(PWDBox.Text));
-
-   //    Windows.Storage.ApplicationDataCompositeValue composite = new Windows.Storage.ApplicationDataCompositeValue();
-   //    composite["Port"] = PortSlider.Value;
-   //    composite["SSID"] = SSIDBox.Text;
-   //    composite["PWD"] = PWDBox.Text;
-   //    composite["IP"] = IPBox.Text;
-   //    localSettings.Values["WifiConfig"] = composite;
-   //}
+            await ESP_Stream.StoreAsync();
+            await ESP_Stream.FlushAsync();
+        }
 
 
+        //private async void WriteWifiData_Click(object sender, RoutedEventArgs e)
+        //{
+
+        //    ArduinoSend(ControlByte.SSID, GetBytes(SSIDBox.Text));
+        //   await System.Threading.Tasks.Task.Delay(300);
+        //    ArduinoSend(ControlByte.Port, new byte[] { (byte)PortSlider.Value });
+        //    await System.Threading.Tasks.Task.Delay(300);
+        //    ArduinoSend(ControlByte.PWD, GetBytes(PWDBox.Text));
+
+        //    Windows.Storage.ApplicationDataCompositeValue composite = new Windows.Storage.ApplicationDataCompositeValue();
+        //    composite["Port"] = PortSlider.Value;
+        //    composite["SSID"] = SSIDBox.Text;
+        //    composite["PWD"] = PWDBox.Text;
+        //    composite["IP"] = IPBox.Text;
+        //    localSettings.Values["WifiConfig"] = composite;
+        //}
+
+   
 
 
-   private async void Button_Click(object sender, RoutedEventArgs e)
-   {
-       var btn = sender as Button;
-       var result = await SettingsDialog.ShowAsync();
-       btn.Content = "Result: " + result;
-       if (WifiDataChanged)
-       {
-           var dialog = new MessageDialog("Changed on Wifi Data will take effect on reboot. \r\nDo you want to reboot Now?","Reboot?");
-           dialog.Commands.Add(new UICommand { Label = "Yes", Id = 0 });
-           dialog.Commands.Add(new UICommand { Label = "No", Id = 1 });
-           var res = await dialog.ShowAsync();
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as Button;
+            var result = await SettingsDialog.ShowAsync();
+            btn.Content = "Result: " + result;
+            if (WifiDataChanged)
+            {
+                var dialog = new MessageDialog("Changed on Wifi Data will take effect on reboot. \r\nDo you want to reboot Now?","Reboot?");
+                dialog.Commands.Add(new UICommand { Label = "Yes", Id = 0 });
+                dialog.Commands.Add(new UICommand { Label = "No", Id = 1 });
+                var res = await dialog.ShowAsync();
 
-           if ((int)res.Id == 0)
-           { ArduinoSend(ControlByte.Reconnect, new byte[0]); }
-       }
-   }
+                if ((int)res.Id == 0)
+                { ArduinoSend(ControlByte.Reconnect, new byte[0]); }
+            }
+        }
 
-   private void SettingsSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
-   {
+        private void SettingsSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
 
-   }
+        }
 
-   private async void WifiSettingsPage_OTAModeSet(object sender, EventArgs e)
-   {
-       ESP_Stream.WriteByte((byte)ControlByte.OTAUpdate);
+        private async void WifiSettingsPage_OTAModeSet(object sender, EventArgs e)
+        {
+            ESP_Stream.WriteByte((byte)ControlByte.OTAUpdate);
 
-       await ESP_Stream.StoreAsync();
-       await ESP_Stream.FlushAsync();
-   }
+            await ESP_Stream.StoreAsync();
+            await ESP_Stream.FlushAsync();
+        }
 
-   private async void WifiSettingsPage_WifiDataSet(object sender, WifiEventArgs e)
-   {
-       ArduinoSend(ControlByte.SSID, GetBytes( e.SSID));
-       await System.Threading.Tasks.Task.Delay(100);
-       ArduinoSend(ControlByte.PWD, GetBytes(e.PWD));
-       await System.Threading.Tasks.Task.Delay(100);
-       ArduinoSend(ControlByte.Port, new byte[] { e.Port });
-       WifiDataChanged = true;
-   }
+        private async void WifiSettingsPage_WifiDataSet(object sender, WifiEventArgs e)
+        {
+            ArduinoSend(ControlByte.SSID, GetBytes( e.SSID));
+            await System.Threading.Tasks.Task.Delay(100);
+            ArduinoSend(ControlByte.PWD, GetBytes(e.PWD));
+            await System.Threading.Tasks.Task.Delay(100);
+            ArduinoSend(ControlByte.Port, new byte[] { e.Port });
+            WifiDataChanged = true;
+        }
 
-   private void Slider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-   {
-       ArduinoSend(ControlByte.LED1Frequency, new byte[] { (byte)(sender as Slider).Value });
-   }
+        private void Slider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            ArduinoSend(ControlByte.LED1Frequency, new byte[] { (byte)(sender as Slider).Value });
+        }
 
-   private void Button_Click_1(object sender, RoutedEventArgs e)
-   {
-       ArduinoSend(ControlByte.SaveStartupCFG, new byte[0]);
-   }
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            ArduinoSend(ControlByte.SaveStartupCFG, new byte[0]);
+        }
 
-   private void LED2StateToggle_Toggled(object sender, RoutedEventArgs e)
-   {
+        private void LED2StateToggle_Toggled(object sender, RoutedEventArgs e)
+        {
 
-   }
+        }
 
-   private void LED2Color_PointerReleased(object sender, PointerRoutedEventArgs e)
-   {
+        private void LED2Color_PointerReleased(object sender, PointerRoutedEventArgs e)
+        {
 
-   }
+        }
 
-   private void LED2Color_SelectedColorChanged(object sender, EventArgs e)
-   {
+        private void LED2Color_SelectedColorChanged(object sender, EventArgs e)
+        {
 
-   }
+        }
 
-   private void LED1ColorCTRL_ColorChanged(object sender, ColorEventArgs e)
-   {
-       ArduinoSend(ControlByte.LED1Data, new byte[] { e.RedValue, e.GreenValue, e.BlueValue });
-   }
+        private void LED1ColorCTRL_ColorChanged(object sender, ColorEventArgs e)
+        {
+            ArduinoSend(ControlByte.LED1Data, new byte[] { e.RedValue, e.GreenValue, e.BlueValue });
+        }
 
-   private void LED2ColorCTRL_ColorChanged(object sender, ColorEventArgs e)
-   {
-       ArduinoSend(ControlByte.LED2Data, new byte[] { e.RedValue, e.GreenValue, e.BlueValue });
+        private void LED2ColorCTRL_ColorChanged(object sender, ColorEventArgs e)
+        {
+            ArduinoSend(ControlByte.LED2Data, new byte[] { e.RedValue, e.GreenValue, e.BlueValue });
 
-   }
+        }
 
-   private void LED1ColorCTRL_FrequenzyChanged(object sender, FrequenzyEventArgs e)
-   {
-       ArduinoSend(ControlByte.LED1Frequency, new byte[] { e.Frequenzy });
+        private void LED1ColorCTRL_FrequenzyChanged(object sender, FrequenzyEventArgs e)
+        {
+            ArduinoSend(ControlByte.LED1Frequency, new byte[] { e.Frequenzy });
 
-   }
+        }
 
-   private void LED2ColorCTRL_FrequenzyChanged(object sender, FrequenzyEventArgs e)
-   {
-       ArduinoSend(ControlByte.LED2Frequency, new byte[] { e.Frequenzy });
-   }
+        private void LED2ColorCTRL_FrequenzyChanged(object sender, FrequenzyEventArgs e)
+        {
+            ArduinoSend(ControlByte.LED2Frequency, new byte[] { e.Frequenzy });
+        }
 
-   private void ModuleSettings_StartupDataSet(object sender, EventArgs e)
-   {
-       ArduinoSend(ControlByte.SaveStartupCFG, new byte[0]);
-   }
-//   Timer t1;
-   private void Button_Click_2(object sender, RoutedEventArgs e)
-   {
-     //  t1 = new Timer(timerCallback, null, TimeSpan.FromMilliseconds(100).Milliseconds, Timeout.Infinite);
-   }
- //  Random rnd = new Random();
-   private async void timerCallback(object state)
-   {
-       // do some work not connected with UI
-
-
-          /*     ESP_Stream.WriteByte((byte)rnd.Next(254)); ESP_Stream.WriteByte((byte)rnd.Next(254)); ESP_Stream.WriteByte((byte)rnd.Next(254)); ESP_Stream.WriteByte((byte)ControlByte.Stop);
-               await ESP_Stream.StoreAsync();*/
-
+        private void ModuleSettings_StartupDataSet(object sender, EventArgs e)
+        {
+            ArduinoSend(ControlByte.SaveStartupCFG, new byte[0]);
+        }
+     //   Timer t1;
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+          //  t1 = new Timer(timerCallback, null, TimeSpan.FromMilliseconds(100).Milliseconds, Timeout.Infinite);
+        }
+      //  Random rnd = new Random();
+        private async void timerCallback(object state)
+        {
+            // do some work not connected with UI
+            
+            
+               /*     ESP_Stream.WriteByte((byte)rnd.Next(254)); ESP_Stream.WriteByte((byte)rnd.Next(254)); ESP_Stream.WriteByte((byte)rnd.Next(254)); ESP_Stream.WriteByte((byte)ControlByte.Stop);
+                    await ESP_Stream.StoreAsync();*/
+                
         }
     }
 
