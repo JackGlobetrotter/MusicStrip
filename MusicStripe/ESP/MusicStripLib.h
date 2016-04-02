@@ -36,21 +36,18 @@ enum ControlByte : uint8_t {
 	MusicTitle,
 	//LED
 	LED1SwitchStade, 
-	LED2SwitchStade,
+
 	LED1Data,
-	LED2Data,
+
 	LEDState,
 
-	LightToggle,
-	MusicState,
-	MicroState,
-	FadeState,
+	
 	SmoothState,
-	FlashState,
+
 	FixColorState,
 
 	LED1Frequency,
-	LED2Frequency,
+	
 	ClientLeft,
 	ClientArrived,
 	SaveStartupCFG

@@ -9,9 +9,7 @@
 #include <GDBStub\src\GDBStub.h>
 #include "MusicStripLib.h"
 #include <IPAddress.h>
-#include <Wire.h>
-#include <Wire.h> 
-#include <PCF8574_HD44780_I2C.h>
+
 
 // First LCD - Address 0x27, 16 chars, 2 line display
 
@@ -32,28 +30,16 @@
 #define G1 14
 #define B1 16
 
-//---------LED 2
-
-#define R2 12
-#define G2 13
-#define B2 10
-
-
-bool LED2_active = false;
 bool LED1_active = false;
 
 byte color0[] = { 0,0,0 };
-byte color1[] = { 0,0,0 };
 
 //long deltas[3] = { 5, 6, 7 };
 long LED1Smooth[3];
-long LED2Smooth[3];
 long LED1rgbval;
-long LED2rgbval;
 // for reasons unknown, if value !=0, the LED doesn't light. Hmm ...
 // and saturation seems to be inverted
 float LED1hue = 0.0, LED1saturation = 1, LED1value = 1;
-float LED2hue = 0.0, LED2saturation = 1, LED2value = 1;
 /*
 chosen LED SparkFun sku: COM-09264
 has Max Luminosity (RGB): (2800, 6500, 1200)mcd
@@ -63,12 +49,9 @@ G  250/950  =   67/256
 B  250/250  =  256/256
 */
 long LED1bright[3] = { 107, 67, 256 };
-long LED2bright[3] = { 107, 67, 256 };
 //long bright[3] = { 256, 256, 256};
 long LED1k, LED1temp_value;
-long LED2k, LED2temp_value;
 int LED1pulsedelay = 0;
-int LED2pulsedelay = 0;
 // ----- Definitions
 
 
@@ -85,30 +68,14 @@ uint8_t ctrl = 0;
 
 
 int LED1_freq = 500;
-int LED2_freq = 500;
 int LED1_counter = 0; //+-5
-int LED2_counter = 0; //+-5
 
 int LED1_mscounter = 0; //ms to freq
-int LED2_mscounter = 0;
 bool LED1_FlashOn;
-int Display_freq;
-int Display_mscounter;
-int Display_counter;
-bool Display_scroll = false;
-
-uint8_t Display_max;
 
 uint8_t LED1_mode = FixColorState;
-uint8_t LED2_mode = FixColorState;
-bool blinking = false;
 
 
-bool scrollup = true;
-bool fadeup = true;
-uint8_t scrollcount = 0;
-uint8_t fadecount = 0;
-PCF8574_HD44780_I2C lcd(0x27, 16,2);
 int go;
 
 bool WifiIsConnected = false;
@@ -118,7 +85,7 @@ bool LightStat = false;
 uint8_t buffer[4];
 
 #define OTAMode 26
-#define EEPROMSize 512
+#define EEPROMSize 128
 
 int tport;
 uint8_t value;
@@ -170,24 +137,7 @@ void storeData(bool WIFI)
 			EEPROM_Pointer++;
 
 		}
-		EEPROM.write(EEPROM_Pointer, LED2_active);
-
-
-		EEPROM_Pointer++;
-		EEPROM.write(EEPROM_Pointer, LED2_mode);
-
-		EEPROM_Pointer++;
-		EEPROM.write(EEPROM_Pointer, LED2_freq);
-
-
-		EEPROM_Pointer++;
-
-		for (byte i = 0; i < 3; i++)
-		{
-			EEPROM.write(EEPROM_Pointer, color1[i]);
-			EEPROM_Pointer++;
-
-		}
+	
 
 	}
 	else
@@ -237,8 +187,8 @@ void loadData()
 {
 	//0 = OTA |LED_DATA  | active|mode|freq|color[3] |  WIFI_DATA | port|ssid|password
 	int	EEPROM_Pointer = 0;
-	int mode = EEPROM.read(EEPROM_Pointer);
-	if (mode == OTAMode)
+
+	if (EEPROM.read(EEPROM_Pointer) == OTAMode)
 		OTAUpdateReq = true;
 	//LED 
 	if (EEPROM.read(EEPROM_Pointer + 1) != 0) {
@@ -262,28 +212,7 @@ void loadData()
 	}
 	else
 		EEPROM_Pointer = 7;
-	if (EEPROM.read(EEPROM_Pointer + 1) != 0) {
-		//LED2
 
-		LED2_active = EEPROM.read(EEPROM_Pointer);
-		EEPROM_Pointer++;
-
-		LED2_mode = EEPROM.read(EEPROM_Pointer);
-		EEPROM_Pointer++;
-
-		LED2_freq = EEPROM.read(EEPROM_Pointer);
-		EEPROM_Pointer++;
-
-		for (byte i = 0; i < 3; i++)
-		{
-			color1[i] = EEPROM.read(EEPROM_Pointer);
-			EEPROM_Pointer++;
-
-		}
-
-	}
-	else
-		EEPROM_Pointer = 13;
 
 //	lcd.print((String)EEPROM_Pointer);
 	go = EEPROM.read(EEPROM_Pointer);
@@ -337,10 +266,10 @@ String WifiConnect()
 
 	server = WiFiServer(port);
 	server.begin();
-	int i = 10;
+	int i = 0;
 	while (WiFi.status() != WL_CONNECTED) {
 		i++;
-		if (i == 5) {
+		if (i == 10) {
 			FallBack();
 			return "";
 		}
@@ -358,14 +287,11 @@ String WifiConnect()
 
 void FallBack()
 {
-	lcd.print("Fallback");
 	
 	WiFi.mode(WIFI_AP);
 	WiFi.softAP("ESPCONFIG");
-
-	IPAddress ip = WiFi.softAPIP();
-	IPString = (String)ip.toString() + ":"+(String)port;
-	DisplayIP();
+	Serial.println(WiFi.softAPIP());
+	Serial.println(port);
 	server.begin();
 
 	byte go = 0;
@@ -457,54 +383,27 @@ void FallBack()
 	storeData(true); ESP.restart();
 }
 
-byte flash[8] = { 0b10000,
-0b11000,
-0b11100,
-0b11110,
-0b11110,
-0b11100,
-0b11000,
-0b10000 };
-
-
 
 void setup() {
-	
-	pinMode(LightPin, OUTPUT);
 
-
-		// create a new custom character
-	
-	lcd.init();           // LCD Initialization              
-	lcd.backlight();      // Backlight ON
-	lcd.clear();          // Clear the display
-	lcd.createChar((uint8_t)0, flash);
-
-
-	EEPROM.begin(512);
+	EEPROM.begin(128);
 	Serial.begin(115200);
-
 	ssid = "ESP8266";
 	password = "1234567890";
 	port = 23;
 
-	WiFiServer server(23);
+	EEPROM_Clear();
 
 	connected = false;
 	OTAUpdateReq = false;
 	run = 0;
-//	analogWriteRange(254);
+
 	analogWriteFreq(200);
-	//FallBack();
+
 loadData();
 
-//lcd.clear();
-//while (true) delay(100000);
 	if (OTAUpdateReq) {
-		lcd.clear();
-		lcd.print("Updating");
-		lcd.setCursor(0, 1);
-		lcd.print("----------------");
+		
 		WiFi.mode(WIFI_STA);
 		WiFi.begin(ssid.c_str(), password.c_str());
 		int i = 0;
@@ -512,7 +411,7 @@ loadData();
 			i++;
 			if (i == 20)
 			{
-				lcd.print("Connection err");
+		
 				EEPROM.write(0, 0);
 				EEPROM.commit();
 				ESP.restart();
@@ -524,66 +423,32 @@ loadData();
 		connected = true;
 
 
-		ArduinoOTA.onStart([]() {
-			lcd.setCursor(0, 1);
-		})
-		;
+	
 		
 	//	ArduinoOTA.setPassword((const char *)"1234567890");
 		ArduinoOTA.onEnd([]() {
-			lcd.setCursor(0, 1);
-			lcd.print("finished");
+
 			EEPROM.write(0, 0);
 			EEPROM.commit();
 		});
-		ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-			lcd.setCursor(0, 1);
-			lcd.print(progress / (total / 100));
-		});
-		ArduinoOTA.onError([](ota_error_t error) {
-			Serial.write(OTAError);
-			if (error == OTA_AUTH_ERROR) lcd.print("AUTH_ERROR");
-			else if (error == OTA_BEGIN_ERROR) lcd.print("BEGIN_ERROR");
-			else if (error == OTA_CONNECT_ERROR) lcd.print("CONNECT_ERROR");
-			else if (error == OTA_RECEIVE_ERROR) lcd.print("RECEIVE_ERROR");
-			else if (error == OTA_END_ERROR) lcd.print("END_ERROR");
-		});
+
 		ArduinoOTA.begin();
 		OTAUpdateReq = true;
 	}
 	else{
 		WiFi.mode(WIFI_STA);
+		WiFiServer server(port);
 		IPString = WifiConnect();
-		DisplayIP();
+	
 		yield();
-		StateWriter(0, LED1_mode);
-		yield();
-		StateWriter(1, LED2_mode);
+		StateWriter( LED1_mode);
 		yield();
 	}
 	
 	
 }
 
-void SendData()
-{
-	client.write((uint8_t)LightStat);
 
-	client.write((uint8_t)LED1_mode);
-	client.write((uint8_t)LED1_active);
-	client.write((uint8_t)LED1_freq);
-	client.write((uint8_t)color0[0]);
-	client.write((uint8_t)color0[1]);
-	client.write((uint8_t)color0[2]);
-
-	client.write((uint8_t)LED2_mode);
-	client.write((uint8_t)LED2_active);
-	client.write((uint8_t)LED2_freq);
-	client.write((uint8_t)color1[0]);
-	client.write((uint8_t)color1[1]);
-	client.write((uint8_t)color1[2]);
-
-}
 void loop() {
 	if (!OTAUpdateReq) {
 		if (!connected) {
@@ -603,33 +468,12 @@ void loop() {
 
 					case LED1SwitchStade:
 						if (GetVerified(1,false))
-							ChangeLEDState(0, buffer[0]);
+							ChangeLEDState(buffer[0]);
 
 						break;
 
-					case LED2SwitchStade:
-						if (GetVerified(1, false))
-							ChangeLEDState(1, buffer[0]);
-						break;
-					case LightToggle:
-						if (client.available() <= 0)
-							delay(50);
-						temp[0] = client.read();
-
-						ToggleLightSwitch((bool)temp[0]);
-
-						//	}
-						break;
-					case GetData:
-
-						SendData();
-
-						break;
-					case MusicTitle:
-						while (!client.available())
-							delay(10);
-						 client.readString();
-						break;
+				
+				
 					case LED1Data:
 						if (!GetVerified(3, false))
 							break;
@@ -638,50 +482,29 @@ void loop() {
 						color0[0] = buffer[0];
 						color0[1] = buffer[1];
 						color0[2] = buffer[2];
-						ChangeLEDState(0, LED1_mode);
+						ChangeLEDState(LED1_mode);
 
 			
 
 
 						break;
-					case LED2Data:
-
-						if (!GetVerified(3, false))
+	
+					case LEDState:
+						if (!GetVerified(1, false))
 							break;
 
-						color1[0] = buffer[0];
-						color1[1] = buffer[1];
-						color1[2] = buffer[2];
-						ChangeLEDState(1, LED2_mode);
-
-
+						
+							LED1_active = buffer[1];
+							ChangeLEDState(LED1_mode);
 
 						break;
-					case LEDState:
-						if (!GetVerified(2, false))
-							break;
-
-						if (!buffer[0]) {
-							LED1_active = buffer[1];
-							ChangeLEDState(0, LED1_mode);
-
-						}
-						else {
-							LED2_active = buffer[1];
-							ChangeLEDState(1, LED2_mode);
-						}break;
 
 					case LED1Frequency:
 						if (!GetVerified(1, false))
 							break;
 						LED1_freq = buffer[0];
 						break;
-					case LED2Frequency:
-						if (!GetVerified(1, false))
-							break;
-						LED2_freq = buffer[0];
-
-						break;
+				
 
 					case SaveStartupCFG:
 						while (client.available() <= 0)
@@ -702,8 +525,7 @@ void loop() {
 						break;
 			
 					default:
-						while (client.available())
-							lcd.print((byte)100);
+	
 						break;
 					}
 					yield();
@@ -713,8 +535,8 @@ void loop() {
 				LoopLedCall();
 			}
 			
-			if(!client.connected())
-			DisplayIP();
+		
+	
 
 			while (!client.connected()) {
 
@@ -723,8 +545,7 @@ void loop() {
 				client.stop();                                    // not connected, so terminate any prior client
 				client = server.available();
 				LoopLedCall();
-				if(client.connected())
-					DisplayColorStripe();
+			
 			}
 
 		}
@@ -732,38 +553,13 @@ void loop() {
 	else
 	{
 		ArduinoOTA.handle();
-		UpdateingAnimation();
+
 	}
 
 
 }
 
-void UpdateingAnimation()
-{
-	
-	if (Display_mscounter < 250)
-		Display_mscounter++;
-	else {
-		Display_mscounter = 0;
-		if (Display_counter == 16) {
-			lcd.setCursor(15, 1);
-			lcd.print("-");
-			lcd.setCursor(0, 1);
-			lcd.write((uint8_t)0);
-		}
-		else {
-			lcd.setCursor(Display_counter - 1, 1);
-			lcd.print("-");
-			lcd.write((uint8_t)0);
-		}
-		if (Display_counter < 16)
-			Display_counter++;
-		else 
-			Display_counter = 1;
-	}
-	delay(2);
 
-}
 
 
 void LoopLedCall()
@@ -777,51 +573,11 @@ void LoopLedCall()
 			Smooth(0);
 
 			break;
-		case FadeState:
-			Fadeing(false);
-			break;
-		case FlashState:
-			if (LED1_freq == LED1_mscounter) {
-				if (LED1_FlashOn) {
-					setColor(new byte[3]{ 0,0,0 }, 0);
-					LED1_FlashOn = false;
-				}
-				else
-				{
-					setColor(color0, 0);
-					LED1_FlashOn = true;
-				}
-				LED1_mscounter = 0;
-
-			}
-			else {
-				LED1_mscounter++;
-				delay(5);
-			}
-			break;
-
-		 default:break;
-
-
-
-
+		
+		default:break;
 
 		}
 }
-
-
-
-void ToggleLightSwitch(bool OnOff)
-{
-	LightStat = OnOff;
-	digitalWrite(LightPin, LightStat);
-	
-
-}
-
-
-
-
 
 
 
@@ -858,198 +614,33 @@ bool GetVerified(int count,bool Fallback)
 	}
 }
 
-//void loop()
-//{
-//
-//	while (Serial.available()) {
-//		ctrl = Serial.read();
-//		switch (ctrl) {
-//		case OTAUpdate:
-//			WifiUpdate();
-//			break;
-//
-//		case LED1SwitchStade:
-//			if (GetVerified(1))
-//				ChangeLEDState(true, buffer[0]);
-//
-//			break;
-//
-//		case LED2SwitchStade:
-//			if (GetVerified(1))
-//				ChangeLEDState(false, buffer[0]);
-//			break;
-//		case LightToggle:
-//			if (Serial.available() <= 0)
-//				delay(50);
-//			temp[0] = Serial.read();
-//
-//			ToggleLightSwitch((bool)temp[0]);
-//
-//			//	}
-//			break;
-//		case GetLightState:
-//
-//			Serial.write((uint8_t)LightStat);
-//
-//			break;
-//
-//		case LED1Data:
-//			if (!GetVerified(3))
-//				break;
-//
-//
-//			color0[0] = buffer[0];
-//			color0[1] = buffer[1];
-//			color0[2] = buffer[2];
-//			ChangeLEDState(true, LED1_mode);
-//
-//
-//
-//
-//			break;
-//		case LED2Data:
-//
-//			if (!GetVerified(3))
-//				break;
-//
-//			color1[0] = buffer[0];
-//			color1[1] = buffer[1];
-//			color1[2] = buffer[2];
-//			ChangeLEDState(false, LED2_mode);
-//
-//
-//
-//			break;
-//		case LEDState:
-//			if (!GetVerified(2))
-//				break;
-//
-//			if (!buffer[0]) {
-//				LED1_active = buffer[1];
-//				ChangeLEDState(true, LED1_mode);
-//
-//			}
-//			else {
-//				LED2_active = buffer[1];
-//				ChangeLEDState(false, LED2_mode);
-//			}break;
-//
-//		case LED1Frequency:
-//			if (!GetVerified(1))
-//				break;
-//			LED1_freq = buffer[0];
-//			break;
-//		case LED2Frequency:
-//			if (!GetVerified(1))
-//				break;
-//			LED2_freq = buffer[0];
-//
-//			break;
-//		case ClientLeft:
-//			DisplayIP();
-//			break;
-//		case SaveStartupCFG:
-//			while (Serial.available() <= 0)
-//				delay(10);
-//			if (Serial.read() == Stop)
-//				storeData(false);
-//			break;
-//		case ClientArrived:
-//			DisplayColorStripe();
-//			break;
-//		default:
-//
-//			break;
-//		}
-//
-//
-//	}
-//	if (LED1_active)
-//		switch (LED1_mode)
-//		{
-//		case SmoothState:
-//			Smooth(0);
-//
-//			break;
-//		case FadeState:
-//			Fadeing(false);
-//			break;
-//		case FlashState:
-//			if (LED1_freq == LED1_mscounter) {
-//				if (LED1_FlashOn) {
-//					setColor(new byte[3]{ 0,0,0 }, 0);
-//					LED1_FlashOn = false;
-//				}
-//				else
-//				{
-//					setColor(color0, 0);
-//					LED1_FlashOn = true;
-//				}
-//				LED1_mscounter = 0;
-//
-//			}
-//			else {
-//				LED1_mscounter++;
-//				delay(5);
-//			}
-//			break;
-//
-//
-//
-//		}
-//}
 
-void 	DisplayIP() {
-	lcd.clear();
-	if (IPString.length() > 16) {
-		lcd.print(IPString.substring(0, 15));
-		lcd.setCursor(0, 1);
-		lcd.print(IPString.substring
-			(16, IPString.length()));
-	}
-	else
-		lcd.print(IPString);
 
-}
+
 //LED1/2_freq, LED1/2_active > LED1/2_mscounter
-void Flash(bool LEDStripe)
+void Flash()
 {
-	if (LED1_active && !LEDStripe) {
+	if (LED1_active) {
 		LED1_mscounter++;
 		if (LED1_mscounter < LED1_freq / 2) {
-			FixColor(LEDStripe);
+			FixColor();
 
 		}
 		else
 		{
 			byte out[] = { 0,0,0 };
-			setColor(out, 0);
+			setColor(out);
 		}
 		if (LED1_mscounter == LED1_freq)
 			LED1_mscounter = 0;
 	}
-	if (LED2_active && LEDStripe) {
-		LED2_mscounter++;
-		if (LED2_mscounter < LED2_freq / 2) {
-			FixColor(LEDStripe);
-
-		}
-		else
-		{
-			byte out[] = { 0,0,0 };
-			setColor(out, 0);
-		}
-		if (LED2_mscounter == LED2_freq)
-			LED2_mscounter = 0;
-
-
-	}
+	
 }
 
 //Spped with LED1_freq, LED1/2_active
 void Smooth(bool LEDStripe)
 {
-	int divider = !LED1_active * 6 + !LED2_active*+6;
+	int divider = !LED1_active * 6 ;
 
 	if (LED1_active && !LEDStripe) {
 
@@ -1067,209 +658,68 @@ void Smooth(bool LEDStripe)
 		analogWrite(B1, LED1Smooth[2] * LED1bright[2] / 256);
 		delay(LED1_freq / divider);
 	}
-	if (LED2_active && LEDStripe) {
-		LED2hue += HUE_DELTA;
-		if (LED2hue > HUE_MAX) {
-			LED2hue = 0.0;
-		}
-		LED2rgbval = HSV_to_RGB(LED2hue, LED2saturation, LED2value);
-		LED2Smooth[0] = (LED2rgbval & 0x00FF0000) >> 16; // there must be better ways
-		LED2Smooth[1] = (LED2rgbval & 0x0000FF00) >> 8;
-		LED2Smooth[2] = LED2rgbval & 0x000000FF;
-		analogWrite(R2, LED2Smooth[0] * LED2bright[0] / 256);
-		analogWrite(G2, LED2Smooth[1] * LED2bright[1] / 256);
-		analogWrite(B2, LED2Smooth[2] * LED2bright[2] / 256);
-		delay(LED2_freq / divider);
-	}
 
 }
 
 
-void DisplayColorStripe()
-{
 
-	lcd.clear();
-	lcd.print(GetDisplayString(0));
-	lcd.setCursor(0, 1);
-	lcd.print(GetDisplayString(1));
-}
-
-void ChangeLEDState(bool One, uint8_t State) {
-	if (!One) {
+void ChangeLEDState( uint8_t State) {
+	
 		LED1_mode = State;
 
 
-	}
-	else {
-		LED2_mode = State;
 
-	}
-	StateWriter(One, State);
+	StateWriter( State);
 
 }
 
-void HardSaveData() {}
 
-void StateWriter(bool One, uint8_t State)
+
+void StateWriter( uint8_t State)
 {
 	switch (State)
 	{
 	case FixColorState:
 
 
-		if (!One&&LED1_active) {
-			setColor(color0, 0);
-		}
-		else if (!One&&!LED1_active) {
-			setColor(new byte[3]{ 0,0,0 }, 0);
-		}
-		else if (One&&LED2_active) {
-			setColor(color1, 1);
+		if (LED1_active) {
+			setColor(color0);
 		}
 		else {
-			setColor(new byte[3]{ 0,0,0 }, 1);
+			setColor(new byte[3]{ 0,0,0 });
 		}
-
+		
 		break;
 
-	case FadeState:
 
-		LED1_counter = 0;
-		LED1_mscounter = 0;
-		fadeup = true;
-
-		break;
-	case FlashState:
-		if (One)
-			LED1_mscounter = 0;
-		else
-			LED1_mscounter = 0;
-		// = 0;
-		fadeup = true;
-
-		break;
+	
 	}
 
-	DisplayColorStripe();
 
-}
 
-String GetDisplayString(bool Line)
-{
-
-	String ret;
-	if (!Line) {
-		if (LED1_active)
-		{
-			ret = String(LED1_mode, DEC) + ": " + (String)color0[0] + "/" + (String)color0[1] + "/" + (String)color0[2];
-		}
-		else
-		{
-			ret = "------------";
-		}
-	}
-	else {
-		if (LED2_active)
-		{
-			ret = String(LED2_mode, DEC) + ": " + (String)color1[0] + "/" + (String)color1[1] + "/" + (String)color1[2];
-		}
-		else
-		{
-			ret = "------------";
-		}
-	}
-	return ret;
 }
 
 
 
 
 
+void setColor(byte *mlt) {
 
 
-void Fadeing(bool LEDStripe) //LED1_counter over 100 =  {X} over {color0[1,2,3]}
-{
-	int divider = LED1_active * 4 + LED2_active*+4;
-
-	if (LED1_active && !LEDStripe) {
-		if (LED1_mscounter >= LED1_freq / divider) {
-			LED1_mscounter = 0;
-			if (fadeup)
-				LED1_counter = LED1_counter + 1;
-			else
-				LED1_counter = LED1_counter - 1;
-			byte currentcolor[] = { (color0[0] * LED1_counter / 100),(color0[1] * LED1_counter / 100) ,(color0[2] * LED1_counter / 100) };
-			setColor(currentcolor, 0);
-
-			if (LED1_counter == 100)
-				fadeup = false;
-			if (LED1_counter == 0)
-				fadeup = true;
-
-
-		}
-		else
-			LED1_mscounter++;
-
-	}
-
-	if (LED2_active && LEDStripe) {
-		if (LED2_mscounter >= LED2_freq / divider) {
-			LED2_mscounter = 0;
-			if (fadeup)
-				LED2_counter = LED2_counter + 1;
-			else
-				LED2_counter = LED2_counter - 1;
-			byte currentcolor[] = { (color1[0] * LED2_counter / 100),(color1[1] * LED2_counter / 100) ,(color1[2] * LED2_counter / 100) };
-			setColor(currentcolor, 0);
-
-			if (LED2_counter == 100)
-				fadeup = false;
-			if (LED2_counter == 0)
-				fadeup = true;
-
-
-		}
-		else
-			LED2_mscounter++;
-	}
-	delay(1);
-}
-
-
-
-
-void SoundPulsation()
-{
-	GetVerified(3, false);
-	setColor(temp, 0);
-}
-
-void setColor(byte *mlt, bool stripe) {
-
-
-	if (!stripe)
-	{
+	
 		analogWrite(R1, mlt[0]*4);
 		analogWrite(G1, mlt[1]*4);
 		analogWrite(B1, mlt[2]*4);
 
 
-	}
-	else
-	{
-		analogWrite(R2, mlt[0]);
-		analogWrite(G2, mlt[1]);
-		analogWrite(B2, mlt[2]);
-	}
+	
 }
 
-void FixColor(bool LEDStripe)
+void FixColor()
 {
-	if (LED1_active && LEDStripe)
-		setColor(color0, 0);
-	if (LED2_active && LEDStripe)
-		setColor(color1, 1);
+	
+		setColor(color0);
+	
 }
 
 

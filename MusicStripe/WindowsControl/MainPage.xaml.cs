@@ -161,7 +161,7 @@ namespace WindowsControl
         public  MainPage()
         {
             
-            ESP_Port = 80;
+            ESP_Port = 23;
             ESP_IP = IPAddress.Parse("192.168.4.1");
             Led1 = new SolidColorBrush(Colors.CadetBlue);
             Windows.Storage.ApplicationDataCompositeValue WifiConfig =
@@ -433,12 +433,7 @@ namespace WindowsControl
         bool completed = false;
         private void SocketEventArg_Completed(object sender, SocketAsyncEventArgs e)
         {
-            completed = true;
-            LightSwitch.IsOn = System.Convert.ToBoolean(readBuf.GetByte(0));
-            LED1State.SelectedIndex = (readBuf.GetByte(1)) - 22;
-            LED1ColorCTRL.SetData(readBuf.ToArray(2, 5));
-            LED2State.SelectedIndex = readBuf.GetByte(7) - 22;
-            LED2ColorCTRL.SetData(readBuf.ToArray(8,5));
+         
    }
 
    private void Listener_ConnectionReceived(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
