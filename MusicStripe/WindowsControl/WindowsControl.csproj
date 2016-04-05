@@ -28,6 +28,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -98,6 +99,7 @@
     <Compile Include="GeneralSettings.xaml.cs">
       <DependentUpon>GeneralSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="hue.cs" />
     <Compile Include="LEDColorControl.xaml.cs">
       <DependentUpon>LEDColorControl.xaml</DependentUpon>
     </Compile>
@@ -118,6 +120,7 @@
     </AppxManifest>
     <PRIResource Include="strings\en-US\Resources.resw" />
     <PRIResource Include="strings\fr-FR\Resources.resw" />
+    <PRIResource Include="Resources.resw" />
     <None Include="WindowsControl_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

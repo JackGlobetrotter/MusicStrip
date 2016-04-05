@@ -22,43 +22,19 @@
 #define HUE_MAX  6.0
 #define HUE_DELTA 0.01
 
-#define LightPin 15
+
 
 
 //----------LED1
-#define R1 4
-#define G1 14
-#define B1 16
+#define R1 0
+#define G1 3
+#define B1 2
 
 bool LED1_active = false;
 
-byte color0[] = { 0,0,0 };
+byte color0[] = { 0,0,254 };
 
-//long deltas[3] = { 5, 6, 7 };
-long LED1Smooth[3];
-long LED1rgbval;
-// for reasons unknown, if value !=0, the LED doesn't light. Hmm ...
-// and saturation seems to be inverted
-float LED1hue = 0.0, LED1saturation = 1, LED1value = 1;
-/*
-chosen LED SparkFun sku: COM-09264
-has Max Luminosity (RGB): (2800, 6500, 1200)mcd
-so we normalize them all to 1200 mcd -
-R  250/600  =  107/256
-G  250/950  =   67/256
-B  250/250  =  256/256
-*/
-long LED1bright[3] = { 107, 67, 256 };
-//long bright[3] = { 256, 256, 256};
-long LED1k, LED1temp_value;
-int LED1pulsedelay = 0;
-// ----- Definitions
-
-
-
-//IRrecv irrecv(IRPin);
-//decode_results results;
-
+uint16_t color0Hue = 0;
 // ----- RuntimeVariabes
 char WifiTemp[50];
 uint8_t temp[3];
@@ -142,7 +118,8 @@ void storeData(bool WIFI)
 	}
 	else
 	{
-		EEPROM_Pointer = 13;
+		yield();
+		EEPROM_Pointer = 7;
 		//WIFI_DATA | port|ssid|password
 	//	lcd.print((String)EEPROM_Pointer + ":" + (String)port);
 
@@ -164,7 +141,7 @@ void storeData(bool WIFI)
 		}
 
 		//lcd.print((String)EEPROM_Pointer + ": l: " + (String)password.length() + " password: " + password);
-
+		
 		EEPROM.write(EEPROM_Pointer
 			, (uint8_t)password.length());
 
@@ -175,10 +152,10 @@ void storeData(bool WIFI)
 			EEPROM.write(EEPROM_Pointer, (uint8_t)password.charAt(i));
 			EEPROM_Pointer++;
 		}
-
+	
 	}
 	EEPROM.commit();
-
+	delay(100);
 }
 
 
@@ -250,6 +227,8 @@ void loadData()
 	if (go != 0)
 		password = temp1;
 
+
+
 	//lcd.print(port);
 	//lcd.print(ssid);
 	//lcd.print(password);
@@ -264,12 +243,11 @@ String WifiConnect()
 
 	WiFi.begin(ssid.c_str(), password.c_str());
 
-	server = WiFiServer(port);
-	server.begin();
+	
 	int i = 0;
 	while (WiFi.status() != WL_CONNECTED) {
 		i++;
-		if (i == 10) {
+		if (i == 20) {
 			FallBack();
 			return "";
 		}
@@ -277,6 +255,7 @@ String WifiConnect()
 	}
 
 
+	server.begin();
 	connected = true;
 
 	return (WiFi.localIP().toString() + ":" + port);
@@ -387,12 +366,16 @@ void FallBack()
 void setup() {
 
 	EEPROM.begin(128);
-	Serial.begin(115200);
+
+	Serial.begin(115200, SERIAL_8N1, SERIAL_TX_ONLY,1);
+	pinMode(0, OUTPUT);
+	pinMode(2, OUTPUT);
+	pinMode(3, OUTPUT);
 	ssid = "ESP8266";
 	password = "1234567890";
 	port = 23;
 
-	EEPROM_Clear();
+//	EEPROM_Clear();
 
 	connected = false;
 	OTAUpdateReq = false;
@@ -403,7 +386,7 @@ void setup() {
 loadData();
 
 	if (OTAUpdateReq) {
-		
+		setColor(new byte[3]{ 255,0,0 });
 		WiFi.mode(WIFI_STA);
 		WiFi.begin(ssid.c_str(), password.c_str());
 		int i = 0;
@@ -439,13 +422,12 @@ loadData();
 		WiFi.mode(WIFI_STA);
 		WiFiServer server(port);
 		IPString = WifiConnect();
-	
+		Serial.println(IPString);
 		yield();
 		StateWriter( LED1_mode);
 		yield();
 	}
-	
-	
+
 }
 
 
@@ -469,34 +451,25 @@ void loop() {
 					case LED1SwitchStade:
 						if (GetVerified(1,false))
 							ChangeLEDState(buffer[0]);
-
 						break;
 
-				
-				
 					case LED1Data:
 						if (!GetVerified(3, false))
 							break;
-
 
 						color0[0] = buffer[0];
 						color0[1] = buffer[1];
 						color0[2] = buffer[2];
 						ChangeLEDState(LED1_mode);
-
-			
-
-
 						break;
 	
 					case LEDState:
-						if (!GetVerified(1, false))
+						if (!GetVerified(2, false))
 							break;
-
-						
+						if (!buffer[0]) {
 							LED1_active = buffer[1];
 							ChangeLEDState(LED1_mode);
-
+						}
 						break;
 
 					case LED1Frequency:
@@ -505,33 +478,31 @@ void loop() {
 						LED1_freq = buffer[0];
 						break;
 				
-
 					case SaveStartupCFG:
 						while (client.available() <= 0)
 							delay(10);
 						if (client.read() == Stop)
 							storeData(false);
 						break;
-				//	case MusicState:
-				//		SoundPulsation(); break;
-
-				
+			
 					case OTAUpdate:
-
-
 						EEPROM.write(0, OTAMode);
 						EEPROM.commit();
 						ESP.restart();
 						break;
 			
 					default:
-	
+						while (client.read() != Stop) {
+							if (!client.available())
+								break;
+							delay(1);
+						}
 						break;
 					}
 					yield();
 				}
 				yield();
-				//client.write((uint8_t)174);
+			
 				LoopLedCall();
 			}
 			
@@ -564,19 +535,10 @@ void loop() {
 
 void LoopLedCall()
 {
-
-
-	if (LED1_active)
-		switch (LED1_mode)
-		{
-		case SmoothState:
-			Smooth(0);
-
-			break;
-		
-		default:break;
-
-		}
+	if (LED1_mode == SmoothState &&LED1_active)
+	{
+		Smooth();
+	}
 }
 
 
@@ -615,60 +577,81 @@ bool GetVerified(int count,bool Fallback)
 }
 
 
+void getRGB(int hue, int sat, int val) {
+	hue = hue % 360;
+		switch (hue / 60) {
+		case 0:
+			color0[0] = 255;
+			color0[1] = (((255 )*hue) / 60) ;
+			color0[2]  = 0;
+			break;
 
+		case 1:
+			color0[0] = (((255 )*(60 - (hue % 60))) / 60) ;
+			color0[1] = val;
+			color0[2] = 0;
+			break;
 
-//LED1/2_freq, LED1/2_active > LED1/2_mscounter
-void Flash()
-{
-	if (LED1_active) {
-		LED1_mscounter++;
-		if (LED1_mscounter < LED1_freq / 2) {
-			FixColor();
+		case 2:
+			color0[0] = 0;
+			color0[1] = 255;
+			color0[2] = (((255 )*(hue % 60)) / 60) ;
+			break;
 
+		case 3:
+			color0[0] = 0;
+			color0[1] = (((255 )*(60 - (hue % 60))) / 60) ;
+			color0[2] = 255;
+			break;
+
+		case 4:
+			color0[0] = (((255 )*(hue % 60)) / 60) ;
+			color0[1] = 0;
+			color0[2] = 255;
+			break;
+
+		case 5:
+			color0[0] = 255;
+			color0[1] = 0;
+			color0[2] = (((255 )*(60 - (hue % 60))) / 60) ;
+			break;
 		}
-		else
-		{
-			byte out[] = { 0,0,0 };
-			setColor(out);
-		}
-		if (LED1_mscounter == LED1_freq)
-			LED1_mscounter = 0;
-	}
+
+		
 	
 }
 
 //Spped with LED1_freq, LED1/2_active
-void Smooth(bool LEDStripe)
+void Smooth()
 {
-	int divider = !LED1_active * 6 ;
+	if (LED1_counter >= LED1_freq)
+	{
+		LED1_counter = 0;
+		if (color0Hue >= 65534)
+			color0Hue = 0;
+		else
+			color0Hue++;
 
-	if (LED1_active && !LEDStripe) {
-
-		LED1hue += HUE_DELTA;
-		if (LED1hue > HUE_MAX) {
-			LED1hue = 0.0;
-		}
-		LED1rgbval = HSV_to_RGB(LED1hue, LED1saturation, LED1value);
-		LED1Smooth[0] = (LED1rgbval & 0x00FF0000) >> 16; // there must be better ways
-		LED1Smooth[1] = (LED1rgbval & 0x0000FF00) >> 8;
-		LED1Smooth[2] = LED1rgbval & 0x000000FF;
-
-		analogWrite(R1, LED1Smooth[0] * LED1bright[0] / 256);
-		analogWrite(G1, LED1Smooth[1] * LED1bright[1] / 256);
-		analogWrite(B1, LED1Smooth[2] * LED1bright[2] / 256);
-		delay(LED1_freq / divider);
+		getRGB(color0Hue, 255, 255);
+		setColor(color0);
+		delay(2);
+	}
+	else
+	{
+		LED1_counter++;
+		setColor(color0);
+		delay(1);
 	}
 
+
+
+	
+
 }
-
-
 
 void ChangeLEDState( uint8_t State) {
 	
 		LED1_mode = State;
-
-
-
 	StateWriter( State);
 
 }
@@ -677,24 +660,23 @@ void ChangeLEDState( uint8_t State) {
 
 void StateWriter( uint8_t State)
 {
-	switch (State)
-	{
-	case FixColorState:
-
-
+	if (State == FixColorState)
+	{	
 		if (LED1_active) {
 			setColor(color0);
 		}
 		else {
 			setColor(new byte[3]{ 0,0,0 });
-		}
-		
-		break;
-
-
+		}	
 	
 	}
-
+	else
+		if (State == SmoothState)
+		{
+			LED1_counter = 0;
+			if (LED1_freq == 0)
+				LED1_freq = 120;
+		}
 
 
 }
@@ -706,7 +688,7 @@ void StateWriter( uint8_t State)
 void setColor(byte *mlt) {
 
 
-	
+
 		analogWrite(R1, mlt[0]*4);
 		analogWrite(G1, mlt[1]*4);
 		analogWrite(B1, mlt[2]*4);
@@ -720,47 +702,5 @@ void FixColor()
 	
 		setColor(color0);
 	
-}
-
-
-
-
-long HSV_to_RGB(float h, float s, float v) {
-	/* modified from Alvy Ray Smith's site: http://www.alvyray.com/Papers/hsv2rgb.htm */
-	// H is given on [0, 6]. S and V are given on [0, 1].
-	// RGB is returned as a 24-bit long #rrggbb
-	int i;
-	float m, n, f;
-
-	// not very elegant way of dealing with out of range: return black
-	if ((s<0.0) || (s>1.0) || (v<1.0) || (v>1.0)) {
-		return 0L;
-	}
-
-	if ((h < 0.0) || (h > 6.0)) {
-		return long(v * 255) + long(v * 255) * 256 + long(v * 255) * 65536;
-	}
-	i = floor(h);
-	f = h - i;
-	if (!(i & 1)) {
-		f = 1 - f; // if i is even
-	}
-	m = v * (1 - s);
-	n = v * (1 - s * f);
-	switch (i) {
-	case 6:
-	case 0:
-		return long(v * 255) * 65536 + long(n * 255) * 256 + long(m * 255);
-	case 1:
-		return long(n * 255) * 65536 + long(v * 255) * 256 + long(m * 255);
-	case 2:
-		return long(m * 255) * 65536 + long(v * 255) * 256 + long(n * 255);
-	case 3:
-		return long(m * 255) * 65536 + long(n * 255) * 256 + long(v * 255);
-	case 4:
-		return long(n * 255) * 65536 + long(m * 255) * 256 + long(v * 255);
-	case 5:
-		return long(v * 255) * 65536 + long(m * 255) * 256 + long(n * 255);
-	}
 }
 

@@ -12,21 +12,28 @@
     <UserControl.Resources>
         <local:RGBToBrush x:Key="RGBToBrushConverter"></local:RGBToBrush>
         <local:BooleanToVisibilityConverter x:Key="BoolToVis" />
-   
+
         <local:BooleanToVisibilityInvertedConverter x:Key="BoolToVisInv" />
     </UserControl.Resources>
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="128*"/>
+            <RowDefinition Height="45*"/>
+            <RowDefinition Height="127*"/>
+        </Grid.RowDefinitions>
 
 
 
 
-        <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  >
+        <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.RowSpan="3"  >
             <TextBlock Name="LEDName" Text="{x:Bind LEDNameString, Mode=TwoWay}" RelativePanel.AlignHorizontalCenterWithPanel="True"></TextBlock>
             <ToggleSwitch Name="LEDStateToggle" OffContent="Mixed" OnContent="Details" RelativePanel.Below="LEDName" RelativePanel.AlignHorizontalCenterWithPanel="True"></ToggleSwitch>
             <Slider ValueChanged="LED_Freq_ValueChanged" Header="Frequenzy" Name="LED_Freq" RelativePanel.Below="LEDStateToggle" RelativePanel.AlignHorizontalCenterWithPanel="True" Width="255" Maximum="255"></Slider>
             <TextBlock Text="{Binding ElementName=LED_Freq, Path=Value}" RelativePanel.RightOf="LED_Freq" RelativePanel.AlignVerticalCenterWith="LED_Freq"></TextBlock>
-            <controls:ColorPicker  Width="400" Name="LED_Color" SelectedColor="{Binding LED_}" RelativePanel.Below="LED_Freq" RelativePanel.AlignHorizontalCenterWithPanel="True" Visibility="{Binding ElementName=LEDStateToggle,Path=IsOn, Converter={StaticResource BoolToVis}}"></controls:ColorPicker>
+            <!--  <controls:ColorPicker  Width="400" Name="LED_Color" SelectedColor="{Binding LED_}" RelativePanel.Below="LED_Freq" RelativePanel.AlignHorizontalCenterWithPanel="True" Visibility="{Binding ElementName=LEDStateToggle,Path=IsOn, Converter={StaticResource BoolToVis}}"></controls:ColorPicker>-->
+            <Image PointerMoved="HSB_UI_PointerMoved" PointerPressed="HSB_UI_PointerPressed" PointerReleased="HSB_UI_PointerReleased" PointerExited="HSB_UI_PointerExited" Width="360" Height="255" Name="HSB_UI"  RelativePanel.Below="LED_Freq"  Visibility="{Binding ElementName=LEDStateToggle,Path=IsOn, Converter={StaticResource BoolToVis}}">
 
+            </Image>
             <RelativePanel Name="RGBSeperate" RelativePanel.AlignHorizontalCenterWithPanel="True" Visibility="{Binding ElementName=LEDStateToggle,Path=IsOn, Converter={StaticResource BoolToVisInv}}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RelativePanel.Below="LED_Freq">
                 <Slider ValueChanged="LED_R_ValueChanged" Value="{Binding ElementName=LED_Color,Path=RedValue, Mode=TwoWay}" Name="LED_R" RelativePanel.AlignHorizontalCenterWithPanel="True"                 Minimum="0" 
                     Maximum="255"
