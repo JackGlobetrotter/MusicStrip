@@ -93,6 +93,9 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddESP.xaml.cs">
+      <DependentUpon>AddESP.xaml</DependentUpon>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
@@ -105,6 +108,9 @@
     </Compile>
     <Compile Include="ModuleSettings.xaml.cs">
       <DependentUpon>ModuleSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ScanNetwork.xaml.cs">
+      <DependentUpon>ScanNetwork.xaml</DependentUpon>
     </Compile>
     <Compile Include="WifiSettings.xaml.cs">
       <DependentUpon>WifiSettings.xaml</DependentUpon>
@@ -145,6 +151,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="AddESP.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="GeneralSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -154,6 +164,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="ModuleSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ScanNetwork.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

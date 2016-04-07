@@ -122,35 +122,35 @@ namespace WindowsControl
         {
 
 
-            tt = new WriteableBitmap(720, 510);
+            tt = new WriteableBitmap(720, 400);
 
 
             int count = 0;
             //  tt = new WriteableBitmap(360, 255);
-            byte[] col = new byte[4 * 720 * 255 * 2];
+            byte[] col = new byte[4 * 720 * 200 * 2];
 
-            for (int x = 0; x < 255; x++)
+            for (int x = 0; x < 100; x++)
             {
                 double brightness = x;
                 for (int y = 0; y < 720; y++)
                 {
 
 
-                    ColorUtil.HsvToRgb(y/2, (double)x / (double)254, 1, out col[count], out col[count + 1], out col[count + 2], out col[count + 3]);
+                    ColorUtil.HsvToRgb(y/2, (double)x / (double)100, 1, out col[count], out col[count + 1], out col[count + 2], out col[count + 3]);
                     //   tt.SetPixel(x, y,  col[0],  col[1],  col[2]);
                     count = count + 4;
 
                 }
             }
 
-            for (int x = 254; x >= 0; x--)
+            for (int x = 99; x >= 0; x--)
             {
                 // double brightness = x;
                 for (int y = 0; y < 720; y++)
                 {
 
 
-                    ColorUtil.HsvToRgb(y/2, 1, (double)x / (double)254, out col[count], out col[count + 1], out col[count + 2], out col[count + 3]);
+                    ColorUtil.HsvToRgb(y/2, 1, (double)x / (double)100, out col[count], out col[count + 1], out col[count + 2], out col[count + 3]);
                     //   tt.SetPixel(x, y,  col[0],  col[1],  col[2]);
                     count = count + 4;
 
@@ -252,18 +252,18 @@ namespace WindowsControl
                 FrequenzyChanged(this, new FrequenzyEventArgs((byte)LED_Freq.Value));
         }
         bool SavePosition;
-        byte[] pos = new byte[2];
+        long[] pos = new long[2];
         private void HSB_UI_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
-            pos[0] = (byte)(((e.GetCurrentPoint(HSB_UI) as Windows.UI.Input.PointerPoint).Position.X) / 2);
-            pos[1] = (byte)(((e.GetCurrentPoint(HSB_UI) as Windows.UI.Input.PointerPoint).Position.Y) / 2);
+            pos[0] = (long)(((e.GetCurrentPoint(HSB_UI) as Windows.UI.Input.PointerPoint).Position.X) / 2);
+            pos[1] = (long)(((e.GetCurrentPoint(HSB_UI) as Windows.UI.Input.PointerPoint).Position.Y) / 2);
             SavePosition = true;
 
         }
 
         private void HSB_UI_PointerReleased(object sender, PointerRoutedEventArgs e)
         {
-            ColorChanged(this, new ColorEventArgs((byte)LED_R.Value, (byte)LED_G.Value, (byte)LED_B.Value)); SavePosition = false;
+            //ColorChanged(this, new ColorEventArgs((byte)LED_R.Value, (byte)LED_G.Value, (byte)LED_B.Value)); SavePosition = false;
         }
 
         private void HSB_UI_PointerExited(object sender, PointerRoutedEventArgs e)
@@ -272,13 +272,13 @@ namespace WindowsControl
             {
                 if (pos[0] <= 20)
                     pos[0] = 0;
-                else if (pos[0] >= 240)
-                    pos[0] = 255;
+                else if (pos[0] >= 340)
+                    pos[0] = 360;
 
                 if (pos[1] <= 20)
                     pos[1] = 0;
-                else if (pos[1] >= 240)
-                    pos[1] = 255;
+                else if (pos[1] >= 80)
+                    pos[1] = 100;
                 ColorChanged(this, new ColorEventArgs(HsvToRgb(pos[0],255,pos[1])));
                 SavePosition = false;
             }
@@ -468,8 +468,9 @@ namespace WindowsControl
         private void HSB_UI_PointerMoved(object sender, PointerRoutedEventArgs e)
         {
             if(SavePosition)
-            { pos[0] = (byte)(((e.GetCurrentPoint(HSB_UI) as Windows.UI.Input.PointerPoint).Position.X)/2);
-                pos[1] = (byte)(((e.GetCurrentPoint(HSB_UI) as Windows.UI.Input.PointerPoint).Position.Y) / 2);
+            { pos[0] = (long)(((e.GetCurrentPoint(HSB_UI) as Windows.UI.Input.PointerPoint).Position.X)/2);
+                pos[1] = (long)(((e.GetCurrentPoint(HSB_UI) as Windows.UI.Input.PointerPoint).Position.Y) / 2);
+              //  System.Diagnostics.Debug.WriteLine(pos[0] + "/" + pos[1]);
             }
         }
     }

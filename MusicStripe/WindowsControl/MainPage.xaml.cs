@@ -610,9 +610,10 @@ namespace WindowsControl
             ArduinoSend(ControlByte.SaveStartupCFG, new byte[0]);
         }
      //   Timer t1;
-        private void Button_Click_2(object sender, RoutedEventArgs e)
+        private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
-          //  t1 = new Timer(timerCallback, null, TimeSpan.FromMilliseconds(100).Milliseconds, Timeout.Infinite);
+            AddESP test = new AddESP();
+            var result = await test.ShowAsync();
         }
       //  Random rnd = new Random();
         private async void timerCallback(object state)

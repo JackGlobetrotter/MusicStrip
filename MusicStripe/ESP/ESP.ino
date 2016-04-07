@@ -229,9 +229,9 @@ void loadData()
 
 
 
-	//lcd.print(port);
-	//lcd.print(ssid);
-	//lcd.print(password);
+	Serial.println(port);
+	Serial.println(ssid);
+	Serial.println(password);
 
 
 }
