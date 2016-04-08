@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -55,11 +57,48 @@ namespace WindowsControl
                     }
                 }
             }
+            NotifyPropertyChanged("ESPResults");
+            //  NotifyPropertyChanged("lastItem");
+            ESPResults.CollectionChanged += ESPResults_CollectionChanged;
+            //ESPResults.Add("sdfghdgf");
             this.InitializeComponent();
-            IPResults.Items.Add("4567898765RDFGHJI");
-            this.UpdateLayout();
-   
-            //    StartScan();
+            ESPResults.Add("sdfghjqsserdtfyghujklds");
+
+                StartScan();
+        }
+
+        private void ESPResults_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            ObservableCollection<string> obsSender = sender as ObservableCollection<string>;
+
+            List<string> editedOrRemovedItems = new List<string>();
+
+            if (e.NewItems != null)
+            {
+                foreach (string newItem in e.NewItems)
+                {
+                    editedOrRemovedItems.Add(newItem);
+                }
+            }
+
+            if (e.OldItems != null)
+            {
+                foreach (string oldItem in e.OldItems)
+                {
+                    editedOrRemovedItems.Add(oldItem);
+                }
+            }
+
+            // get the action which raised the collection changed event
+            NotifyCollectionChangedAction action = e.Action;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void NotifyPropertyChanged(string propertyName)
+        {
+            var handler = this.PropertyChanged;
+            if (handler != null)
+                handler(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public void StartScan()
@@ -72,11 +111,11 @@ namespace WindowsControl
                       int run = (int)state;
                       for (int ip = (256 / parallel) * run; ip < (256 / parallel) * (run + 1); ip++)
                       {
-                          if (await TryHost(SubNet + ip, 23, 1000))
+                   
+                          if (await TryHost(SubNet + ip, 8080, 10))
                           {
                               ESPResults.Add(SubNet + ip + ":");
-                              IPResults.Items.Add(SubNet + ip + ":");                             
-                              this.UpdateLayout();
+                            
                           }
                       }
                   },i);
@@ -94,16 +133,18 @@ namespace WindowsControl
 
             try
             {
-                System.Diagnostics.Debug.WriteLine(IP+ Port.ToString());
+                ESPResults.Add(IP + ":"+ Port.ToString());
+                System.Diagnostics.Debug.WriteLine(IP + ":" + Port.ToString());
                 cts.CancelAfter(TimeOut);
                 await clientSocket.ConnectAsync(new HostName(IP), Port.ToString()).AsTask(cts.Token);
-                await clientSocket.CancelIOAsync();
+              //  await clientSocket.CancelIOAsync();
                 clientSocket.Dispose();
                 return true;
 
             }
             catch (TaskCanceledException)
             {
+                clientSocket.Dispose();
                 return false;
                 // Debug.WriteLine("Operation was cancelled.");
             }
@@ -121,21 +162,7 @@ namespace WindowsControl
                 _LocalIP = value;
             }
         }
-        public void RefreshView()
-        {
-            var oldItems = _view.ToArray();
-
-            var tasks = _store.Where<TaskItem>(task => IncludeCompletedItems || !task.Completed);
-
-            _view.Clear();
-            _view.AddRange(tasks);
-            if (CollectionChanged != null)
-            {
-                // Call the event handler for the updated list.
-                CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-            }
-
-        }
+      
         public ObservableCollection<string> ESPResults
         {
             get
@@ -148,5 +175,7 @@ namespace WindowsControl
                 _ESPResults = value;
             }
         }
+
+       
     }
 }

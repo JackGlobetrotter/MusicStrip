@@ -14,7 +14,8 @@
             <ProgressRing Name="IPProgress" IsActive="True" RelativePanel.Below="IPUI" RelativePanel.AlignHorizontalCenterWithPanel="True"></ProgressRing>
             <TextBlock RelativePanel.Below="IPProgress"  RelativePanel.AlignHorizontalCenterWithPanel="True">Searching</TextBlock>
 
-            <ListBox ItemsSource="{Binding ESPResults}" RelativePanel.Below="IPProgress"  RelativePanel.AlignHorizontalCenterWithPanel="True" Margin="0,50,0,0" Name="IPResults"></ListBox>
+            <ListBox ScrollViewer.IsVerticalRailEnabled="True" ScrollViewer.VerticalScrollMode="Enabled" 
+         ScrollViewer.VerticalScrollBarVisibility="Visible" ItemsSource="{Binding ESPResults}" RelativePanel.Below="IPProgress"  RelativePanel.AlignHorizontalCenterWithPanel="True" Margin="0,50,0,0" Name="IPResults"></ListBox>
         </RelativePanel>
     </Grid>
 </Page>
