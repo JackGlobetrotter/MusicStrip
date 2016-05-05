@@ -22,7 +22,22 @@ namespace WindowsControl
         public AddESP()
         {
             this.InitializeComponent();
+            ScanPage.ESPSelected += ScanPage_ESPSelected;
         }
+
+        private async void ScanPage_ESPSelected(object sender, WifiAPEventArgs e)
+        {
+            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+              {
+              PivotItem ToAdd = new PivotItem();
+              ToAdd.Content = new ESPDataUI( new ESPWifiData(e.ESPData.IPAdresse, e.ESPData.LocalPort));
+                  ToAdd.Header = e.ESPData.IPAdresse + ": " + e.ESPData.LocalPort;
+                 rootPivot.Items.Add(ToAdd);
+                 (rootPivot.Items[rootPivot.Items.Count - 1] as PivotItem).Header = e.ESPData.IPAdresse;
+             });
+          rootPivot.SelectedIndex = rootPivot.Items.Count-1;
+        }
+
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
             if (rootPivot.SelectedIndex > 0)

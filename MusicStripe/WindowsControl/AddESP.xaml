@@ -20,11 +20,11 @@
                     <AppBarButton Icon="Forward" Label="Next" Click="NextButton_Click"/>
                 </CommandBar>
             </Pivot.RightHeader>
-            <PivotItem Header="Pivot Item 1">
+            <PivotItem Header="Scan">
                 <!--Pivot content goes here-->
-                <local:ScanNetwork></local:ScanNetwork>
+                <local:ScanNetwork x:Name="ScanPage"></local:ScanNetwork>
             </PivotItem>
-            
+          
         </Pivot>
 
     </Grid>

@@ -11,10 +11,12 @@
         <RelativePanel>
             <TextBlock RelativePanel.AlignHorizontalCenterWithPanel="True" Name="IPField">Local IP-Adresse:</TextBlock>
             <TextBlock Name="IPUI" Text="{Binding LocalIP}" RelativePanel.AlignHorizontalCenterWithPanel="True" RelativePanel.RightOf="IPField"></TextBlock>
-            <ProgressRing Name="IPProgress" IsActive="True" RelativePanel.Below="IPUI" RelativePanel.AlignHorizontalCenterWithPanel="True"></ProgressRing>
-            <TextBlock RelativePanel.Below="IPProgress"  RelativePanel.AlignHorizontalCenterWithPanel="True">Searching</TextBlock>
+            <TextBlock Name="StandartUIIP" RelativePanel.AlignHorizontalCenterWithPanel="True" RelativePanel.Below="IPUI">IP Namespace: </TextBlock>
+            <TextBlock  RelativePanel.RightOf="StandartUIIP" RelativePanel.AlignHorizontalCenterWithPanel="True" Text="{Binding SubNet}" RelativePanel.AlignVerticalCenterWith="StandartUIIP" ></TextBlock>
+            <ProgressRing Name="IPProgress" IsActive="True" RelativePanel.Below="StandartUIIP" RelativePanel.AlignHorizontalCenterWithPanel="True"></ProgressRing>
+            <TextBlock RelativePanel.Below="IPProgress"  RelativePanel.AlignHorizontalCenterWithPanel="True" Name="IPProgressText">Searching</TextBlock>
 
-            <ListBox ScrollViewer.IsVerticalRailEnabled="True" ScrollViewer.VerticalScrollMode="Enabled" 
+            <ListBox DoubleTapped="IPResults_DoubleTapped" SelectionChanged="IPResults_SelectionChanged" ScrollViewer.IsVerticalRailEnabled="True" ScrollViewer.VerticalScrollMode="Enabled" Height="200"
          ScrollViewer.VerticalScrollBarVisibility="Visible" ItemsSource="{Binding ESPResults}" RelativePanel.Below="IPProgress"  RelativePanel.AlignHorizontalCenterWithPanel="True" Margin="0,50,0,0" Name="IPResults"></ListBox>
         </RelativePanel>
     </Grid>

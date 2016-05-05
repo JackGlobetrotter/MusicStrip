@@ -1,3 +1,7 @@
+#define LCD
+#define ESP12
+#undef ESP01
+//External equipment
 #include <EEPROM.h>
 #include <EEPROM\EEPROM.h>
 #include <WiFiClient.h>
@@ -13,7 +17,30 @@
 
 // First LCD - Address 0x27, 16 chars, 2 line display
 
+#ifdef LCD
+#include <Wire.h> 
+#include <PCF8574_HD44780_I2C.h>
 
+PCF8574_HD44780_I2C lcd(0x27, 16, 2);
+
+byte flash[8] = { 0b10000,
+0b11000,
+0b11100,
+0b11110,
+0b11110,
+0b11100,
+0b11000,
+0b10000 };
+
+#endif // LCD
+
+#if defined(ESP01)
+#define EEPROMSize 128
+#elif defined(ESP12)
+#define EEPROMSize 512
+#else
+#define EEPROMSize 128
+#endif // ESP01
 
 #define WIFIPointer 0
 
@@ -26,9 +53,9 @@
 
 
 //----------LED1
-#define R1 0
-#define G1 3
-#define B1 2
+#define R1 12
+#define G1 14
+#define B1 13
 
 bool LED1_active = false;
 
@@ -61,7 +88,7 @@ bool LightStat = false;
 uint8_t buffer[4];
 
 #define OTAMode 26
-#define EEPROMSize 128
+
 
 int tport;
 uint8_t value;
@@ -269,6 +296,13 @@ void FallBack()
 	
 	WiFi.mode(WIFI_AP);
 	WiFi.softAP("ESPCONFIG");
+#ifdef LCD
+	lcd.clear();
+	lcd.print("ESPCONFIG");
+	lcd.setCursor(0, 1);
+	lcd.print(WiFi.softAPIP()+":"+(String)23);
+#endif // LCD
+
 	Serial.println(WiFi.softAPIP());
 	Serial.println(port);
 	server.begin();
@@ -366,11 +400,17 @@ void FallBack()
 void setup() {
 
 	EEPROM.begin(128);
+#ifdef LCD
+	lcd.init(5,4);           // LCD Initialization              
+	lcd.backlight();      // Backlight ON
+	lcd.clear();          // Clear the display
+	lcd.createChar((uint8_t)0, flash);
+#endif // LCD
 
 	Serial.begin(115200, SERIAL_8N1, SERIAL_TX_ONLY,1);
-	pinMode(0, OUTPUT);
-	pinMode(2, OUTPUT);
-	pinMode(3, OUTPUT);
+	pinMode(R1, OUTPUT);
+	pinMode(G1, OUTPUT);
+	pinMode(B1, OUTPUT);
 	ssid = "ESP8266";
 	password = "1234567890";
 	port = 23;
@@ -386,6 +426,13 @@ void setup() {
 loadData();
 
 	if (OTAUpdateReq) {
+#ifdef LCD
+		lcd.clear();
+		lcd.print("Updating");
+		lcd.setCursor(0, 1);
+		lcd.print("----------------");
+#endif // LCD
+
 		setColor(new byte[3]{ 255,0,0 });
 		WiFi.mode(WIFI_STA);
 		WiFi.begin(ssid.c_str(), password.c_str());
@@ -394,7 +441,11 @@ loadData();
 			i++;
 			if (i == 20)
 			{
-		
+#ifdef LCD
+				lcd.print("Connection err");
+#endif // LCD
+
+			
 				EEPROM.write(0, 0);
 				EEPROM.commit();
 				ESP.restart();
@@ -407,7 +458,26 @@ loadData();
 
 
 	
-		
+#ifdef LCD
+
+		ArduinoOTA.onStart([]() {
+			lcd.setCursor(0, 1);
+		})
+			;
+		ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+			lcd.setCursor(0, 1);
+			lcd.print(progress / (total / 100));
+		});
+		ArduinoOTA.onError([](ota_error_t error) {
+			Serial.write(OTAError);
+			if (error == OTA_AUTH_ERROR) lcd.print("AUTH_ERROR");
+			else if (error == OTA_BEGIN_ERROR) lcd.print("BEGIN_ERROR");
+			else if (error == OTA_CONNECT_ERROR) lcd.print("CONNECT_ERROR");
+			else if (error == OTA_RECEIVE_ERROR) lcd.print("RECEIVE_ERROR");
+			else if (error == OTA_END_ERROR) lcd.print("END_ERROR");
+		});
+#endif // LCD
+
 	//	ArduinoOTA.setPassword((const char *)"1234567890");
 		ArduinoOTA.onEnd([]() {
 
@@ -420,9 +490,16 @@ loadData();
 	}
 	else{
 		WiFi.mode(WIFI_STA);
-		WiFiServer server(port);
+		server = WiFiServer(port);
 		IPString = WifiConnect();
+#ifdef LCD
+		DisplayIP();
+	
+#else
 		Serial.println(IPString);
+
+#endif // LCD
+
 		yield();
 		StateWriter( LED1_mode);
 		yield();
@@ -447,7 +524,35 @@ void loop() {
 					byte req = client.read();
 					switch (req)
 					{
+					case GetData: //send type|LCD|LED[RedPin,GreenPin,BluePin,active,Red,Green,Blue,frequenzy]
+#ifdef ESP01
+						client.write((uint8_t)1);
+#elif defined (ESP12)
+						client.write((uint8_t)12);
+#endif // ESP01
 
+
+#ifdef LCD
+						client.write((uint8_t)1);
+#else
+						client.write((uint8_t)0);
+#endif // LCD
+
+						client.write((uint8_t)1);
+						for (uint8_t i = 0; i < 1; i++)
+						{
+							client.write((uint8_t)R1);
+							client.write((uint8_t)G1);
+							client.write((uint8_t)G1);
+							client.write((uint8_t)LED1_active);
+							client.write((uint8_t)color0[0]);
+							client.write((uint8_t)color0[1]);
+							client.write((uint8_t)color0[2]);
+							client.write((uint8_t)LED1_freq);
+							client.write((uint8_t)LED1_mode);
+						}
+						
+						break;
 					case LED1SwitchStade:
 						if (GetVerified(1,false))
 							ChangeLEDState(buffer[0]);
@@ -462,7 +567,11 @@ void loop() {
 						color0[2] = buffer[2];
 						ChangeLEDState(LED1_mode);
 						break;
-	
+					case Blink:
+						if (GetVerified(1,false))
+							blink(buffer[0]);
+						
+						break;
 					case LEDState:
 						if (!GetVerified(2, false))
 							break;
@@ -493,7 +602,7 @@ void loop() {
 			
 					default:
 						while (client.read() != Stop) {
-							if (!client.available())
+							if (!client.available()||!client.connected())
 								break;
 							delay(1);
 						}
@@ -507,7 +616,11 @@ void loop() {
 			}
 			
 		
-	
+#ifdef  LCD
+			if (!client.connected())
+				DisplayIP();
+#endif //  LCD
+
 
 			while (!client.connected()) {
 
@@ -516,7 +629,10 @@ void loop() {
 				client.stop();                                    // not connected, so terminate any prior client
 				client = server.available();
 				LoopLedCall();
-			
+#ifdef  LCD
+				if(client.connected())
+					DisplayColorStripe();
+#endif //  LCD
 			}
 
 		}
@@ -532,7 +648,17 @@ void loop() {
 
 
 
-
+void blink(uint8_t count)
+{
+	for (uint8_t i = 0; i < count; i++)
+	{
+		setColor(new byte[3]{ 0,0,0 });
+		delay(200);
+		setColor(new byte[3]{ 255,255,255 });
+		delay(200);
+	}
+	setColor(color0);
+}
 void LoopLedCall()
 {
 	if (LED1_mode == SmoothState &&LED1_active)
@@ -653,7 +779,10 @@ void ChangeLEDState( uint8_t State) {
 	
 		LED1_mode = State;
 	StateWriter( State);
+#ifdef  LCD
 
+		DisplayColorStripe();
+#endif //  LCD
 }
 
 
@@ -704,3 +833,73 @@ void FixColor()
 	
 }
 
+#ifdef LCD
+
+
+
+int Display_counter, Display_mscounter;
+
+void UpdateingAnimation()
+{
+
+	if (Display_mscounter < 250)
+		Display_mscounter++;
+	else {
+		Display_mscounter = 0;
+		if (Display_counter == 16) {
+			lcd.setCursor(15, 1);
+			lcd.print("-");
+			lcd.setCursor(0, 1);
+			lcd.write((uint8_t)0);
+		}
+		else {
+			lcd.setCursor(Display_counter - 1, 1);
+			lcd.print("-");
+			lcd.write((uint8_t)0);
+		}
+		if (Display_counter < 16)
+			Display_counter++;
+		else
+			Display_counter = 1;
+	}
+	delay(2);
+
+}
+
+void 	DisplayIP() {
+	lcd.clear();
+	if (IPString.length() > 16) {
+		lcd.print(IPString.substring(0, 15));
+		lcd.setCursor(0, 1);
+		lcd.print(IPString.substring
+			(16, IPString.length()));
+	}
+	else
+		lcd.print(IPString);
+
+}
+
+void DisplayColorStripe()
+{
+
+	lcd.clear();
+	lcd.print(GetDisplayString());
+
+}
+String GetDisplayString()
+{
+
+	String ret;
+
+		if (LED1_active)
+		{
+			ret = String(LED1_mode, DEC) + ": " + (String)color0[0] + "/" + (String)color0[1] + "/" + (String)color0[2];
+		}
+		else
+		{
+			ret = "------------";
+		}
+	
+	return ret;
+}
+#endif // LCD

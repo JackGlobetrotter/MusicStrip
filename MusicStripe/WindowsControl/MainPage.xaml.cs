@@ -26,6 +26,7 @@ using Windows.UI.ViewManagement;
 using Windows.UI.Popups;
 using System.Threading;
 using Windows.Security.Cryptography;
+using Windows.Storage;
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace WindowsControl
@@ -140,10 +141,12 @@ namespace WindowsControl
     /// </summary>
     public sealed partial class MainPage : Page
     {
+  
         bool setting = false;
         SerialDevice device;
         Windows.Storage.ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
         Windows.Storage.StorageFolder localFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+
         bool WifiDataChanged=false;
         StreamSocket ESP;
         IPAddress _ESP_IP;
@@ -160,7 +163,7 @@ namespace WindowsControl
         bool IsConnected;
         public  MainPage()
         {
-            
+         //   localSettings.Values.
             ESP_Port = 80;
             ESP_IP = IPAddress.Parse("192.168.4.1");
             Led1 = new SolidColorBrush(Colors.CadetBlue);
@@ -215,7 +218,8 @@ namespace WindowsControl
        
         }
 
-       
+
+      
         public async void FakeConnectESP()
         {
             var aqsFilter = SerialDevice.GetDeviceSelector("COM4");
@@ -343,48 +347,7 @@ namespace WindowsControl
 
         }
 
-        enum ControlByte : byte
-        {
-            //WIFI
-            Connect = 1,
-            Reconnect,
-            Port,
-            SSID,
-            PWD,
-            IP,
-            WifiConnectSate,
-            //ESP8266
-            OTAUpdate,
-            OTAStart,
-            OTAEnd,
-            OTAError,
-            //General
-            Start,
-            Stop,
-            GetData,
-            RGBColor,
-            MusicTitle,
-            //LED
-            LED1SwitchStade,
-            LED2SwitchStade,
-            LED1Data,
-            LED2Data,
-            LEDState,
-
-            LightToggle,
-            MusicState,
-            MicroState,
-            FadeState,
-            SmoothState,
-            FlashState,
-            FixColorState,
-
-            LED1Frequency,
-            LED2Frequency,
-            ClientLeft,
-            ClientArrived,
-            SaveStartupCFG
-        };
+     
 
         private void LED1State_SelectionChanged(object sender, SelectionChangedEventArgs e)
 
@@ -612,8 +575,14 @@ namespace WindowsControl
      //   Timer t1;
         private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            AddESP test = new AddESP();
-            var result = await test.ShowAsync();
+             AddESP test = new AddESP();
+             if(await test.ShowAsync()== Windows.UI.Xaml.Controls.ContentDialogResult.Primary)
+            {
+
+
+            }
+            else { }
+
         }
       //  Random rnd = new Random();
         private async void timerCallback(object state)
@@ -626,5 +595,47 @@ namespace WindowsControl
                 
         }
     }
+    public enum ControlByte : byte
+    {
+        //WIFI
+        Connect = 1,
+        Reconnect,
+        Port,
+        SSID,
+        PWD,
+        IP,
+        WifiConnectSate,
+        //ESP8266
+        OTAUpdate,
+        OTAStart,
+        OTAEnd,
+        OTAError,
+        //General
+        Start,
+        Stop,
+        GetData,
+        RGBColor,
+        MusicTitle,
+        //LED
+        LED1SwitchStade,
+        LED2SwitchStade,
+        LED1Data,
+        LED2Data,
+        LEDState,
 
+        LightToggle,
+        MusicState,
+        MicroState,
+        FadeState,
+        SmoothState,
+        FlashState,
+        FixColorState,
+
+        LED1Frequency,
+        LED2Frequency,
+        ClientLeft,
+        ClientArrived,
+        SaveStartupCFG,
+        Blink
+    };
 }

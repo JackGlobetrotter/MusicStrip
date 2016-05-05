@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +15,8 @@ using Windows.Foundation.Collections;
 using Windows.Networking;
 using Windows.Networking.Connectivity;
 using Windows.Networking.Sockets;
+using Windows.Storage.Streams;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -31,11 +35,15 @@ namespace WindowsControl
     public sealed partial class ScanNetwork : Page
     {
         private string _LocalIP;
-        private ObservableCollection<string> _ESPResults;
-        string SubNet = "";
-        public ScanNetwork()
+        private string _StandartIP;
+        private string _SubNet;
+        private ObservableCollection<ESPWifiData> _ESPResults;
+        public delegate void ESPSelectedHandel(object sender, WifiAPEventArgs e);
+        public event ESPSelectedHandel ESPSelected;
+
+        public  ScanNetwork()
         {
-            _ESPResults = new ObservableCollection<string>();
+            _ESPResults = new ObservableCollection<ESPWifiData>();
             this.DataContext = this;
             var icp = NetworkInformation.GetInternetConnectionProfile();
             if (icp != null && icp.NetworkAdapter != null && icp.NetworkAdapter.NetworkAdapterId != null)
@@ -43,9 +51,11 @@ namespace WindowsControl
                 var name = icp.ProfileName;
 
                 var hostnames = NetworkInformation.GetHostNames();
-
+  
                 foreach (var hn in hostnames)
                 {
+                   
+                
                     if (hn.IPInformation != null &&
                         hn.IPInformation.NetworkAdapter != null &&
                         hn.IPInformation.NetworkAdapter.NetworkAdapterId != null &&
@@ -53,7 +63,8 @@ namespace WindowsControl
                         hn.Type == HostNameType.Ipv4)
                     {
                         LocalIP = hn.CanonicalName;
-                        SubNet = LocalIP.Split('.')[0] + "." + LocalIP.Split('.')[1] + "." + LocalIP.Split('.')[2] + "." ;
+              
+                        SubNet = LocalIP.Split('.')[0] + "." + LocalIP.Split('.')[1] + "." + LocalIP.Split('.')[2];
                     }
                 }
             }
@@ -62,20 +73,23 @@ namespace WindowsControl
             ESPResults.CollectionChanged += ESPResults_CollectionChanged;
             //ESPResults.Add("sdfghdgf");
             this.InitializeComponent();
-            ESPResults.Add("sdfghjqsserdtfyghujklds");
+            // ESPResults.Add("sdfghjqsserdtfyghujklds");
 
-                StartScan();
+            /*  StartScan(23);
+          StartScan(80);*/
+            _ESPResults.Add(new ESPWifiData("192.168.1.82", 80));
+
         }
 
         private void ESPResults_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            ObservableCollection<string> obsSender = sender as ObservableCollection<string>;
+            ObservableCollection<ESPWifiData> obsSender = sender as ObservableCollection<ESPWifiData>;
 
-            List<string> editedOrRemovedItems = new List<string>();
+            List<ESPWifiData> editedOrRemovedItems = new List<ESPWifiData>();
 
             if (e.NewItems != null)
             {
-                foreach (string newItem in e.NewItems)
+                foreach (ESPWifiData newItem in e.NewItems)
                 {
                     editedOrRemovedItems.Add(newItem);
                 }
@@ -83,7 +97,7 @@ namespace WindowsControl
 
             if (e.OldItems != null)
             {
-                foreach (string oldItem in e.OldItems)
+                foreach (ESPWifiData oldItem in e.OldItems)
                 {
                     editedOrRemovedItems.Add(oldItem);
                 }
@@ -100,43 +114,52 @@ namespace WindowsControl
             if (handler != null)
                 handler(this, new PropertyChangedEventArgs(propertyName));
         }
-
-        public void StartScan()
+        int _ResultCounter;
+        public async 
+        Task
+StartScan(int Port)
         {
             int parallel = 8;
             for (int i = 0; i < parallel; i++)
             {
-                 Task.Factory.StartNew(async (object state) =>
+              //  ESPResults.Add("dsfghffdgrzerg0025");
+            await     Task.Factory.StartNew(async (object state) =>
                   {
                       int run = (int)state;
                       for (int ip = (256 / parallel) * run; ip < (256 / parallel) * (run + 1); ip++)
                       {
-                   
-                          if (await TryHost(SubNet + ip, 8080, 10))
+
+                         // ESPResults.Add(ip + ":" + 23);
+                          if (await TryHost(SubNet +"."+ ip, Port, 1000))
                           {
-                              ESPResults.Add(SubNet + ip + ":");
-                            
+                              if(SubNet+ "." + ip != LocalIP)
+                              await this.Dispatcher.TryRunAsync(CoreDispatcherPriority.Normal, (() => { ESPResults.Add(new ESPWifiData(SubNet + "." + ip  , Port)); } ));
+
+
                           }
+                          if (ip == 255)
+                              ResultCounter++;
                       }
-                  },i);
+                  
+                  }, i);
             }
+
 
         }
 
         async Task<bool> TryHost(string IP, int Port, int TimeOut)
         {
             StreamSocket clientSocket = new StreamSocket();
-
-     
-
             CancellationTokenSource cts = new CancellationTokenSource();
 
             try
             {
-                ESPResults.Add(IP + ":"+ Port.ToString());
-                System.Diagnostics.Debug.WriteLine(IP + ":" + Port.ToString());
+
+              //  System.Diagnostics.Debug.WriteLine(IP + ":" + Port.ToString());
                 cts.CancelAfter(TimeOut);
-                await clientSocket.ConnectAsync(new HostName(IP), Port.ToString()).AsTask(cts.Token);
+                var task =  clientSocket.ConnectAsync(new HostName(IP), Port.ToString()).AsTask(cts.Token);
+               // Debug.WriteLine(task.Id);
+                await task;
               //  await clientSocket.CancelIOAsync();
                 clientSocket.Dispose();
                 return true;
@@ -144,11 +167,12 @@ namespace WindowsControl
             }
             catch (TaskCanceledException)
             {
-                clientSocket.Dispose();
+                clientSocket.Dispose(); // Debug.WriteLine("Operation was cancelled.");
                 return false;
-                // Debug.WriteLine("Operation was cancelled.");
+               
             }
-
+            catch (Exception ex) { return false; }
+  
         }
         public string LocalIP
         {
@@ -163,7 +187,7 @@ namespace WindowsControl
             }
         }
       
-        public ObservableCollection<string> ESPResults
+        public ObservableCollection<ESPWifiData> ESPResults
         {
             get
             {
@@ -176,6 +200,85 @@ namespace WindowsControl
             }
         }
 
-       
+        public string SubNet
+        {
+            get
+            {
+                return _SubNet;
+            }
+
+            set
+            {
+                _SubNet = value;
+            }
+        }
+
+        public string StandartIP
+        {
+            get
+            {
+                return _StandartIP;
+            }
+
+            set
+            {
+                _StandartIP = value;
+            }
+        }
+
+        public int ResultCounter
+        {
+            get
+            {
+                return _ResultCounter;
+            }
+
+            set
+            {
+              //  Debug.WriteLine(value);
+                if (value == 2)
+                     this.Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+                    {
+                        IPProgress.IsActive = false; IPProgressText.Text = "Finished";
+                       
+                      //  this.ScanFinished(this, new WifiAPEventArgs(_ESPResults.ToList<ESPWifiData>()));
+                    });
+                _ResultCounter = value;
+            }
+        }
+
+        private async void IPResults_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var ESP = new StreamSocket();
+            HostName hostName
+              = new HostName(_ESPResults[IPResults.SelectedIndex].IPAdresse);
+
+
+
+            // If necessary, tweak the socket's control options before carrying out the connect operation.
+            // Refer to the StreamSocketControl class' MSDN documentation for the full list of control options.
+            ESP.Control.KeepAlive = false;
+
+            // Save the socket, so subsequent steps can use it.
+
+            await ESP.ConnectAsync(hostName, _ESPResults[IPResults.SelectedIndex].LocalPort.ToString());
+
+            var ESP_Stream = new DataWriter(ESP.OutputStream);
+            var dr = new DataReader(ESP.InputStream);
+            dr.InputStreamOptions = InputStreamOptions.None;
+
+            ESP_Stream.WriteByte((byte)ControlByte.Blink);
+            ESP_Stream.WriteByte((byte)3);
+            ESP_Stream.WriteByte((byte)ControlByte.Stop);
+            await ESP_Stream.StoreAsync();
+            ESP_Stream.Dispose();
+            ESP.Dispose();
+            
+        }
+
+        private void IPResults_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            ESPSelected(this, new WifiAPEventArgs(ESPResults[(sender as ListBox).SelectedIndex]));
+        }
     }
 }
