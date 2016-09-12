@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -11,21 +11,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{0DA48D24-86F7-42F9-B094-54370895DE3A}</ProjectGuid>
-    <RootNamespace>Test</RootNamespace>
-    <ProjectName>Test</ProjectName>
+    <ProjectGuid>{AC1A01E2-3421-40F5-9BBF-112B74ACBED3}</ProjectGuid>
+    <RootNamespace>TEST</RootNamespace>
+    <ProjectName>TEST</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>
+    </PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>
+    </PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -45,10 +47,10 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino;C:\Program Files (x86)\Arduino\hardware\arduino\avr\variants\standard;C:\Users\jakob\OneDrive\Documents\GitHubVisualStudio\MusicStrip\MusicStripe\Test;C:\Program Files (x86)\Arduino\libraries;C:\Program Files (x86)\Arduino\hardware\arduino\avr\libraries;C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\gh5lkta2.f0q\Micro Platforms\default\debuggers;C:\Users\jakob\OneDrive\Documents\Arduino\libraries;C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino;C:\Program Files (x86)\Arduino\hardware\arduino\avr\variants\standard;C:\Program Files (x86)\Arduino\hardware\arduino\avr\libraries\SoftwareSerial;C:\Program Files (x86)\Arduino\libraries\LiquidCrystal\src;C:\Users\jakob\OneDrive\Documents\Arduino\libraries\MusicLibraryLib\src;C:\Program Files (x86)\Arduino\hardware\arduino\avr\libraries\EEPROM;C:\Program Files (x86)\Arduino\libraries;C:\Program Files (x86)\Arduino\hardware\arduino\avr\libraries;C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\gh5lkta2.f0q\Micro Platforms\default\debuggers;C:\Users\jakob\OneDrive\Documents\Arduino\libraries;C:\Program Files (x86)\Arduino\hardware\tools\avr/avr/include/;C:\Program Files (x86)\Arduino\hardware\tools\avr//avr/include/avr/;C:\Program Files (x86)\Arduino\hardware\tools\avr/lib\gcc\avr\4.8.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>C:\Users\jakob\OneDrive\Documents\GitHubVisualStudio\MusicStrip\MusicStripe\Test\__vm\.Test.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>C:\Users\Jakob\OneDrive\Documents\Arduino\libraries\WebSockets\src;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\ESP8266WiFi\src;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\Hash\src;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\ESP8266WebServer\src;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\ESP8266mDNS;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\DNSServer\src;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\DNSServer\src\utility;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\ESP8266mDNS\utility;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\ESP8266WebServer\src\utility;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\ESP8266WiFi\src\utility;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\Hash\src\utility;C:\Users\Jakob\OneDrive\Documents\Arduino\libraries\WebSockets\src\utility;C:\Program Files (x86)\Arduino\libraries;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries;C:\Users\Jakob\OneDrive\Documents\Arduino\libraries;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266\libb64;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266\spiffs;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266\umm_malloc;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\variants\nodemcu;C:\Users\Jakob\Source\Repos\MusicStrip\MusicStripe\TEST;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0/tools/sdk/include;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0/tools/sdk/lwip/include;C:\Users\Jakob\AppData\Local\Temp\VMicroBuilds\TEST\esp8266_nodemcuv2/core;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\variants\nodemcu;C:\Users\Jakob\OneDrive\Documents\Arduino\libraries\WebSockets\src;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\ESP8266WiFi\src;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\Hash\src;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\ESP8266WebServer\src;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\ESP8266mDNS;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\DNSServer\src;C:\Program Files (x86)\Arduino\libraries;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries;C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\dm2pjehk.czz\Micro Platforms\default\debuggers;C:\Users\Jakob\OneDrive\Documents\Arduino\libraries;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include\c++\4.8.2;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include\c++\4.8.2\xtensa-lx106-elf;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\lib\gcc\xtensa-lx106-elf\4.8.2\include;C:\Users\Jakob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\tools\sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>C:\Users\Jakob\Source\Repos\MusicStrip\MusicStripe\TEST\__vm\.TEST.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
-      <PreprocessorDefinitions>__AVR_ATmega328p__;__AVR_ATmega328P__;F_CPU=16000000L;ARDUINO=10607;ARDUINO_AVR_UNO;ARDUINO_ARCH_AVR;__cplusplus=201103L;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>__ESP8266_ESp8266__;__ESP8266_ESP8266__;__ets__;ICACHE_FLASH;F_CPU=80000000L;LWIP_OPEN_SRC;ARDUINO=106011;ARDUINO_ESP8266_NODEMCU;ARDUINO_ARCH_ESP8266;ESP8266;__cplusplus=201103L;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -69,14 +71,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="Test.ino">
+    <ProjectCapability Include="VisualMicro" />
+  </ItemGroup>
+  <PropertyGroup>
+    <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="TEST.ino">
       <FileType>CppCode</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="__vm\.Test.vsarduino.h" />
+    <ClInclude Include="__vm\.TEST.vsarduino.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties arduino.upload.port="COM6" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

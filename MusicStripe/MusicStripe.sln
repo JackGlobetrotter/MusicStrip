@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ESP", "ESP\ESP.vcxproj", "{0715618A-6A51-41F5-89C3-5D6ECAFA7129}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -14,7 +14,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsControl", "WindowsCo
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MusicStripe", "MusicStripe\MusicStripe.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test\Test.vcxproj", "{0DA48D24-86F7-42F9-B094-54370895DE3A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TEST", "TEST\TEST.vcxproj", "{AC1A01E2-3421-40F5-9BBF-112B74ACBED3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,14 +68,14 @@ Global
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x64.ActiveCfg = Release|Win32
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.ActiveCfg = Release|Win32
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.Build.0 = Release|Win32
-		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Debug|ARM.ActiveCfg = Debug|Win32
-		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Debug|x64.ActiveCfg = Debug|Win32
-		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Debug|x86.ActiveCfg = Debug|Win32
-		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Debug|x86.Build.0 = Debug|Win32
-		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Release|ARM.ActiveCfg = Release|Win32
-		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Release|x64.ActiveCfg = Release|Win32
-		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Release|x86.ActiveCfg = Release|Win32
-		{0DA48D24-86F7-42F9-B094-54370895DE3A}.Release|x86.Build.0 = Release|Win32
+		{AC1A01E2-3421-40F5-9BBF-112B74ACBED3}.Debug|ARM.ActiveCfg = Debug|Win32
+		{AC1A01E2-3421-40F5-9BBF-112B74ACBED3}.Debug|x64.ActiveCfg = Debug|Win32
+		{AC1A01E2-3421-40F5-9BBF-112B74ACBED3}.Debug|x86.ActiveCfg = Debug|Win32
+		{AC1A01E2-3421-40F5-9BBF-112B74ACBED3}.Debug|x86.Build.0 = Debug|Win32
+		{AC1A01E2-3421-40F5-9BBF-112B74ACBED3}.Release|ARM.ActiveCfg = Release|Win32
+		{AC1A01E2-3421-40F5-9BBF-112B74ACBED3}.Release|x64.ActiveCfg = Release|Win32
+		{AC1A01E2-3421-40F5-9BBF-112B74ACBED3}.Release|x86.ActiveCfg = Release|Win32
+		{AC1A01E2-3421-40F5-9BBF-112B74ACBED3}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
